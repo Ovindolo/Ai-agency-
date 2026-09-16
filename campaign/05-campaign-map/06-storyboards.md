@@ -12,7 +12,7 @@ Sound-off legibility is mandatory on all three: every unit must be fully compreh
 | # | In–Out | Visual | Voiceover | Burned-in caption | Audio |
 |---|---|---|---|---|---|
 | 1 | 0:00–0:02 | Macro pilled merino, hard raking light from camera left. No establishing shot, no logo, cold open on texture | *"This one's been washed."* | `this one's been washed` | Room tone only |
-| 2 | 0:02–0:04 | Whip cut to intact merino. **Identical light, identical scale** — the only variable is the fabric | *"This one hasn't."* | `this one hasn't` | Whip transition, short |
+| 2 | 0:02–0:04 | **Match cut** to intact merino. Identical light, identical scale, identical push — the only variable in the frame is the fabric | *"This one hasn't."* | `this one hasn't` | Hard cut. No transition, no whip, no sound |
 | 3 | 0:04–0:07 | Slow push into the drum interior, cold and unlovely | *"Same sweater. The difference is the machine."* `[RTB-1]` | `the difference is the machine` | Low drum rumble enters |
 | 4 | 0:07–0:12 | Bottle lifted from a dresser, two pump presses across a hanging tee | *"Most washes are for smell, not dirt. This removes the smell — enzymes, not fragrance."* `[RTB-2]` | `most washes are for smell, not dirt` → `enzymes, not fragrance` | Rumble cuts dead on the first press. Two soft pump hisses |
 | 5 | 0:12–0:15 | Tee on a wooden hanger, morning light, holds | — | `wear it again.` → `Get the Starter Kit — $34` | Silence |
@@ -23,7 +23,9 @@ Sound-off legibility is mandatory on all three: every unit must be fully compreh
 
 *The audio cut at 0:07.* The drum rumble runs under shots 3 and 4's opening, then stops dead on the first pump press. The silence is the product benefit rendered as sound. It costs nothing and it is the only thing in the unit a competitor cannot copy from a screenshot.
 
-**Frame 2 is the whole ad.** If shots 1 and 2 are not lit identically, at the same scale, on the same fabric, the comparison is worthless and a viewer will feel the cheat without being able to name it. Shoot both halves in one session without moving the light.
+**Frame 2 is the whole ad, and it is a match cut.** If shots 1 and 2 are not lit identically, at the same scale, on the same fabric, the comparison is worthless and a viewer will feel the cheat without being able to name it. Shoot both halves in one session without moving the light.
+
+An earlier draft of this board called for a *whip transition* into shot 2. That was wrong and is corrected here: a whip tells the eye the camera moved, which is the one thing this cut must not say. The two frames have to read as the same setup with the fabric swapped. Hard cut, no transition, no sound on the cut.
 
 **Hypothesis.** *The two-sweater comparison in the first two seconds will hold cold traffic past three seconds at a materially higher rate than a talking-head open.* Read on 3-second hold rate against a product-first control.
 
@@ -71,4 +73,8 @@ One continuous move through the five feet between the wardrobe and the front doo
 
 **Shoot order.** Both knit halves first, in one session, without moving the light. Then the drum. Then product interaction. The hanging-tee close reuses the PS-02 setup and should be shot the same day.
 
-**Caption spec.** JetBrains Mono, lowercase, Graphite on a Paper pad at 82% opacity, lower third, flush left, 3.3% of frame height. Never over a face. Never centered.
+**Caption spec.** JetBrains Mono, lowercase, **Paper text on a solid Graphite pad**, lower third, flush left, 3.3% of frame height. Never over a face, never centered.
+
+The pad inverts against the frame, always. An earlier spec had Graphite text on a Paper pad, which is invisible on four of V-01's five shots — all of which sit on a Paper ground. One inverting rule is legible on every frame in the campaign and reads as a technical annotation, which is the brand's voice anyway.
+
+**Safe areas.** Captions must clear TikTok's right rail (right 17% of frame, 34–80% height) and the bottom caption zone (bottom 17%). The animatic has a Safe areas overlay for checking this — copy that sits under the platform's own UI has not been written, it has been discarded.

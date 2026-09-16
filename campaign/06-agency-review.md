@@ -12,8 +12,8 @@ Every asset audited against ten axes before handoff. Findings are reported **Pro
 | Message clarity | **Pass** | One message, seven expressions. A stranger can restate it after one view. |
 | Brand consistency | **Repaired** | See F-02, F-06 |
 | Product accuracy | **Repaired** | See F-11 — the Brand Lock specified the object it separately forbade |
-| Visual continuity | **Pass** | One light, one lens family, one palette across UGC, product and paid. |
-| Platform fit | **Repaired** | See F-07 |
+| Visual continuity | **Repaired** | See F-12 — a transition that contradicted the shot it introduced |
+| Platform fit | **Repaired** | See F-07, F-13 — captions had no safe-area bounds and were unreadable on their own grounds |
 | Claim accuracy | **Repaired** | See F-01, F-03, F-04, F-08, F-09 — the most serious cluster in the audit |
 | CTA clarity | **Repaired** | See F-02 |
 | AI artifacts | **Pass** | Negative constraints on every prompt cover hands, duplication, warped geometry, melted text. |
@@ -92,6 +92,22 @@ Every asset audited against ten axes before handoff. Findings are reported **Pro
 **Why it matters.** Small, but it is a production document. A partner reading it looks for a fourth persona, does not find it, and either asks — costing a day — or invents one — costing the brand system.
 
 **Repair applied.** Corrected to three.
+
+## F-13 · The caption spec was invisible on most of its own frames — HIGH
+
+**Problem.** The caption spec called for Graphite text on a Paper pad at 82% opacity. Four of V-01's five shots sit on a Paper ground. A Paper pad on a Paper frame is not a caption, it is a rumour.
+
+**Why it matters.** Captions are the entire sound-off layer, and sound-off is how most of this media will be consumed. A caption spec that fails on 80% of the unit's own frames means the unit does not work muted — which is not a styling problem, it is the media plan failing.
+
+**Repair applied.** Inverted and locked: **Paper text on a solid Graphite pad, always**, on every frame in the campaign. One rule, legible on any ground, and it reads as a technical annotation — which is the brand's voice regardless. Applied in the animatic and written into the caption spec in `06-storyboards.md`, along with the platform safe-area bounds that were missing entirely.
+
+## F-12 · The transition destroyed the comparison it set up — HIGH
+
+**Problem.** V-01's board specified a *whip cut* from shot 1 to shot 2, in the same table row that required the two frames be "identical light, identical scale."
+
+**Why it matters.** The ad's entire argument is *these two frames differ in one variable only.* A whip tells the eye the camera moved between them. The viewer cannot articulate the objection, but they stop believing the comparison — and an evidence ad that isn't believed is worse than no ad, because it spends the budget teaching people to distrust the claim.
+
+**Repair applied.** Changed to a **hard match cut** — identical framing, identical scale, identical push curve across both shots, no transition and no sound on the cut. Visible in the animatic: shots 1 and 2 run the same motion, so the only thing that changes at 0:02 is the fabric.
 
 ## F-11 · The Brand Lock specified the object it forbade — SEVERE
 
