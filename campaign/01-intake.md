@@ -8,7 +8,7 @@
 
 **AIRING No.1 Refresh Mist** — a garment refresh mist that removes odor from clothes so they can be worn again without washing.
 
-- **Format:** 250ml matte aluminum bottle, black fine-mist trigger. Refilled by a 30ml concentrate vial + tap water.
+- **Format:** 250ml matte aluminum bottle, black fine-mist pump actuator. Refilled by a 30ml concentrate vial + tap water.
 - **Mechanism:** an enzyme blend that breaks down odor-causing compounds, plus a molecular-capture agent that traps volatile odor molecules. It removes odor rather than perfuming over it. No fabric softeners, no quaternary ammonium compounds, no residue — so it is safe on merino, cashmere, raw denim and elastane.
 - **Scents:** *Cold Air* (neutral, no added fragrance) and *Line Dry* (very light clean-cotton mineral).
 - **Price:** Starter Kit $34 (bottle + 1 concentrate). Refill 3-pack $27. Subscription −15%.
@@ -74,7 +74,7 @@ Assumed timeline: 6 weeks concept → live. Assumed test budget: modest, structu
 
 ## 9. What must never change?
 
-Locked in full in `04-brand-lock.md`. In short: the name AIRING, the product name No.1 Refresh Mist, the bottle (matte aluminum, flat shoulder, black trigger), the single-line wordmark at the bottle's midpoint, the scent names *Cold Air* and *Line Dry*, the palette, and the tagline *Wear it again.*
+Locked in full in `04-brand-lock.md`. In short: the name AIRING, the product name No.1 Refresh Mist, the bottle (matte aluminum, flat shoulder, black pump actuator), the single-line wordmark at the bottle's midpoint, the scent names *Cold Air* and *Line Dry*, the palette, and the tagline *Wear it again.*
 
 ## 10. What real proof exists?
 

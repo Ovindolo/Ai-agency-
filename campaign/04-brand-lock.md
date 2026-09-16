@@ -10,7 +10,7 @@ Direction A approved. This document governs every asset. Anything that contradic
 
 **Logo / wordmark.** `AIRING` set in the primary grotesk, Medium weight, letterspaced +8%, all caps, on a single line. No icon, no symbol, no lockup variant, no tagline attached to the mark. Reproduces in one color only: Graphite on light, Paper on dark. Minimum width 18mm print / 72px screen.
 
-**Product appearance.** 250ml cylindrical bottle, matte anodized aluminum in Paper White, **flat shoulder with a hard 90° transition** to the neck. Black matte fine-mist trigger, black collar. Wordmark screen-printed in Graphite on a single horizontal line at the bottle's vertical midpoint. Scent name in mono, small caps, 24mm below the wordmark. **No illustrations, no botanicals, no gradients, no back-label copy visible in any hero image.** Refill concentrate: 30ml clear glass vial, black screw cap, single mono label.
+**Product appearance.** 250ml cylindrical bottle, matte anodized aluminum in Paper White, **flat shoulder with a hard 90° transition** to the neck. Black matte fine-mist pump actuator (a flat actuator pressed with one finger — never a pistol-grip trigger sprayer), black collar. Wordmark screen-printed in Graphite on a single horizontal line at the bottle's vertical midpoint. Scent name in mono, small caps, 24mm below the wordmark. **No illustrations, no botanicals, no gradients, no back-label copy visible in any hero image.** Refill concentrate: 30ml clear glass vial, black screw cap, single mono label.
 
 **Core promise.** Removes odor so clothes can be worn again — without the wash cycle that wears them out.
 
@@ -45,7 +45,7 @@ Creator (age, gender, ethnicity, body, voice) · location and room · time of da
 
 ## FORBIDDEN — never appears, in any asset, under any circumstance
 
-**Product errors.** Altered bottle shape or a rounded shoulder · any color but Paper White body / black trigger · wordmark moved, scaled disproportionately, curved or duplicated · invented label copy, ingredients lists, icons or certification badges · a spray cloud that reads as aerosol mist rather than a fine pump fan · the bottle shown with a pistol-grip trigger or a squeeze head.
+**Product errors.** Altered bottle shape or a rounded shoulder · any color but Paper White body / black pump · wordmark moved, scaled disproportionately, curved or duplicated · invented label copy, ingredients lists, icons or certification badges · a spray cloud that reads as aerosol mist rather than a fine pump fan · the bottle shown with a pistol-grip trigger or a squeeze head.
 
 **Claim errors.** Any statement not in `claims-substantiation-register.md` · "kills 99.9% of bacteria" or any antimicrobial, sanitizing or disinfecting claim · "eco," "clean," "non-toxic," "chemical-free," "natural" as bare adjectives · any number — wears, percentages, days, dollars saved — without a registered source · comparative claims naming a competitor · anything implying the product cleans, launders or replaces washing entirely. **It replaces *some* washes. That distinction is legal, not stylistic.**
 
@@ -95,7 +95,7 @@ the wordmark; mono small caps for annotations. Graphite on Paper or Paper on
 Graphite. Flush left. No serif, no script, no outline, no shadow, no gradient.
 
 PROTECTED — PRODUCT REF governs the bottle absolutely: 250ml matte Paper White
-aluminum cylinder, hard 90° flat shoulder, black matte fine-mist trigger and collar,
+aluminum cylinder, hard 90° flat shoulder, black matte fine-mist pump actuator and collar,
 AIRING wordmark in Graphite on one horizontal line at the vertical midpoint, mono
 scent name below. Do not restyle, recolor, reshape, re-letter, add labels, add
 badges, or add back-label copy.

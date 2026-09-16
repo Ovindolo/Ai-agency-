@@ -24,7 +24,7 @@ All three share the standing block from `04-brand-lock.md`. What changes is the 
 Studio product photograph, 4:5 vertical. A single 250ml cylindrical matte anodized
 aluminum spray bottle in warm Paper White (#F4F2ED) stands upright on warm
 paper-white seamless, positioned on the right third of the frame. Hard 90° flat
-shoulder transitioning to the neck. Matte black fine-mist trigger head and black
+shoulder transitioning to the neck. Matte black fine-mist pump actuator and black
 collar. The wordmark "AIRING" is screen-printed in dark Graphite (#1A1A18), all caps,
 letterspaced, on a single horizontal line at the bottle's vertical midpoint, squarely
 facing camera; a small monospaced scent name sits below it. One hard light source
@@ -66,7 +66,7 @@ Lifestyle interior photograph, 4:5. Early morning in a real bedroom. A Paper Whi
 an open wardrobe door, filling the left two-thirds of the frame; the knit structure
 and a soft drape fold are clearly resolved. On the oiled-wood dresser top in the
 lower-right, sharp and smaller in frame, stands the 250ml matte Paper White aluminum
-AIRING bottle — hard 90° flat shoulder, black matte fine-mist trigger and collar,
+AIRING bottle — hard 90° flat shoulder, black matte fine-mist pump actuator and collar,
 "AIRING" wordmark in Graphite on a single horizontal line at the vertical midpoint,
 monospaced scent name below, facing camera. A wristwatch and two coins sit beside it.
 Folded indigo denim in Line-Dry Blue (#2E4A7D) at the dresser's far corner is the only
@@ -128,7 +128,7 @@ color cast, no blur gradient, no sage or cream, no watermark.
 | Bottle on Graphite, hard light, 16:9 with left negative space | Paid static backgrounds, site hero |
 | Refill vial + bottle, overhead, off-center | Refill and subscription PDP module |
 | Both scent variants side by side, PS-01 lighting | PDP variant selector |
-| Hand operating the trigger, 85mm, fabric out of focus behind | How-it-works step 2 |
+| Hand operating the pump, 85mm, fabric out of focus behind | How-it-works step 2 |
 | Bottle in a packed suitcase, hard light | Travel angle, secondary audience |
 | Macro: indigo denim weave · technical knit · cashmere · cotton jersey | Mechanism section, four-up grid |
 | Washing machine drum interior, cold, unlovely, 4:5 | The antagonist. Paid static and the page's problem section |

@@ -1,0 +1,478 @@
+<title>AIRING Brand Board</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F2ED; --surface:#EAE7DF; --ink:#1A1A18; --ink-2:#56544D;
+  --ink-3:#8A877D; --hairline:#D6D2C7; --blue:#2E4A7D; --orange:#C9410F;
+  --fabric:#E6E2D8; --fabric-line:#C9C4B6; --fabric-hi:#FBF9F4; --fabric-lo:#A7A295;
+  --focus:#2E4A7D;
+  /* fixed brand values — these never theme-shift, they are the spec */
+  --spec-paper:#F4F2ED; --spec-graphite:#1A1A18; --spec-blue:#2E4A7D; --spec-orange:#E8541F;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B;
+    --ink-3:#77746A; --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345;
+    --fabric:#232220; --fabric-line:#3A3833; --fabric-hi:#4E4B44; --fabric-lo:#0E0E0D;
+    --focus:#8FAAD8;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B;
+  --ink-3:#77746A; --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345;
+  --fabric:#232220; --fabric-line:#3A3833; --fabric-hi:#4E4B44; --fabric-lo:#0E0E0D;
+  --focus:#8FAAD8;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif; font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:1060px; margin:0 auto; padding-inline:20px}
+h1,h2,h3{margin:0; font-weight:600; text-wrap:balance; font-variation-settings:"wdth" 108}
+h1{font-size:clamp(28px,5vw,44px); line-height:1.05; letter-spacing:-.02em}
+h2{font-size:clamp(21px,3vw,27px); letter-spacing:-.012em; line-height:1.15}
+h3{font-size:16px; letter-spacing:-.005em}
+p{margin:0}
+.lede{color:var(--ink-2); font-size:clamp(16px,2vw,18.5px); max-width:36rem}
+.small{font-size:13.5px; line-height:1.5}
+.dim{color:var(--ink-2)}
+.tag{font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.sec{padding-block:clamp(36px,5.5vw,58px); border-top:1px solid var(--hairline)}
+.sec > * + *{margin-top:20px}
+.head{padding-block:clamp(40px,6vw,68px) clamp(28px,4vw,40px)}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+/* ---------- mark ---------- */
+.markbox{background:var(--spec-paper); border:1px solid var(--hairline);
+  display:grid; place-items:center; padding:clamp(34px,7vw,64px) 20px}
+.wordmark{color:var(--spec-graphite); font-weight:600; font-variation-settings:"wdth" 122;
+  letter-spacing:.09em; font-size:clamp(30px,7.5vw,62px); line-height:1; text-transform:uppercase}
+.marknotes{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0 26px}
+.marknotes > div{padding-block:12px; border-top:1px solid var(--hairline)}
+
+/* ---------- palette ---------- */
+.swatches{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px}
+.sw{border:1px solid var(--hairline)}
+.chip{height:84px}
+.sw .meta{padding:10px 12px 13px}
+.usage{display:flex; height:32px; border:1px solid var(--hairline); overflow:hidden}
+.usage i{display:block}
+.usekey{display:flex; flex-wrap:wrap; gap:6px 18px}
+.usekey span{display:inline-flex; align-items:center; gap:7px}
+.usekey b{width:9px; height:9px; display:inline-block}
+
+/* ---------- type ---------- */
+.spec{display:grid; gap:0}
+.spec > div{display:grid; grid-template-columns:minmax(0,1fr); gap:6px;
+  padding-block:20px; border-top:1px solid var(--hairline)}
+@media (min-width:760px){ .spec > div{grid-template-columns:11rem minmax(0,1fr); gap:0 28px} }
+.spec > div:last-child{border-bottom:1px solid var(--hairline)}
+.sample-d{font-size:clamp(26px,4.4vw,38px); font-weight:600; font-variation-settings:"wdth" 108;
+  letter-spacing:-.018em; line-height:1.08}
+.sample-b{font-size:17px; line-height:1.55; color:var(--ink-2); max-width:34rem}
+.sample-m{font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-2)}
+
+/* ---------- product ---------- */
+.prod{border:1px solid var(--hairline); background:var(--surface); padding:12px}
+.prod svg{display:block; width:100%; height:auto; max-width:100%}
+
+/* ---------- comps ---------- */
+.comps{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:26px}
+.unit > * + *{margin-top:12px}
+.comp{container-type:inline-size; position:relative; aspect-ratio:4/5; max-width:100%;
+  border:1px solid var(--hairline); overflow:hidden; background:var(--fabric)}
+.comp canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.comp .type{position:absolute; inset:0; padding:5cqw; display:flex; flex-direction:column}
+.ch{font-weight:600; font-variation-settings:"wdth" 106; letter-spacing:-.015em;
+  font-size:16px; font-size:6.6cqw; line-height:1.06; text-wrap:balance}
+.cb{font-size:11px; font-size:3.3cqw; line-height:1.35; margin-top:2.6cqw}
+.cm{font-family:"JetBrains Mono",monospace; font-size:8px; font-size:2.7cqw;
+  letter-spacing:.1em; text-transform:uppercase}
+.pad{background:var(--spec-paper); color:var(--spec-graphite); padding:3.6cqw 3.6cqw 4cqw; align-self:flex-start; max-width:92%}
+.ctapill{display:inline-block; background:var(--spec-graphite); color:var(--spec-paper);
+  padding:2.2cqw 3.2cqw; font-size:2.9cqw; font-weight:600; margin-top:3.2cqw}
+.anno{position:absolute; color:var(--spec-orange); border-left:2px solid var(--spec-orange);
+  padding-left:1.8cqw; font-family:"JetBrains Mono",monospace; font-size:2.6cqw;
+  letter-spacing:.09em; text-transform:uppercase}
+.holder{position:absolute; inset:0; background:
+  repeating-linear-gradient(45deg, transparent 0 9px, var(--hairline) 9px 10px);
+  display:grid; place-items:center; padding:8cqw; text-align:center}
+.holder p{font-family:"JetBrains Mono",monospace; font-size:2.9cqw; line-height:1.5;
+  letter-spacing:.06em; color:var(--ink-2); background:var(--paper); padding:3cqw}
+.meta-rows{display:grid; gap:0}
+.meta-rows > div{display:grid; grid-template-columns:5.6rem minmax(0,1fr); gap:4px 14px;
+  padding-block:9px; border-top:1px solid var(--hairline); font-size:13.5px}
+.meta-rows > div:last-child{border-bottom:1px solid var(--hairline)}
+.meta-rows b{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3); padding-top:.28em}
+.meta-rows span{color:var(--ink-2)}
+
+/* ---------- forbidden ---------- */
+.forbid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:0 28px}
+.forbid > div{padding-block:16px; border-top:1px solid var(--hairline)}
+.forbid ul{margin:.5em 0 0; padding-left:1.05em; color:var(--ink-2); font-size:14px; line-height:1.55}
+.forbid li{margin-bottom:.22em}
+.rule{color:var(--orange)}
+footer{border-top:1px solid var(--hairline); background:var(--surface); margin-top:clamp(40px,6vw,64px)}
+.foot{padding-block:30px 38px; color:var(--ink-3); font-size:13.5px; line-height:1.6; max-width:44rem}
+.foot strong{color:var(--ink-2); font-weight:600}
+</style>
+
+<div class="wrap">
+
+  <header class="head">
+    <p class="tag">Phase 4 · Brand Lock · reference artifact</p>
+    <h1 style="margin-top:14px">AIRING Brand Board</h1>
+    <p class="lede" style="margin-top:16px">The permanent <span class="mono" style="font-size:.88em">BRAND REF</span> for every asset in the campaign — the mark, the palette and its usage limits, the type system, and the product spec that governs all four generation prompts. Below it, the three static ads laid out at 4:5 so the type can be judged in frame.</p>
+  </header>
+
+  <section class="sec">
+    <p class="tag">The mark</p>
+    <h2>One word, one line, one color.</h2>
+    <div class="markbox"><div class="wordmark">Airing</div></div>
+    <div class="marknotes">
+      <div><h3>Construction</h3><p class="small dim">Archivo, weight 600, width axis 122, all caps, letterspaced +9%. Single line. No icon, no symbol, no lockup variant, no tagline attached.</p></div>
+      <div><h3>Color</h3><p class="small dim">One color only. Graphite on light grounds, Paper on dark. Never tinted, never reversed out of an image without a solid pad behind it.</p></div>
+      <div><h3>Limits</h3><p class="small dim">Minimum 18mm print, 72px screen. Clear space on all sides equal to the cap height. Never curved, stretched, outlined or duplicated.</p></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Palette</p>
+    <h2>Four values. One of them is a scalpel.</h2>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#F4F2ED"></div>
+        <div class="meta"><h3>Paper</h3><p class="mono small dim">#F4F2ED</p>
+        <p class="small dim" style="margin-top:6px">Ground. Wardrobe, fabric, product body. 60–80% of frame.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#1A1A18"></div>
+        <div class="meta"><h3>Graphite</h3><p class="mono small dim">#1A1A18</p>
+        <p class="small dim" style="margin-top:6px">Type, the machine, shadow. 15–30% of frame.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#2E4A7D"></div>
+        <div class="meta"><h3>Line-Dry Blue</h3><p class="mono small dim">#2E4A7D</p>
+        <p class="small dim" style="margin-top:6px">Denim, depth, the one saturated note. Under 20%.</p></div></div>
+      <div class="sw"><div class="chip" style="background:#E8541F"></div>
+        <div class="meta"><h3>Caution Orange</h3><p class="mono small dim">#E8541F</p>
+        <p class="small dim" style="margin-top:6px">Evidence marks and CTA only. <span class="rule">Under 5%.</span></p></div></div>
+    </div>
+    <div>
+      <p class="tag" style="margin-bottom:8px">Maximum share of any single frame</p>
+      <div class="usage">
+        <i style="background:#F4F2ED; flex:70"></i><i style="background:#1A1A18; flex:22"></i>
+        <i style="background:#2E4A7D; flex:6"></i><i style="background:#E8541F; flex:2"></i>
+      </div>
+      <div class="usekey mono small dim" style="margin-top:10px">
+        <span><b style="background:#F4F2ED; outline:1px solid var(--hairline)"></b>Paper 70</span>
+        <span><b style="background:#1A1A18"></b>Graphite 22</span>
+        <span><b style="background:#2E4A7D"></b>Blue 6</span>
+        <span><b style="background:#E8541F"></b>Orange 2</span>
+      </div>
+      <p class="small dim" style="margin-top:14px">Caution Orange is the only rule here that gets enforced rather than judged. If it is decorating, it is wrong — it points at damage, or it marks the CTA, or it is not in the frame.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Typography</p>
+    <h2>One grotesk. One mono. No serif, ever.</h2>
+    <p class="lede small">The category default is a soft serif on cream. Refusing it is not a style preference — the entire visual position depends on reading as an instrument rather than a linen closet.</p>
+    <div class="spec">
+      <div>
+        <div><p class="mono small dim">Display</p><p class="small dim" style="margin-top:4px">Archivo 600 · wdth 108 · −1.8% tracking</p></div>
+        <p class="sample-d">It's not the wearing that wears your clothes out.</p>
+      </div>
+      <div>
+        <div><p class="mono small dim">Body</p><p class="small dim" style="margin-top:4px">Archivo 400 · wdth 100 · 1.55 line height · 65ch</p></div>
+        <p class="sample-b">Most of your laundry isn't dirty. It smells — so it goes in the machine, and the machine is what wears it out. Forty minutes of wet fiber dragging against wet fiber, twice a week, is what turns a good knit into a tired one.</p>
+      </div>
+      <div>
+        <div><p class="mono small dim">Utility</p><p class="small dim" style="margin-top:4px">JetBrains Mono 500 · +12% tracking · caps</p></div>
+        <p class="sample-m">Machine-washed · Fig. 1 · Cold Air · 250ml · RTB-2 pending</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Product spec · PRODUCT REF</p>
+    <h2>The bottle, dimensioned.</h2>
+    <p class="lede small">Until a physical bottle exists and is photographed, this drawing is the protected reference. Every generation prompt inherits it verbatim.</p>
+    <div class="prod">
+      <svg viewBox="0 0 600 500" role="img" aria-label="Annotated specification drawing of the AIRING 250ml bottle">
+        <defs>
+          <linearGradient id="alu" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#FFFEFB"/><stop offset="0.28" stop-color="#F4F2ED"/>
+            <stop offset="0.78" stop-color="#E3DFD5"/><stop offset="1" stop-color="#CFCABD"/>
+          </linearGradient>
+          <linearGradient id="blk" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#3A3A36"/><stop offset="0.3" stop-color="#1A1A18"/>
+            <stop offset="1" stop-color="#0B0B0A"/>
+          </linearGradient>
+        </defs>
+        <g stroke="var(--ink-3)" stroke-width="1" fill="none" opacity="0.65">
+          <path d="M200 49 H262"/><path d="M200 75 H266"/>
+          <path d="M398 112 H384"/><path d="M398 284 H386"/><path d="M398 306 H386"/><path d="M398 424 H386"/>
+        </g>
+        <rect x="250" y="42" width="16" height="12" fill="url(#blk)"/>
+        <rect x="264" y="34" width="72" height="30" fill="url(#blk)"/>
+        <rect x="268" y="64" width="64" height="22" fill="url(#blk)"/>
+        <rect x="274" y="86" width="52" height="26" fill="url(#alu)"/>
+        <rect x="216" y="112" width="168" height="336" fill="url(#alu)"/>
+        <text x="300" y="288" text-anchor="middle" fill="#1A1A18" font-family="Archivo, sans-serif"
+              font-weight="600" font-size="23" letter-spacing="2.1"
+              style="font-variation-settings:'wdth' 122">AIRING</text>
+        <text x="300" y="310" text-anchor="middle" fill="#56544D" font-family="JetBrains Mono, monospace"
+              font-size="9" letter-spacing="2.4">COLD AIR</text>
+        <g fill="var(--ink-2)" font-family="JetBrains Mono, monospace" font-size="10.5" letter-spacing="0.6">
+          <text x="196" y="46" text-anchor="end">fine-mist pump actuator</text>
+          <text x="196" y="59" text-anchor="end" fill="var(--ink-3)">flat — pressed with one finger</text>
+          <text x="196" y="79" text-anchor="end">black matte collar</text>
+          <text x="404" y="109">hard 90° shoulder — no radius</text>
+          <text x="404" y="281">wordmark — one line, at the</text>
+          <text x="404" y="294" fill="var(--ink-3)">vertical midpoint of the body</text>
+          <text x="404" y="316">scent name — mono, small caps</text>
+          <text x="404" y="421">250ml matte anodized aluminum</text>
+          <text x="404" y="434" fill="var(--ink-3)">Paper White · brushed grain</text>
+        </g>
+        <g fill="var(--orange)" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="0.6">
+          <text x="216" y="472">FORBIDDEN — pistol-grip trigger · squeeze head · rounded shoulder · any label copy</text>
+        </g>
+      </svg>
+    </div>
+    <p class="small dim">The lock previously read "fine-mist trigger" while separately forbidding a pistol-grip trigger — a contradiction that would have produced the forbidden object on the first generation. Corrected across all four prompts: it is a flat pump actuator, pressed with one finger.</p>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Static ads · 4:5</p>
+    <h2>The three units, in frame.</h2>
+    <p class="lede small">Type set at final proportion. Image areas are procedural stand-ins or marked holders — none is a photograph, and none is evidence of anything.</p>
+
+    <div class="comps">
+
+      <div class="unit">
+        <div class="comp">
+          <canvas id="c1" aria-label="Comp: abraded knit left, intact knit right"></canvas>
+          <div class="anno" style="left:6%; top:31%">Machine-washed</div>
+          <div class="type" style="justify-content:flex-end">
+            <div class="pad">
+              <p class="ch">Same sweater. One of these went in the machine.</p>
+              <p class="cb">Pilling isn't age. It's abrasion — forty minutes of wet fiber dragging against wet fiber, on repeat.</p>
+              <span class="ctapill">Get the Starter Kit — $34</span>
+            </div>
+          </div>
+        </div>
+        <div class="meta-rows">
+          <div><b>Unit</b><span>S-01 — "Same Sweater"</span></div>
+          <div><b>Level</b><span>Problem-unaware → problem-aware</span></div>
+          <div><b>Testing</b><span>Whether showing fiber damage before mentioning odor buys attention from cold traffic that would scroll past a laundry product.</span></div>
+          <div><b>Gated</b><span class="rule mono" style="font-size:12px">RTB-1</span></div>
+        </div>
+      </div>
+
+      <div class="unit">
+        <div class="comp">
+          <canvas id="c2" aria-label="Comp: interior of a washing machine drum"></canvas>
+          <div class="type">
+            <div style="color:var(--spec-paper)">
+              <p class="cm" style="opacity:.62">AIRING</p>
+              <p class="ch" style="margin-top:2.4cqw">Forty minutes of this. Twice a week.</p>
+              <p class="cb" style="opacity:.78">Nobody questions the machine. It's just what you do with clothes.</p>
+            </div>
+            <div style="margin-top:auto"><span class="ctapill" style="background:var(--spec-paper); color:var(--spec-graphite)">Get the Starter Kit — $34</span></div>
+          </div>
+        </div>
+        <div class="meta-rows">
+          <div><b>Unit</b><span>S-02 — "The Drum"</span></div>
+          <div><b>Level</b><span>Problem-unaware</span></div>
+          <div><b>Testing</b><span>Whether removing the product from the image entirely makes the argument land harder and the click more qualified. Read on add-to-cart, not CTR.</span></div>
+          <div><b>Gated</b><span class="rule mono" style="font-size:12px">RTB-1 · RTB-2 · RTB-3</span></div>
+        </div>
+      </div>
+
+      <div class="unit">
+        <div class="comp">
+          <div class="holder"><p>PS-02 recomposed<br>indigo denim over a chair back<br>hard low window light, camera left<br>bottle sharp, lower right</p></div>
+          <div class="type">
+            <p class="cm" style="color:var(--ink-2)">Day 9</p>
+            <div style="margin-top:auto">
+              <div class="pad">
+                <p class="ch">Day nine. Nobody noticed.</p>
+                <p class="cb">Raw denim isn't meant to go in the machine. So what do you do instead?</p>
+                <span class="ctapill">Get the Starter Kit — $34</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="meta-rows">
+          <div><b>Unit</b><span>S-03 — "Day Nine"</span></div>
+          <div><b>Level</b><span>Solution-aware</span></div>
+          <div><b>Testing</b><span>Whether a narrow, community-specific ad beats the broad ad inside the denim and wool audience by enough to justify audience-specific creative.</span></div>
+          <div><b>Gated</b><span class="rule mono" style="font-size:12px">RTB-2</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="sec">
+    <p class="tag">Forbidden</p>
+    <h2>What never appears, in any asset.</h2>
+    <div class="forbid">
+      <div><h3>Product</h3><ul>
+        <li>Rounded shoulder or altered bottle shape</li>
+        <li>Pistol-grip trigger or squeeze head</li>
+        <li>Any color but Paper White body, black pump</li>
+        <li>Invented label copy, icons, certification badges</li>
+        <li>Aerosol cloud instead of a fine pump fan</li>
+      </ul></div>
+      <div><h3>Claim</h3><ul>
+        <li>Anything not in the substantiation register</li>
+        <li>Antimicrobial, sanitizing, "kills 99.9%"</li>
+        <li>"Eco", "clean", "non-toxic" as bare adjectives</li>
+        <li>Any number without a registered source</li>
+        <li>"Replaces washing" without the limiting clause</li>
+      </ul></div>
+      <div><h3>Proof</h3><ul>
+        <li>Testimonials, ratings, review counts</li>
+        <li>Customer photos, press logos, "as seen in"</li>
+        <li>Awards, certifications, partnerships</li>
+        <li>Sales figures, waitlist numbers</li>
+      </ul></div>
+      <div><h3>Visual</h3><ul>
+        <li>Any serif, script or handwriting face</li>
+        <li>Sage, lavender, terracotta, cream</li>
+        <li>Steam, bubbles, suds, water droplets</li>
+        <li>Florals, botanicals, eucalyptus</li>
+        <li>Lens flare, sparkles, freshness swooshes</li>
+        <li>Centered symmetrical flat-lays on pure white</li>
+      </ul></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap"><div class="foot">
+    <p><strong>Concept work.</strong> AIRING is an agency-originated product concept. No bottle has been manufactured, no formula mixed, no photograph taken and no ad run.</p>
+    <p style="margin-top:1em">The two canvas panels in the ad comps are drawn procedurally as art-direction stand-ins. They are layout placeholders for photographs that do not exist yet — not photographs, and not evidence. The third comp is a marked holder carrying its shot spec.</p>
+    <p style="margin-top:1em">Claim markers on each unit name the evidence that must clear before that ad can run. All three are currently unrunnable.</p>
+  </div></div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  function tok(n,f){ var v=getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v||f; }
+  function rnd(seed){ var s=seed; return function(){ s=(s*16807)%2147483647; return (s-1)/2147483646; }; }
+  function fit(cv){
+    var w=cv.clientWidth, h=cv.clientHeight; if(!w||!h) return null;
+    var d=Math.min(window.devicePixelRatio||1,2);
+    cv.width=Math.round(w*d); cv.height=Math.round(h*d);
+    var g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0);
+    return {g:g,w:w,h:h};
+  }
+
+  /* S-01 — knit comparison */
+  function knit(){
+    var cv=document.getElementById('c1'); if(!cv) return; var s=fit(cv); if(!s) return;
+    var g=s.g,w=s.w,h=s.h, r=rnd(20260916), mid=w/2;
+    var base=tok('--fabric','#E6E2D8'), line=tok('--fabric-line','#C9C4B6');
+    var hi=tok('--fabric-hi','#FBF9F4'), lo=tok('--fabric-lo','#A7A295');
+    g.fillStyle=base; g.fillRect(0,0,w,h);
+    var sx=7, sy=9; g.lineWidth=1; g.lineCap='round';
+    for(var y=-sy;y<h+sy;y+=sy){ for(var x=-sx;x<w+sx;x+=sx){
+      var L=x<mid, jx=L?(r()-0.5)*3:(r()-0.5)*0.5, jy=L?(r()-0.5)*3:(r()-0.5)*0.5;
+      g.strokeStyle=line; g.globalAlpha=L?0.28+r()*0.4:0.5;
+      g.beginPath(); g.arc(x+jx,y+jy,sx*0.44,Math.PI*0.08,Math.PI*0.92); g.stroke();
+      g.beginPath(); g.arc(x+jx+sx/2,y+jy+sy/2,sx*0.44,Math.PI*1.08,Math.PI*1.92); g.stroke();
+    }}
+    g.globalAlpha=1; g.lineWidth=0.85;
+    for(var f=0;f<48;f++){
+      var fx=r()*mid, fy=r()*h, len=4+r()*13, a=(r()-0.5)*2.4;
+      g.strokeStyle=r()>0.45?hi:lo; g.globalAlpha=0.32+r()*0.4;
+      g.beginPath(); g.moveTo(fx,fy);
+      g.quadraticCurveTo(fx+Math.cos(a)*len*0.6, fy+Math.sin(a)*len*0.6-3, fx+Math.cos(a)*len, fy+Math.sin(a)*len);
+      g.stroke();
+    }
+    g.globalAlpha=1;
+    var n=Math.round(mid*h/820);
+    for(var p=0;p<n;p++){
+      var px=r()*(mid-8)+4, py=r()*(h-8)+4, pr=1.4+r()*3;
+      g.globalAlpha=0.5; g.fillStyle=lo;
+      g.beginPath(); g.ellipse(px+pr*0.7,py+pr*0.45,pr*0.95,pr*0.6,0,0,6.2832); g.fill();
+      var rg=g.createRadialGradient(px-pr*0.42,py-pr*0.42,pr*0.12,px,py,pr*1.1);
+      rg.addColorStop(0,hi); rg.addColorStop(1,line);
+      g.globalAlpha=0.92; g.fillStyle=rg;
+      g.beginPath(); g.arc(px,py,pr,0,6.2832); g.fill();
+    }
+    g.globalAlpha=1;
+    var lg=g.createLinearGradient(0,0,w,h*0.3);
+    lg.addColorStop(0,'rgba(255,255,255,0.10)'); lg.addColorStop(0.55,'rgba(0,0,0,0)');
+    lg.addColorStop(1,'rgba(0,0,0,0.20)');
+    g.fillStyle=lg; g.fillRect(0,0,w,h);
+    g.globalAlpha=0.05;
+    for(var i=0;i<1600;i++){ g.fillStyle=r()>0.5?'#FFF':'#000'; g.fillRect(r()*w,r()*h,1,1); }
+    g.globalAlpha=1;
+    g.strokeStyle=tok('--hairline','#D6D2C7'); g.lineWidth=1;
+    g.beginPath(); g.moveTo(mid+0.5,0); g.lineTo(mid+0.5,h); g.stroke();
+  }
+
+  /* S-02 — drum interior */
+  function drum(){
+    var cv=document.getElementById('c2'); if(!cv) return; var s=fit(cv); if(!s) return;
+    var g=s.g,w=s.w,h=s.h, r=rnd(4711);
+    var cx=w*0.5, cy=h*0.52, R=Math.min(w,h)*0.62;
+    g.fillStyle='#0C0C0B'; g.fillRect(0,0,w,h);
+    var bg=g.createRadialGradient(cx-R*0.45,cy-R*0.5,R*0.05,cx,cy,R*1.25);
+    bg.addColorStop(0,'#4A4945'); bg.addColorStop(0.45,'#2A2A27'); bg.addColorStop(1,'#101010');
+    g.fillStyle=bg; g.beginPath(); g.arc(cx,cy,R,0,6.2832); g.fill();
+    /* perforations, lit from upper left */
+    for(var ring=1; ring<=9; ring++){
+      var rr=R*(ring/9.6), cnt=Math.max(6,Math.round(rr*0.46));
+      for(var k=0;k<cnt;k++){
+        var a=(k/cnt)*6.2832 + ring*0.31, px=cx+Math.cos(a)*rr, py=cy+Math.sin(a)*rr*0.995;
+        var lit=(Math.cos(a+2.35)+1)/2;
+        g.fillStyle='rgba(0,0,0,0.85)';
+        g.beginPath(); g.arc(px,py,2.1,0,6.2832); g.fill();
+        g.strokeStyle='rgba(255,255,255,'+(0.05+lit*0.26).toFixed(3)+')'; g.lineWidth=0.9;
+        g.beginPath(); g.arc(px-0.4,py-0.4,2.5,Math.PI*0.75,Math.PI*1.85); g.stroke();
+      }
+    }
+    /* three paddles */
+    g.save(); g.translate(cx,cy);
+    for(var t=0;t<3;t++){
+      g.rotate(6.2832/3);
+      var pg=g.createLinearGradient(0,-R*0.9,R*0.12,-R*0.5);
+      pg.addColorStop(0,'#5C5B56'); pg.addColorStop(1,'#232320');
+      g.fillStyle=pg;
+      g.beginPath(); g.moveTo(-R*0.055,-R*0.94); g.lineTo(R*0.055,-R*0.94);
+      g.lineTo(R*0.03,-R*0.30); g.lineTo(-R*0.03,-R*0.30); g.closePath(); g.fill();
+    }
+    g.restore();
+    /* drum rim */
+    g.strokeStyle='#6B6A64'; g.lineWidth=2.4;
+    g.beginPath(); g.arc(cx,cy,R,0,6.2832); g.stroke();
+    g.strokeStyle='rgba(0,0,0,0.9)'; g.lineWidth=7;
+    g.beginPath(); g.arc(cx,cy,R+5,0,6.2832); g.stroke();
+    /* vignette + grain */
+    var vg=g.createRadialGradient(cx,cy,R*0.55,cx,cy,Math.max(w,h)*0.85);
+    vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.92)');
+    g.fillStyle=vg; g.fillRect(0,0,w,h);
+    g.globalAlpha=0.07;
+    for(var i=0;i<2000;i++){ g.fillStyle=r()>0.5?'#FFF':'#000'; g.fillRect(r()*w,r()*h,1,1); }
+    g.globalAlpha=1;
+  }
+
+  function all(){ knit(); drum(); }
+  all();
+  var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(all,150); });
+  if(window.matchMedia){
+    var mq=window.matchMedia('(prefers-color-scheme: dark)');
+    if(mq.addEventListener) mq.addEventListener('change', function(){ setTimeout(all,60); });
+  }
+  if(window.MutationObserver){
+    new MutationObserver(function(){ setTimeout(all,60); })
+      .observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  }
+})();
+</script>

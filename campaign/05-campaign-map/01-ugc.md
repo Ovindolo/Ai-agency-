@@ -29,14 +29,14 @@ Each concept below is production-ready: hook, persona, setting, script, shot lis
 2. 0:02–0:07 — Cut to insert: hands lifting tee out of drawer, natural handheld drift.
 3. 0:07–0:12 — **Macro insert.** Shoulder seam raked by window light, pills catching highlights. The money shot.
 4. 0:12–0:18 — Back to MCU, creator explaining, tee held up in frame.
-5. 0:18–0:24 — Product interaction: bottle picked up off dresser, two visible trigger pulls, fine fan of mist across the fabric.
+5. 0:18–0:24 — Product interaction: bottle picked up off dresser, two visible pump presses, fine fan of mist across the fabric.
 6. 0:24–0:28 — Wide: tee on a wooden hanger on the door frame, creator steps out of frame, holds on the empty shot for a beat.
 
 **On-screen text.** `0:01` *washing ≠ cleaning* · `0:08` *this is abrasion, not age* · `0:19` *enzyme, not fragrance* · `0:26` *wear it again.* (Graphite on Paper pad, mono, lower third, flush left.)
 
 **B-roll to generate separately.** Macro pilling on merino · a knit cuff distorting under tension · a washing machine drum spinning, shot from inside the door, cold and unlovely · a hanger on a door frame in morning light.
 
-**Product interaction rules.** Bottle lives on the dresser in shot before it is used. Trigger pulled with the index finger, bottle held upright at 20–25cm from fabric. Mist reads as a fine fan that disperses, never as an aerosol cloud. Wordmark faces camera on pickup. Bottle is never waved at the lens.
+**Product interaction rules.** Bottle lives on the dresser in shot before it is used. Pump pressed flat with the index finger, bottle held upright at 20–25cm from fabric. Mist reads as a fine fan that disperses, never as an aerosol cloud. Wordmark faces camera on pickup. Bottle is never waved at the lens.
 
 **CTA.** Spoken: none. On-screen end card only: `Get the Starter Kit — $34` with `AI-generated` label persistent bottom-left.
 
@@ -170,7 +170,7 @@ Composition weighted right, negative space upper-left for type. Cool, unglamorou
 documentary.
 [STANDING BLOCK — 35mm, f/4, 5200K, Paper/Graphite palette, fine grain]
 PROTECTED — bottle per PRODUCT REF exactly: hard 90° flat shoulder, black matte
-fine-mist trigger and collar, AIRING wordmark in Graphite on one horizontal line at
+fine-mist pump actuator and collar, AIRING wordmark in Graphite on one horizontal line at
 the vertical midpoint, mono scent name below. Do not restyle, recolor, reshape,
 re-letter or add labels.
 NEGATIVE — no steam, no mist in air, no water droplets, no sparkle, no lens flare,

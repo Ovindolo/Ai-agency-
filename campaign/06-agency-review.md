@@ -11,7 +11,7 @@ Every asset audited against ten axes before handoff. Findings are reported **Pro
 | Audience fit | **Pass** | Every asset speaks to the considered-wardrobe buyer. Nothing drifts to the mass laundry shopper. |
 | Message clarity | **Pass** | One message, seven expressions. A stranger can restate it after one view. |
 | Brand consistency | **Repaired** | See F-02, F-06 |
-| Product accuracy | **Pass** | Bottle spec identical in all five generation prompts; PROTECTED block present in every one. |
+| Product accuracy | **Repaired** | See F-11 — the Brand Lock specified the object it separately forbade |
 | Visual continuity | **Pass** | One light, one lens family, one palette across UGC, product and paid. |
 | Platform fit | **Repaired** | See F-07 |
 | Claim accuracy | **Repaired** | See F-01, F-03, F-04, F-08, F-09 — the most serious cluster in the audit |
@@ -92,6 +92,16 @@ Every asset audited against ten axes before handoff. Findings are reported **Pro
 **Why it matters.** Small, but it is a production document. A partner reading it looks for a fourth persona, does not find it, and either asks — costing a day — or invents one — costing the brand system.
 
 **Repair applied.** Corrected to three.
+
+## F-11 · The Brand Lock specified the object it forbade — SEVERE
+
+**Problem.** LOCKED described the closure as a *"fine-mist trigger."* FORBIDDEN listed *"the bottle shown with a pistol-grip trigger or a squeeze head."* The same document both mandated and prohibited a trigger. Found while drawing the product spec — the word had to resolve to a shape, and it resolved to two.
+
+**Why it matters.** The most dangerous kind of defect: invisible in prose, fatal in production. "Trigger" in a generation prompt reliably produces a pistol-grip trigger sprayer, because that is what the word means to an image model. Every one of the four PROTECTED blocks carried it, so the first render of every prompt would have produced the explicitly forbidden object — and it would have looked correct enough to approve, because the prompt said what the render showed.
+
+It also propagated into direction. UGC-01 and UGC-03 staged *"trigger pulls,"* which is a whole-hand gesture; V-03's sound design was built on *"two trigger pulls,"* which is a mechanical click, not a pump's hiss. The wrong noun had already produced wrong performance and wrong audio.
+
+**Repair applied.** Resolved in favor of the product the brand actually needs — a **flat fine-mist pump actuator, pressed with one finger**, which is what a fabric mist uses and what the forbidden list was protecting. Corrected in eleven places across six files: the LOCKED clause now names the actuator and explicitly excludes a pistol-grip trigger sprayer in the same sentence, all four generation prompts updated, both UGC product-interaction notes rewritten as pump presses, V-03's sound design corrected, and the commissioned shot list renamed to "pump detail."
 
 ## F-10 · A structural risk left as a checklist item — MEDIUM
 

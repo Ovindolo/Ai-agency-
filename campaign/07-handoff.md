@@ -67,7 +67,7 @@ Nine complete generation prompts, each carrying the standing block, the PROTECTE
 - [ ] Physical bottle produced and photographed → **becomes the permanent PRODUCT REF**
 - [ ] Brand board rendered from the Brand Lock → **becomes the permanent BRAND REF**
 
-**Photography** — PS-01 · PS-02 · PS-03 · drum interior · 4× fabric macro · refill overhead · both variants · trigger detail · suitcase
+**Photography** — PS-01 · PS-02 · PS-03 · drum interior · 4× fabric macro · refill overhead · both variants · pump detail · suitcase
 
 **Video** — V-01, V-02, V-03 in 9:16 and 1:1 · 3 UGC concepts × 3 casting variants (9 assets) · B-roll library
 

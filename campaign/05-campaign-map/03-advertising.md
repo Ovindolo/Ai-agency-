@@ -69,7 +69,7 @@ Opens on H5 — *"Fabric spray doesn't clean anything."* — spoken flat to came
 - **Note.** This is also the legal safe-harbour asset — it is the only unit that explicitly bounds the claim, and it should be the first thing counsel reviews.
 
 ### V-03 — "The Five Feet" · 12s · 9:16
-No voiceover. Sound design only: wardrobe door, two trigger pulls, hanger on a rail, a door closing. Shot as one continuous 12-second move through the five feet between the wardrobe and the front door. Type enters twice: `most loads go in for smell, not dirt` at 0:05, `wear it again.` at 0:10.
+No voiceover. Sound design only: wardrobe door, two pump presses, hanger on a rail, a door closing. Shot as one continuous 12-second move through the five feet between the wardrobe and the front door. Type enters twice: `most loads go in for smell, not dirt` at 0:05, `wear it again.` at 0:10.
 - **Awareness.** Solution-aware, retargeting, and brand. **Hypothesis.** *A non-verbal, texture-led unit will hold a warm audience and lift branded search even at a weaker direct-response rate.* Judged on frequency-adjusted brand search lift, not CPA.
 
 ---
