@@ -100,9 +100,12 @@ footer{border-top:1px solid var(--line); background:var(--surface); margin-top:c
 
 <section class="sec" style="border-top:none; padding-top:0">
   <div class="alert">
-    <p class="small" style="font-weight:600; letter-spacing:.06em; text-transform:uppercase; font-size:11px; color:var(--accent)">Cât câștigă pe oră acum, la 250 lei</p>
-    <p class="big" id="nowRate" style="margin-top:8px">7 lei/h</p>
-    <p class="small" style="margin-top:10px; color:var(--ink-2)">Salariul minim net în România e în jur de <b>14 lei/oră</b>. Coșul de gunoi la un supermarket se plătește mai bine decât broderia asta.</p>
+    <p class="small" style="font-weight:600; letter-spacing:.06em; text-transform:uppercase; font-size:11px; color:var(--accent)">Problema nu e prețul mediu. E că e un singur preț.</p>
+    <div style="display:flex; gap:28px; flex-wrap:wrap; margin-top:12px; align-items:flex-end">
+      <div><p class="big" id="rateT1">25 lei/h</p><p class="small" style="color:var(--ink-2); margin-top:4px">„Matei" — 6 ore, la 250 lei</p></div>
+      <div><p class="big" id="rateT3" style="color:var(--warn)">4 lei/h</p><p class="small" style="color:var(--ink-2); margin-top:4px">Duomo Milano — 40 ore, la 250 lei</p></div>
+    </div>
+    <p class="small" style="margin-top:14px; color:var(--ink-2)">Aceeași sumă pentru o muncă de <b id="raport">6,7</b> ori mai lungă. Piesele simple sunt plătite decent. <b>Cele complexe sunt lucrate aproape gratis</b> — și tocmai alea sunt cele care fac magazinul memorabil.</p>
   </div>
 </section>
 
@@ -120,7 +123,7 @@ footer{border-top:1px solid var(--line); background:var(--surface); margin-top:c
     <div class="panel">
       <div class="grp">
         <p class="t">Munca</p>
-        <div class="f"><label for="i-h">Ore de lucru</label><input id="i-h" type="number" step="1" value="18"></div>
+        <div class="f"><label for="i-h">Ore de lucru</label><input id="i-h" type="number" step="1" value="6"></div>
         <div class="f"><label for="i-r">Tarif dorit lei/oră</label><input id="i-r" type="number" step="5" value="45"></div>
         <p class="note">Salariu minim ≈ 14 lei/h · meșteșugar calificat 40–60 · artist cu portofoliu 80–120</p>
       </div>
@@ -138,7 +141,7 @@ footer{border-top:1px solid var(--line); background:var(--surface); margin-top:c
       <div class="grp">
         <p class="t">Vânzare</p>
         <div class="f"><label for="i-c">Comision platformă %</label><input id="i-c" type="number" step="0.5" value="0"></div>
-        <div class="f"><label for="i-luna">Piese pe lună</label><input id="i-luna" type="number" step="0.5" value="6"></div>
+        <div class="f"><label for="i-luna">Piese pe lună</label><input id="i-luna" type="number" step="0.5" value="5"></div>
         <p class="note">Etsy ≈ 10–11% total (listare + tranzacție + plată). Facebook/Instagram direct = 0%.</p>
       </div>
     </div>
@@ -188,9 +191,9 @@ footer{border-top:1px solid var(--line); background:var(--surface); margin-top:c
 (function(){
   "use strict";
   var TIERS=[
-    {n:"Treapta 1", t:"Nume + motive", ex:"Matei, Erik, Eva", h:18},
-    {n:"Treapta 2", t:"Nume + dată + oră", ex:"Francesca, Iris — anunț de naștere", h:26},
-    {n:"Treapta 3", t:"Scenă / portret / fond pictat", ex:"Duomo Milano, galeria, The Tichy Family", h:55}
+    {n:"Treapta 1", t:"Nume + motive", ex:"Matei, Erik, Eva", h:6},
+    {n:"Treapta 2", t:"Nume + dată + oră", ex:"Francesca, Iris — anunț de naștere", h:10},
+    {n:"Treapta 3", t:"Scenă / portret / fond pictat", ex:"Duomo Milano, galeria, The Tichy Family", h:40}
   ];
   var active=0;
   var ids=["h","r","g","nc","pc","uc","mp","ms","a","x","c","luna"], F={};
@@ -245,7 +248,12 @@ footer{border-top:1px solid var(--line); background:var(--surface); margin-top:c
 
   function render(){
     var m=calc();
-    document.getElementById("nowRate").textContent=Math.round(m.acumRate)+" lei/h";
+    var matNow=v("g")+(v("nc")*v("pc")*v("uc")/100)+(v("mp")*v("ms"))+v("a")+v("x");
+    var net250=250-matNow;
+    var r1=net250/6, r3=net250/40;
+    document.getElementById("rateT1").textContent=Math.round(r1)+" lei/h";
+    document.getElementById("rateT3").textContent=Math.round(r3)+" lei/h";
+    document.getElementById("raport").textContent=(40/6).toFixed(1).replace(".",",");
     document.getElementById("oRec").textContent=lei(m.rec);
     document.getElementById("oRecEur").textContent="≈ "+Math.round(m.rec/5)+" € · "+v("h")+" ore de lucru";
     document.getElementById("oMin").textContent=lei(m.minim);
