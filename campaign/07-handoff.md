@@ -113,6 +113,10 @@ Supporting: S-02 tests whether removing the product from the image improves clic
 4. **Offer terms (RTB-7, RTB-8).** Pricing, the 30-day guarantee, the $30 shipping threshold — all invented by the agency, all commercial decisions the agency cannot make.
 5. **Formulation feasibility (A-04).** No chemist has seen this. If the mechanism is not achievable at this price, Direction A loses its argument and the B-led fallback applies.
 
+**Also required before launch**
+
+5b. **A five-touch post-purchase flow** (F-14). 46% of modeled twelve-month value arrives after the ad works, and the campaign originally specified nothing to earn it. Spec in `08-unit-economics.md`. This is a deliverable, not an optimization.
+
 **Approval before action**
 
 6. Any media spend. 7. Any publishing to any platform. 8. Any creator or supplier contact. 9. Any domain purchase or store build. 10. Synthetic-media labeling sign-off for all UGC under Meta and TikTok policy.

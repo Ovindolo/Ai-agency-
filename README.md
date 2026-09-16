@@ -27,6 +27,8 @@ A complete brand and campaign built end-to-end by the Full-Stack AI Agency proto
 | `campaign/05-campaign-map/v01-animatic.html` | 5 | V-01 as a playable animatic — https://claude.ai/artifact/C1CDmuX8UnSNwbsEFDNhtc |
 | `campaign/06-agency-review.md` | 6 | Consistency audit: problem → why → repair |
 | `campaign/07-handoff.md` | 7 | Production order, checklist, approvals, gaps |
+| `campaign/08-unit-economics.md` | — | The commercial model — CAC ceiling, sensitivities, four findings |
+| `campaign/08-unit-economics.html` | — | Live model — https://claude.ai/artifact/SEcdpfj5FhwsLpQLXQXWZ2 |
 | `campaign/claims-substantiation-register.md` | — | Every factual claim and what must verify it |
 
 ## Hard rules honoured throughout

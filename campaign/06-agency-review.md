@@ -18,6 +18,7 @@ Every asset audited against ten axes before handoff. Findings are reported **Pro
 | CTA clarity | **Repaired** | See F-02 |
 | AI artifacts | **Pass** | Negative constraints on every prompt cover hands, duplication, warped geometry, melted text. |
 | Unnecessary complexity | **Repaired** | See F-05, F-10 |
+| Commercial coverage | **Repaired** | See F-14 — 46% of customer value had no asset attached to it |
 
 ---
 
@@ -92,6 +93,16 @@ Every asset audited against ten axes before handoff. Findings are reported **Pro
 **Why it matters.** Small, but it is a production document. A partner reading it looks for a fourth persona, does not find it, and either asks — costing a day — or invents one — costing the brand system.
 
 **Repair applied.** Corrected to three.
+
+## F-14 · Half the customer's value had no asset attached to it — SEVERE
+
+**Problem.** The package specifies seven organic posts, three UGC concepts, three video units, three static ads and a full landing page — every one of them aimed at someone who has not bought. It specifies **zero** communication with someone who has. Found by building the unit-economics model, not by reading the work.
+
+**Why it matters.** At the modeled assumptions, 46% of twelve-month customer value arrives from refills — after the advertising has finished its job. That value was treated as automatic. It is not: a customer who forgets the bottle exists, or who applied it wrong on day one and concluded it doesn't work, never becomes a refill. The most valuable message this brand will ever send is a replenishment reminder timed to the bottle running out, and it was not in the plan at all.
+
+It also makes the campaign's own CAC ceiling unreachable. The $32.47 twelve-month ceiling assumes a 38% repeat rate that nothing in the work is trying to cause.
+
+**Repair applied.** A five-touch post-purchase flow specified in `08-unit-economics.md` — day 0 (the honest test, which sets an evaluation the product can win), day 3 (application technique, since most product failure is application failure), day 21 (one question, no offer), ~day 100 (replenishment), lapsed +60 (one win-back, then stop). Added to the handoff as a required deliverable rather than an optimization.
 
 ## F-13 · The caption spec was invisible on most of its own frames — HIGH
 

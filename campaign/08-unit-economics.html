@@ -1,0 +1,419 @@
+<title>AIRING Unit Economics</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F2ED; --surface:#EAE7DF; --ink:#1A1A18; --ink-2:#56544D; --ink-3:#8A877D;
+  --hairline:#D6D2C7; --blue:#2E4A7D; --orange:#C9410F; --focus:#2E4A7D;
+  --c-pos:#3E63A8; --c-mark:#E8541F;
+  --c1:#C7C2B5; --c2:#AFA99A; --c3:#97917F; --c4:#7E7867;
+  --grid:#E1DDD2; --chart-bg:#FCFCFB;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B; --ink-3:#77746A;
+  --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345; --focus:#8FAAD8;
+  --c-pos:#5E8CD6; --c-mark:#EC6034;
+  --c1:#4A4741; --c2:#5C594F; --c3:#6F6B5F; --c4:#827D6F;
+  --grid:#2A2926; --chart-bg:#1A1A19;
+}}
+:root[data-theme="dark"]{
+  --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B; --ink-3:#77746A;
+  --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345; --focus:#8FAAD8;
+  --c-pos:#5E8CD6; --c-mark:#EC6034;
+  --c1:#4A4741; --c2:#5C594F; --c3:#6F6B5F; --c4:#827D6F;
+  --grid:#2A2926; --chart-bg:#1A1A19;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif; font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:1060px; margin:0 auto; padding-inline:20px}
+h1,h2,h3{margin:0; font-weight:600; text-wrap:balance; font-variation-settings:"wdth" 108}
+h1{font-size:clamp(27px,4.6vw,42px); line-height:1.05; letter-spacing:-.02em}
+h2{font-size:clamp(20px,2.8vw,26px); letter-spacing:-.012em}
+h3{font-size:15.5px}
+p{margin:0}
+.tag{font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.lede{color:var(--ink-2); max-width:38rem}
+.small{font-size:13.5px; line-height:1.5}
+.dim{color:var(--ink-2)}
+.sec{padding-block:clamp(32px,5vw,52px); border-top:1px solid var(--hairline)}
+.sec > * + *{margin-top:18px}
+.head{padding-block:clamp(36px,5.5vw,60px) clamp(20px,3vw,28px)}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+/* hero figure */
+.hero{display:grid; gap:22px; align-items:end}
+@media (min-width:760px){ .hero{grid-template-columns:auto minmax(0,1fr)} }
+.big{font-size:clamp(56px,13vw,104px); font-weight:600; line-height:0.86;
+  letter-spacing:-.04em; font-variation-settings:"wdth" 104; color:var(--c-pos)}
+.bigsub{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-3); margin-top:12px}
+
+/* tiles */
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:0}
+.tiles > div{padding:16px 18px 18px; border-top:1px solid var(--hairline);
+  border-right:1px solid var(--hairline)}
+.tiles > div:last-child{border-right:none}
+.tiles .v{font-size:27px; font-weight:600; letter-spacing:-.02em; line-height:1.1}
+.tiles .k{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3); margin-bottom:7px}
+.tiles .n{font-size:12.5px; color:var(--ink-2); margin-top:5px; line-height:1.4}
+
+/* inputs */
+.model{display:grid; gap:22px}
+@media (min-width:880px){ .model{grid-template-columns:300px minmax(0,1fr)} }
+.panel{border:1px solid var(--hairline); background:var(--surface); padding:16px 16px 18px}
+.grp + .grp{margin-top:16px; padding-top:14px; border-top:1px solid var(--hairline)}
+.grp > p{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3); margin-bottom:9px}
+.fld{display:grid; grid-template-columns:minmax(0,1fr) 78px; gap:8px; align-items:center;
+  margin-bottom:7px}
+.fld label{font-size:13.5px; color:var(--ink-2)}
+.fld input{width:100%; font:inherit; font-family:"JetBrains Mono",monospace; font-size:12.5px;
+  padding:5px 7px; border:1px solid var(--hairline); background:var(--paper); color:var(--ink);
+  border-radius:2px; text-align:right}
+.fld input:focus{border-color:var(--focus)}
+.reset{margin-top:14px; width:100%; background:none; border:1px solid var(--hairline);
+  color:var(--ink-2); padding:8px; font-family:"JetBrains Mono",monospace; font-size:10.5px;
+  letter-spacing:.11em; text-transform:uppercase; border-radius:2px; cursor:pointer}
+.reset:hover{border-color:var(--ink-3); color:var(--ink)}
+
+/* charts */
+.fig{border:1px solid var(--hairline); background:var(--chart-bg); padding:16px 16px 12px;
+  position:relative}
+.fig + .fig{margin-top:20px}
+.fig h3{margin-bottom:3px}
+.fig .cap{font-size:13px; color:var(--ink-2); margin-bottom:14px}
+svg{display:block; width:100%; height:auto; max-width:100%; overflow:visible}
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px}
+.legend span{display:inline-flex; align-items:center; gap:7px;
+  font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--ink-2)}
+.legend b{width:10px; height:10px; display:inline-block; border-radius:1px}
+.tip{position:absolute; pointer-events:none; opacity:0; transition:opacity .1s;
+  background:var(--ink); color:var(--paper); padding:7px 9px; border-radius:2px;
+  font-family:"JetBrains Mono",monospace; font-size:11px; line-height:1.45; z-index:5;
+  white-space:nowrap; transform:translate(-50%,-115%)}
+.tip.on{opacity:1}
+details{margin-top:12px; border-top:1px solid var(--hairline); padding-top:10px}
+summary{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--ink-3); cursor:pointer}
+table{border-collapse:collapse; width:100%; margin-top:10px; font-size:13px}
+th,td{text-align:right; padding:5px 8px; border-bottom:1px solid var(--hairline); color:var(--ink-2)}
+th:first-child,td:first-child{text-align:left}
+th{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3)}
+.tbl-scroll{overflow-x:auto}
+
+/* findings */
+.find{display:grid; gap:0}
+.find > div{padding-block:18px; border-top:1px solid var(--hairline)}
+.find > div:last-child{border-bottom:1px solid var(--hairline)}
+.find p{color:var(--ink-2); font-size:14.5px; margin-top:6px}
+.find .n{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--c-mark)}
+.warn{border-left:3px solid var(--c-mark); padding:3px 0 3px 17px; max-width:38rem}
+footer{border-top:1px solid var(--hairline); background:var(--surface); margin-top:clamp(36px,5vw,56px)}
+.foot{padding-block:28px 36px; color:var(--ink-3); font-size:13.5px; line-height:1.6; max-width:44rem}
+.foot strong{color:var(--ink-2); font-weight:600}
+</style>
+
+<div class="wrap">
+
+<header class="head">
+  <p class="tag">Agency addendum · commercial model</p>
+  <h1 style="margin-top:12px">What you can afford to pay for a customer</h1>
+  <p class="lede" style="margin-top:16px">The campaign deliberately quotes no CPA target — nobody can, before an impression runs. What <em>can</em> be stated before launch is the <strong>ceiling</strong>: the number above which acquisition stops being a business. This derives it, and every input is yours to overwrite.</p>
+</header>
+
+<section class="sec" style="border-top:none; padding-top:0">
+  <div class="hero">
+    <div>
+      <div class="big" id="heroVal">$17.61</div>
+      <p class="bigsub">First-order CAC ceiling · break-even on purchase one</p>
+    </div>
+    <p class="small dim" style="max-width:26rem">Pay more than this to acquire a customer and you are funding growth out of capital, not margin. That may be a deliberate choice — it is not an accident you want to discover in month four.</p>
+  </div>
+  <div class="tiles" style="margin-top:26px">
+    <div><p class="k">12-month ceiling</p><p class="v" id="t12">$32.47</p><p class="n">Break-even including expected refills</p></div>
+    <div><p class="k">Healthy target</p><p class="v" id="t3x">$10.82</p><p class="n">At 3:1 contribution to CAC</p></div>
+    <div><p class="k">Break-even ROAS</p><p class="v" id="tRoas">1.93×</p><p class="n">On the first order alone</p></div>
+    <div><p class="k">Refill share of LTV</p><p class="v" id="tShare">46%</p><p class="n">Earned after the ad stops working</p></div>
+  </div>
+  <div class="warn" style="margin-top:22px">
+    <p class="small"><strong>Every default below is an agency assumption, not a measured figure.</strong> No supplier has quoted, no order has shipped, no customer has repeated. The model's value is the structure and the sensitivities — replace the inputs with real numbers and the outputs become real.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="tag">The model</p>
+  <h2>Change anything. Everything recalculates.</h2>
+  <div class="model">
+    <div class="panel">
+      <div class="grp">
+        <p>Starter kit</p>
+        <div class="fld"><label for="i-sp">Price</label><input id="i-sp" type="number" step="0.5" value="34"></div>
+        <div class="fld"><label for="i-sc">COGS</label><input id="i-sc" type="number" step="0.25" value="7.50"></div>
+        <div class="fld"><label for="i-sf">Fulfillment</label><input id="i-sf" type="number" step="0.25" value="5.40"></div>
+      </div>
+      <div class="grp">
+        <p>Refill 3-pack</p>
+        <div class="fld"><label for="i-rp">Price</label><input id="i-rp" type="number" step="0.5" value="27"></div>
+        <div class="fld"><label for="i-rc">COGS</label><input id="i-rc" type="number" step="0.25" value="4.20"></div>
+        <div class="fld"><label for="i-rf">Fulfillment</label><input id="i-rf" type="number" step="0.25" value="3.10"></div>
+        <div class="fld"><label for="i-sd">Sub discount %</label><input id="i-sd" type="number" step="1" value="15"></div>
+      </div>
+      <div class="grp">
+        <p>Operations</p>
+        <div class="fld"><label for="i-pp">Processing %</label><input id="i-pp" type="number" step="0.1" value="2.9"></div>
+        <div class="fld"><label for="i-pf">Processing fixed</label><input id="i-pf" type="number" step="0.05" value="0.30"></div>
+        <div class="fld"><label for="i-rr">Return rate %</label><input id="i-rr" type="number" step="0.5" value="6"></div>
+        <div class="fld"><label for="i-rk">Cost per return</label><input id="i-rk" type="number" step="0.25" value="4.00"></div>
+      </div>
+      <div class="grp">
+        <p>Customer behavior</p>
+        <div class="fld"><label for="i-re">Repeat rate %</label><input id="i-re" type="number" step="1" value="38"></div>
+        <div class="fld"><label for="i-pk">Packs per repeater</label><input id="i-pk" type="number" step="0.1" value="2.1"></div>
+      </div>
+      <button class="reset" id="reset">Reset to assumptions</button>
+    </div>
+
+    <div>
+      <div class="fig" id="fig1">
+        <h3>Where the $<span id="spLbl">34</span> goes</h3>
+        <p class="cap">One starter order, expected value after returns. Contribution is what's left to pay for the customer.</p>
+        <svg id="svg1" viewBox="0 0 720 168" role="img" aria-label="Cost breakdown of one starter order and one refill order"></svg>
+        <div class="legend" id="leg1"></div>
+        <div class="tip" id="tip1"></div>
+        <details>
+          <summary>Table view</summary>
+          <div class="tbl-scroll"><table id="tbl1"></table></div>
+        </details>
+      </div>
+
+      <div class="fig" id="fig2">
+        <h3>The ceiling depends on repeat rate</h3>
+        <p class="cap">12-month CAC ceiling across every possible repeat rate. The marked point is your current assumption.</p>
+        <svg id="svg2" viewBox="0 0 720 300" role="img" aria-label="Line chart: twelve-month CAC ceiling as repeat rate varies from 0 to 100 percent"></svg>
+        <div class="tip" id="tip2"></div>
+        <details>
+          <summary>Table view</summary>
+          <div class="tbl-scroll"><table id="tbl2"></table></div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="tag">What the model says</p>
+  <h2>Four things worth acting on</h2>
+  <div class="find">
+    <div>
+      <p class="n">Correction</p>
+      <h3>The refill isn't "the business." It's half of it.</h3>
+      <p>Earlier in this engagement the agency wrote that <em>the refill is the business.</em> At these assumptions that's wrong: the starter kit contributes <b id="f1a">$17.61</b> on its own — <b id="f1b">54%</b> of twelve-month value. That's a structurally <em>stronger</em> position than a loss-leader model, because survival doesn't depend on retention. It also means the acquisition ad can be judged on first-order economics, which is a much faster feedback loop than waiting on a repeat cohort.</p>
+    </div>
+    <div>
+      <p class="n">Lever</p>
+      <h3>Fulfillment is the second-largest cost on the starter.</h3>
+      <p>At <b id="f2a">$5.40</b> it is <b id="f2b">15.9%</b> of the starter price — more than processing and returns combined. The free-shipping threshold sits at $30 so the $34 kit always absorbs it. Moving that threshold above the starter price would recover the margin and kill conversion; the real lever is packaging the starter to ship at letterbox rate, which is a product decision, not a marketing one.</p>
+    </div>
+    <div>
+      <p class="n">Decision</p>
+      <h3>The subscription discount has a hurdle rate.</h3>
+      <p>A <b id="f3a">15%</b> subscribe-and-save cuts refill contribution from <b id="f3b">$18.62</b> to <b id="f3c">$14.68</b>. To be worth offering, it must lift refill volume by at least <b id="f3d">26.8%</b>. That is a testable number, not a preference — and it should be tested before the discount is printed on the page, because a discount is far easier to launch than to withdraw.</p>
+    </div>
+    <div>
+      <p class="n">Gap — F-14</p>
+      <h3>Nothing in this package earns the refill.</h3>
+      <p><b id="f4a">46%</b> of twelve-month value arrives after the ad has done its job, and the campaign specifies no post-purchase flow at all — no refill reminder timed to the bottle running out, no first-use email that improves the odds the product works, no replenishment trigger. Seven organic posts were specified for people who haven't bought, and zero touches for people who have. That is a real hole in the work, found by modeling it, and it is now logged against the campaign.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer><div class="wrap"><div class="foot">
+  <p><strong>A structure, not a forecast.</strong> Every input ships with an agency assumption because no real figure exists — the brand has no supplier quotes, no shipped orders and no repeat cohort. Nothing here predicts performance, and no output should be quoted as a projection.</p>
+  <p style="margin-top:1em">What it does do is convert "we don't set CPA targets before launch" into "here is how you derive yours, and here is which input moves it most." Replace the assumptions with quotes and cohort data and the outputs become decision-grade.</p>
+</div></div></footer>
+
+<script>
+(function(){
+  "use strict";
+  var DEF={sp:34,sc:7.50,sf:5.40,rp:27,rc:4.20,rf:3.10,sd:15,pp:2.9,pf:0.30,rr:6,rk:4.00,re:38,pk:2.1};
+  var ids=Object.keys(DEF), F={};
+  ids.forEach(function(k){ F[k]=document.getElementById('i-'+k); });
+
+  function val(k){ var v=parseFloat(F[k].value); return isFinite(v)?v:DEF[k]; }
+  function money(n){ return '$'+n.toFixed(2); }
+  function pct(n){ return n.toFixed(1)+'%'; }
+  function cssv(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  function calc(){
+    var v={}; ids.forEach(function(k){ v[k]=val(k); });
+    var r=Math.min(0.95,Math.max(0,v.rr/100));
+    var procS=v.sp*v.pp/100+v.pf;
+    var starter={
+      revenue: v.sp*(1-r),
+      cogs: v.sc, fulfil: v.sf,
+      proc: procS*(1-r),
+      returns: v.rk*r
+    };
+    starter.contribution = starter.revenue - starter.cogs - starter.fulfil - starter.proc - starter.returns;
+    var procR=v.rp*v.pp/100+v.pf;
+    var refill={ revenue:v.rp, cogs:v.rc, fulfil:v.rf, proc:procR, returns:0 };
+    refill.contribution = refill.revenue - refill.cogs - refill.fulfil - refill.proc;
+    var subPrice=v.rp*(1-v.sd/100), procSub=subPrice*v.pp/100+v.pf;
+    var subContribution=subPrice-v.rc-v.rf-procSub;
+    var repeatValue=(v.re/100)*v.pk*refill.contribution;
+    var ltv=starter.contribution+repeatValue;
+    return {v:v, starter:starter, refill:refill, ltv:ltv, repeatValue:repeatValue,
+      subContribution:subContribution,
+      uplift: subContribution>0 ? (refill.contribution/subContribution-1)*100 : NaN,
+      roas: starter.contribution>0 ? v.sp/starter.contribution : NaN,
+      share: ltv!==0 ? repeatValue/ltv*100 : 0};
+  }
+
+  /* ---------- chart 1: stacked cost bars ---------- */
+  var SEG=[
+    {k:'cogs',   name:'COGS',        c:'--c4'},
+    {k:'fulfil', name:'Fulfillment', c:'--c3'},
+    {k:'proc',   name:'Processing',  c:'--c2'},
+    {k:'returns',name:'Returns',     c:'--c1'},
+    {k:'contribution', name:'Contribution', c:'--c-pos'}
+  ];
+  function bars(m){
+    var svg=document.getElementById('svg1'), W=720, padL=0, padR=16, y0=26, bh=46, gap=40;
+    var rows=[{label:'Starter', d:m.starter, gross:m.starter.revenue},
+              {label:'Refill 3-pack', d:m.refill, gross:m.refill.revenue}];
+    var max=Math.max(rows[0].gross,rows[1].gross,1);
+    var W2=W-padL-padR, out='', tb='<tr><th>Line</th><th>Starter</th><th>Refill</th></tr>';
+    rows.forEach(function(row,ri){
+      var y=y0+ri*(bh+gap), x=padL;
+      out+='<text x="0" y="'+(y-8)+'" fill="'+cssv('--ink')+'" font-family="Archivo,sans-serif" font-size="14" font-weight="600">'+row.label+'</text>';
+      out+='<text x="'+(W-padR)+'" y="'+(y-8)+'" text-anchor="end" fill="'+cssv('--ink-3')+'" font-family="JetBrains Mono,monospace" font-size="11">'+money(row.gross)+' net revenue</text>';
+      SEG.forEach(function(s){
+        var vv=row.d[s.k]||0; if(vv<=0.001) return;
+        var w=vv/max*W2;
+        out+='<rect class="sg" data-l="'+s.name+'" data-v="'+money(vv)+'" data-p="'+(vv/row.gross*100).toFixed(1)+'% of '+row.label.toLowerCase()+'" '+
+             'x="'+x.toFixed(1)+'" y="'+y+'" width="'+Math.max(0,w-2).toFixed(1)+'" height="'+bh+'" fill="'+cssv(s.c)+'" rx="1"></rect>';
+        if(w>46) out+='<text x="'+(x+8)+'" y="'+(y+bh/2+4)+'" fill="'+(s.k==='contribution'?'#FFFFFF':cssv('--ink'))+'" font-family="JetBrains Mono,monospace" font-size="'+(w>70?11:9.5)+'" pointer-events="none">'+money(vv)+'</text>';
+        x+=w;
+      });
+    });
+    SEG.forEach(function(s){
+      tb+='<tr><td>'+s.name+'</td><td>'+money(rows[0].d[s.k]||0)+'</td><td>'+money(rows[1].d[s.k]||0)+'</td></tr>';
+    });
+    svg.innerHTML=out;
+    document.getElementById('tbl1').innerHTML=tb;
+    document.getElementById('leg1').innerHTML=SEG.map(function(s){
+      return '<span><b style="background:'+cssv(s.c)+'"></b>'+s.name+'</span>'; }).join('');
+    var tip=document.getElementById('tip1'), fig=document.getElementById('fig1');
+    svg.querySelectorAll('.sg').forEach(function(el){
+      el.addEventListener('mousemove', function(e){
+        var fr=fig.getBoundingClientRect();
+        tip.style.left=(e.clientX-fr.left)+'px'; tip.style.top=(e.clientY-fr.top)+'px';
+        tip.innerHTML=el.dataset.l+' · '+el.dataset.v+'<br>'+el.dataset.p;
+        tip.classList.add('on');
+      });
+      el.addEventListener('mouseleave', function(){ tip.classList.remove('on'); });
+    });
+  }
+
+  /* ---------- chart 2: sensitivity line ---------- */
+  function line(m){
+    var svg=document.getElementById('svg2'), W=720,H=300, L=64,R=18,T=18,B=44;
+    var base=m.starter.contribution, slope=m.v.pk*m.refill.contribution;
+    var dMax=Math.max(base+slope, base, 1), dMin=Math.min(0, base);
+    var raw=(dMax-dMin)/5, mag=Math.pow(10,Math.floor(Math.log10(raw)||0)), nn=raw/mag;
+    var step=(nn<=1?1:nn<=2?2:nn<=2.5?2.5:nn<=5?5:10)*mag;
+    var yMax=Math.ceil(dMax/step)*step, yMin=Math.floor(dMin/step)*step;
+    function X(p){ return L+(p/100)*(W-L-R); }
+    function Y(v){ return H-B-((v-yMin)/(yMax-yMin))*(H-T-B); }
+    var out='', i;
+    for(var tv=yMin; tv<=yMax+0.001; tv+=step){
+      var y=Y(tv);
+      out+='<line x1="'+L+'" y1="'+y.toFixed(1)+'" x2="'+(W-R)+'" y2="'+y.toFixed(1)+'" stroke="'+cssv('--grid')+'" stroke-width="1"></line>';
+      out+='<text x="'+(L-10)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" fill="'+cssv('--ink-3')+'" font-family="JetBrains Mono,monospace" font-size="10">$'+tv.toFixed(0)+'</text>';
+    }
+    out+='<text transform="translate(14,'+((T+H-B)/2)+') rotate(-90)" text-anchor="middle" fill="'+cssv('--ink-3')+'" font-family="JetBrains Mono,monospace" font-size="10" letter-spacing="1">12-MONTH CEILING</text>';
+    for(i=0;i<=100;i+=25){
+      out+='<text x="'+X(i).toFixed(1)+'" y="'+(H-B+20)+'" text-anchor="middle" fill="'+cssv('--ink-3')+'" font-family="JetBrains Mono,monospace" font-size="10">'+i+'%</text>';
+    }
+    out+='<text x="'+((L+W-R)/2)+'" y="'+(H-4)+'" text-anchor="middle" fill="'+cssv('--ink-3')+'" font-family="JetBrains Mono,monospace" font-size="10" letter-spacing="1">REPEAT RATE</text>';
+    var d='';
+    for(i=0;i<=100;i+=2){ d+=(i===0?'M':'L')+X(i).toFixed(1)+' '+Y(base+slope*i/100).toFixed(1)+' '; }
+    out+='<path d="'+d+'" fill="none" stroke="'+cssv('--c-pos')+'" stroke-width="2" stroke-linejoin="round"></path>';
+    var cx=X(m.v.re), cy=Y(m.ltv);
+    out+='<line x1="'+cx.toFixed(1)+'" y1="'+Y(yMin).toFixed(1)+'" x2="'+cx.toFixed(1)+'" y2="'+cy.toFixed(1)+'" stroke="'+cssv('--c-mark')+'" stroke-width="1" stroke-dasharray="3 3"></line>';
+    out+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5.5" fill="'+cssv('--c-mark')+'" stroke="'+cssv('--chart-bg')+'" stroke-width="2"></circle>';
+    /* the line rises left-to-right, so the clear space is always above-left of the point */
+    var lx=Math.max(L+4, cx-14);
+    out+='<text x="'+lx.toFixed(1)+'" y="'+(cy-18).toFixed(1)+'" text-anchor="end" fill="'+cssv('--ink')+'" font-family="JetBrains Mono,monospace" font-size="11" font-weight="500">'+money(m.ltv)+' at '+m.v.re+'%</text>';
+    out+='<rect id="hit2" x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)+'" fill="transparent"></rect>';
+    svg.innerHTML=out;
+
+    var tb='<tr><th>Repeat rate</th><th>12-month CAC ceiling</th></tr>';
+    [0,20,40,60,80,100].forEach(function(p){
+      tb+='<tr><td>'+p+'%</td><td>'+money(base+slope*p/100)+'</td></tr>';
+    });
+    document.getElementById('tbl2').innerHTML=tb;
+
+    var tip=document.getElementById('tip2'), fig=document.getElementById('fig2');
+    var hit=svg.querySelector('#hit2');
+    hit.addEventListener('mousemove', function(e){
+      var box=svg.getBoundingClientRect(), fr=fig.getBoundingClientRect();
+      var px=(e.clientX-box.left)/box.width*W;
+      var p=Math.min(100,Math.max(0,(px-L)/(W-L-R)*100));
+      tip.style.left=(e.clientX-fr.left)+'px'; tip.style.top=(e.clientY-fr.top)+'px';
+      tip.innerHTML=p.toFixed(0)+'% repeat<br>ceiling '+money(base+slope*p/100);
+      tip.classList.add('on');
+    });
+    hit.addEventListener('mouseleave', function(){ tip.classList.remove('on'); });
+  }
+
+  function set(id,txt){ var el=document.getElementById(id); if(el) el.textContent=txt; }
+  function update(){
+    var m=calc();
+    set('heroVal', money(m.starter.contribution));
+    set('t12', money(m.ltv));
+    set('t3x', money(m.ltv/3));
+    set('tRoas', isFinite(m.roas)? m.roas.toFixed(2)+'×' : '—');
+    set('tShare', m.share.toFixed(0)+'%');
+    set('spLbl', m.v.sp.toFixed(0));
+    set('f1a', money(m.starter.contribution));
+    set('f1b', (100-m.share).toFixed(0)+'%');
+    set('f2a', money(m.v.sf));
+    set('f2b', pct(m.v.sf/m.v.sp*100));
+    set('f3a', m.v.sd.toFixed(0)+'%');
+    set('f3b', money(m.refill.contribution));
+    set('f3c', money(m.subContribution));
+    set('f3d', isFinite(m.uplift)? m.uplift.toFixed(1)+'%' : '—');
+    set('f4a', m.share.toFixed(0)+'%');
+    bars(m); line(m);
+    try{ localStorage.setItem('airing-econ', JSON.stringify(
+      ids.reduce(function(o,k){ o[k]=val(k); return o; },{}))); }catch(e){}
+  }
+  ids.forEach(function(k){ F[k].addEventListener('input', update); });
+  document.getElementById('reset').addEventListener('click', function(){
+    ids.forEach(function(k){ F[k].value=DEF[k]; }); update();
+  });
+  try{
+    var saved=JSON.parse(localStorage.getItem('airing-econ')||'null');
+    if(saved) ids.forEach(function(k){ if(typeof saved[k]==='number') F[k].value=saved[k]; });
+  }catch(e){}
+  update();
+  window.addEventListener('resize', function(){ clearTimeout(window.__rt); window.__rt=setTimeout(update,180); });
+  if(window.matchMedia){
+    var mq=window.matchMedia('(prefers-color-scheme: dark)');
+    if(mq.addEventListener) mq.addEventListener('change', function(){ setTimeout(update,60); });
+  }
+  if(window.MutationObserver) new MutationObserver(function(){ setTimeout(update,60); })
+    .observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
