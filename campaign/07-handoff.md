@@ -30,6 +30,7 @@ Locked, Flexible, Forbidden, plus the reusable visual generation specification a
 | Advertising | `05-campaign-map/03-advertising.md` | 5 hooks, 3 statics, 3 videos, standing copy, headline bank, test structure |
 | Landing page | `05-campaign-map/04-landing-page.md` | Full page copy, section by section, with build notes |
 | Social | `05-campaign-map/05-social-campaign.md` | 7 posts, sequenced over 10 days |
+| Storyboards | `05-campaign-map/06-storyboards.md` | Frame breakdowns for all three video units |
 
 ## 5. Finished copy — ready to set
 
@@ -42,6 +43,7 @@ Cleared of internal inconsistency and ready for layout. **Still gated on claim s
 - 7 social posts: hook, body direction, full caption
 - Headline bank: 6 headlines under 40 characters
 - Standing long-form copy block
+- Frame-level storyboards for V-01, V-02 and V-03 with captions, audio cues and sound-off spec
 
 ## 6. Production-ready prompts
 
@@ -96,7 +98,7 @@ Supporting: S-02 tests whether removing the product from the image improves clic
 **Week 3 — Evidence photography.** PS-03 first. It is the campaign's load-bearing image; if it fails, the direction needs re-testing before more money goes in.
 **Week 4 — Studio and lifestyle.** PS-01, PS-02, the commissioned list.
 **Week 4 — Page build.** In parallel. Ship with `[RTB-n]` blockers live so the build physically cannot deploy early.
-**Week 5 — Video.** V-01 first, then UGC across three casting variants, then V-02 and V-03.
+**Week 5 — Video.** V-01 first, then UGC across three casting variants, then V-02 and V-03. The animatic is the edit reference: match its pace and its audio cut at 0:07 before deviating.
 **Week 6 — Legal.** Full claim review against the register. Expect cuts. Budget for a copy pass after them, not before.
 **Week 7 — Organic first, paid second.** Social posts 1–5 run before any spend, so the paid traffic lands on a profile with a position rather than an empty grid.
 **Week 8 — Test 1 only.** One question at a time.
@@ -122,8 +124,10 @@ Stated plainly, because a specification is not a deliverable.
 | Not done | Delivered instead |
 |---|---|
 | No image was generated | 7 complete, production-ready prompts with protected specs and negative lists |
-| No video was generated | 3 scripts with shot lists, timings and 2 generation prompts |
-| No landing page was built | Complete page copy plus build notes and the null-on-empty proof component spec |
+| No video footage was shot | 3 scripts with shot lists, timings, audio cues and 2 generation prompts |
+| No landing page was built | **Built.** `05-campaign-map/landing-page.html` — full page against the Brand Lock, with claims-audit mode |
+| No brand reference existed | **Built.** `04-brand-board.html` — mark, palette limits, type, annotated bottle spec, three ads at 4:5 |
+| No video was produced | **Animatic built.** `05-campaign-map/v01-animatic.html` — playable 15s timing study for V-01 |
 | Nothing was published | 7 posts written and sequenced, awaiting approval |
 | No media was bought | Test structure with hypotheses and read-outs |
 | No claim was verified | Register of 8 claims with the exact evidence each needs |

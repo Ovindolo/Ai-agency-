@@ -1,0 +1,593 @@
+<title>Two Sweaters Animatic</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F2ED; --surface:#EAE7DF; --ink:#1A1A18; --ink-2:#56544D; --ink-3:#8A877D;
+  --hairline:#D6D2C7; --blue:#2E4A7D; --orange:#C9410F; --focus:#2E4A7D;
+  --fabric:#E6E2D8; --fabric-line:#C9C4B6; --fabric-hi:#FBF9F4; --fabric-lo:#A7A295;
+  --spec-paper:#F4F2ED; --spec-graphite:#1A1A18; --spec-orange:#E8541F;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B; --ink-3:#77746A;
+  --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345; --focus:#8FAAD8;
+  --fabric:#232220; --fabric-line:#3A3833; --fabric-hi:#4E4B44; --fabric-lo:#0E0E0D;
+}}
+:root[data-theme="dark"]{
+  --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B; --ink-3:#77746A;
+  --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345; --focus:#8FAAD8;
+  --fabric:#232220; --fabric-line:#3A3833; --fabric-hi:#4E4B44; --fabric-lo:#0E0E0D;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif; font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+.wrap{max-width:1060px; margin:0 auto; padding-inline:20px}
+h1,h2,h3{margin:0; font-weight:600; text-wrap:balance; font-variation-settings:"wdth" 108}
+h1{font-size:clamp(27px,4.6vw,40px); line-height:1.06; letter-spacing:-.02em}
+h2{font-size:clamp(20px,2.8vw,26px); letter-spacing:-.012em}
+h3{font-size:15.5px}
+p{margin:0}
+.tag{font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.lede{color:var(--ink-2); max-width:36rem}
+.small{font-size:13.5px; line-height:1.5}
+.dim{color:var(--ink-2)}
+.sec{padding-block:clamp(32px,5vw,52px); border-top:1px solid var(--hairline)}
+.sec > * + *{margin-top:18px}
+.head{padding-block:clamp(36px,5.5vw,60px) clamp(22px,3vw,32px)}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+button{font:inherit; cursor:pointer}
+
+/* ---------- player ---------- */
+.player{display:grid; gap:26px; align-items:start}
+@media (min-width:880px){ .player{grid-template-columns:330px minmax(0,1fr)} }
+.stage{position:relative; aspect-ratio:9/16; width:100%; max-width:330px;
+  background:#101010; border:1px solid var(--hairline); overflow:hidden}
+.stage canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.ov{position:absolute; inset:0; pointer-events:none}
+.cap{position:absolute; left:6%; bottom:9%; max-width:84%;
+  font-family:"JetBrains Mono",monospace; font-size:13px; letter-spacing:.02em;
+  background:rgba(244,242,237,.86); color:#1A1A18; padding:7px 9px; line-height:1.35}
+.cap.big{font-family:"Archivo",sans-serif; font-weight:600; font-size:23px; letter-spacing:-.01em;
+  font-variation-settings:"wdth" 108; background:none; color:#F4F2ED; padding:0; text-shadow:0 1px 14px rgba(0,0,0,.55)}
+.cap.cta{background:#1A1A18; color:#F4F2ED; font-weight:600; font-size:13px}
+.ai{position:absolute; left:6%; top:4%; font-family:"JetBrains Mono",monospace;
+  font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:rgba(244,242,237,.62)}
+.tc{position:absolute; right:6%; top:4%; font-family:"JetBrains Mono",monospace;
+  font-size:9.5px; letter-spacing:.06em; color:rgba(244,242,237,.62)}
+
+/* ---------- transport ---------- */
+.transport{margin-top:14px; max-width:330px}
+.rail{position:relative; height:26px; display:flex; gap:2px; border:1px solid var(--hairline)}
+.rail i{display:block; position:relative; background:var(--surface); overflow:hidden}
+.rail i span{position:absolute; left:4px; top:5px; font-family:"JetBrains Mono",monospace;
+  font-size:9.5px; color:var(--ink-3)}
+.rail i.on{background:var(--blue)}
+.rail i.on span{color:#FFF}
+.hook{position:absolute; left:0; top:-16px; height:12px; width:13.33%;
+  border-left:2px solid var(--spec-orange); border-top:1px solid var(--spec-orange);
+  border-right:1px solid var(--spec-orange)}
+.hook b{position:absolute; left:0; top:-13px; font-family:"JetBrains Mono",monospace;
+  font-size:9px; letter-spacing:.09em; text-transform:uppercase; color:var(--spec-orange);
+  font-weight:500; white-space:nowrap}
+.head-pos{position:absolute; top:0; bottom:0; width:2px; background:var(--orange); pointer-events:none}
+.audio{display:flex; height:13px; margin-top:4px; position:relative; border:1px solid var(--hairline)}
+.audio .rumble{position:absolute; left:26.67%; width:29%; top:0; bottom:0; background:var(--ink-3); opacity:.5}
+.audio .hiss{position:absolute; width:2px; top:0; bottom:0; background:var(--blue)}
+.audio .lab{position:absolute; right:4px; top:1px; font-family:"JetBrains Mono",monospace;
+  font-size:9px; color:var(--ink-3); letter-spacing:.06em}
+input[type=range]{width:100%; margin-top:10px; accent-color:var(--blue)}
+.btns{display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap}
+.pb{background:var(--ink); color:var(--paper); border:1px solid var(--ink);
+  padding:9px 16px; font-size:14px; font-weight:600; border-radius:2px; min-width:92px}
+.pb:hover{background:var(--blue); border-color:var(--blue)}
+.tg{background:none; border:1px solid var(--hairline); color:var(--ink-2); padding:9px 12px;
+  font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.11em;
+  text-transform:uppercase; border-radius:2px}
+.tg[aria-pressed="true"]{border-color:var(--orange); color:var(--orange)}
+.clock{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-3); margin-left:auto}
+
+/* ---------- script ---------- */
+.script{display:grid; gap:0}
+.script > div{display:grid; grid-template-columns:4.4rem minmax(0,1fr); gap:4px 14px;
+  padding-block:13px; border-top:1px solid var(--hairline); transition:background .15s}
+.script > div:last-child{border-bottom:1px solid var(--hairline)}
+.script > div.on{background:var(--surface)}
+.script > div.on .t{color:var(--orange)}
+.t{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.06em;
+  color:var(--ink-3); padding-top:.3em}
+.script .vo{color:var(--ink-2); font-size:14.5px; margin-top:3px}
+.script .vo em{color:var(--ink); font-style:italic}
+.script .cx{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-3);
+  margin-top:5px; letter-spacing:.03em}
+body.silent .vo{opacity:.28}
+.vostrip{border:1px solid var(--hairline); padding:11px 13px; margin-top:14px; min-height:62px;
+  max-width:330px; background:var(--surface)}
+.vostrip p{font-size:14.5px; color:var(--ink-2)}
+body.silent .vostrip{border-style:dashed}
+body.silent .vostrip .live{display:none}
+.mutenote{display:none; font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--orange);
+  letter-spacing:.06em; line-height:1.5}
+body.silent .mutenote{display:block}
+
+/* ---------- strip ---------- */
+.strip{display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:12px}
+.fr{border:1px solid var(--hairline)}
+.fr .box{aspect-ratio:9/16; position:relative; background:#101010}
+.fr canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.fr .m{padding:8px 9px 10px}
+.fr .m b{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.08em;
+  color:var(--ink-3); display:block}
+.fr .m span{font-size:12.5px; color:var(--ink-2); line-height:1.35; display:block; margin-top:3px}
+
+/* ---------- tables / notes ---------- */
+.rows{display:grid; gap:0}
+.rows > div{display:grid; grid-template-columns:minmax(0,1fr); gap:4px;
+  padding-block:14px; border-top:1px solid var(--hairline)}
+@media (min-width:720px){ .rows > div{grid-template-columns:5.2rem minmax(0,1fr); gap:0 20px} }
+.rows > div:last-child{border-bottom:1px solid var(--hairline)}
+.rows b{font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3); padding-top:.3em}
+.rows span{color:var(--ink-2); font-size:14.5px}
+.callout{border-left:3px solid var(--blue); padding:3px 0 3px 17px; max-width:36rem}
+.callout p{font-size:17px; line-height:1.4}
+.warn{border-left:3px solid var(--orange); padding:3px 0 3px 17px; max-width:36rem}
+.two{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:0 28px}
+.two > div{padding-block:15px; border-top:1px solid var(--hairline)}
+footer{border-top:1px solid var(--hairline); background:var(--surface); margin-top:clamp(36px,5vw,56px)}
+.foot{padding-block:28px 36px; color:var(--ink-3); font-size:13.5px; line-height:1.6; max-width:44rem}
+.foot strong{color:var(--ink-2); font-weight:600}
+</style>
+
+<div class="wrap">
+
+<header class="head">
+  <p class="tag">V-01 · 15s · 9:16 · Meta &amp; TikTok · Test 1</p>
+  <h1 style="margin-top:12px">Two Sweaters</h1>
+  <p class="lede" style="margin-top:14px">The unit the launch rests on. Its hypothesis is about <em>timing</em> — whether a fabric comparison holds a stranger past three seconds — and timing cannot be judged on a paper storyboard. So play it.</p>
+</header>
+
+<section class="sec">
+  <p class="tag">Animatic</p>
+  <div class="player">
+    <div>
+      <div class="stage">
+        <canvas id="stage" aria-label="Animatic playback of the V-01 advertisement"></canvas>
+        <div class="ov">
+          <div class="ai">AI-generated · animatic</div>
+          <div class="tc" id="tc">0:00</div>
+          <div id="caps"></div>
+        </div>
+      </div>
+
+      <div class="transport">
+        <div class="rail" id="rail">
+          <div class="hook"><b>Hook window · 0–2s</b></div>
+          <div class="head-pos" id="playhead" style="left:0"></div>
+        </div>
+        <div class="audio">
+          <div class="rumble"></div>
+          <div class="hiss" style="left:55.7%"></div>
+          <div class="hiss" style="left:61%"></div>
+          <div class="lab">AUDIO</div>
+        </div>
+        <input type="range" id="scrub" min="0" max="15" step="0.05" value="0" aria-label="Scrub timeline">
+        <div class="btns">
+          <button class="pb" id="play">Play</button>
+          <button class="tg" id="mute" aria-pressed="false">Audio off</button>
+          <span class="clock mono" id="clock">0.00 / 15.00s</span>
+        </div>
+        <div class="vostrip">
+          <p class="tag" style="font-size:10px">Voiceover</p>
+          <p class="live" id="vo" style="margin-top:5px">—</p>
+          <p class="mutenote">Audio off — this is what a muted viewer gets. Everything load-bearing is still on screen.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2>The script, following along</h2>
+      <div class="script" id="script"></div>
+      <div class="callout" style="margin-top:20px">
+        <p>The rumble cuts dead on the first pump press. The silence is the product benefit rendered as sound.</p>
+      </div>
+      <p class="small dim" style="margin-top:14px">It costs nothing, and it is the only thing in this unit a competitor cannot copy from a screenshot.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="tag">Frames</p>
+  <h2>Five shots</h2>
+  <div class="strip" id="strip"></div>
+</section>
+
+<section class="sec">
+  <p class="tag">The two decisions</p>
+  <div class="two">
+    <div>
+      <h3>The cold open</h3>
+      <p class="small dim" style="margin-top:6px">No brand, no product, no context for two full seconds — just fabric. Cold traffic gives roughly that long, and a logo spends it on something the viewer has no reason to care about yet.</p>
+    </div>
+    <div>
+      <h3>Frame 2 is the whole ad</h3>
+      <p class="small dim" style="margin-top:6px">If shots 1 and 2 aren't lit identically, at the same scale, on the same fabric, the comparison is worthless — and a viewer will feel the cheat without being able to name it. Shoot both halves in one session without moving the light.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="tag">Test 1</p>
+  <h2>What this unit is asking</h2>
+  <div class="rows">
+    <div><b>Hypothesis</b><span>The two-sweater comparison in the first two seconds will hold cold traffic past three seconds at a materially higher rate than a talking-head open.</span></div>
+    <div><b>Against</b><span>A product-first control — same copy, same offer, opening on the bottle.</span></div>
+    <div><b>Read on</b><span>3-second hold rate first, outbound CTR second. Not CPA — Test 1 is an attention question, and judging it on conversion answers a different one.</span></div>
+    <div><b>Gated</b><span class="mono" style="color:var(--orange); font-size:13px">RTB-1 · RTB-2 — neither cleared. This unit cannot run today.</span></div>
+  </div>
+  <p class="small dim">No outcome is predicted. If the hypothesis fails, the finding is that the argument doesn't buy attention in this category — which is worth knowing before a scaled spend, and is the entire reason the test runs first.</p>
+</section>
+
+<section class="sec">
+  <p class="tag">Production</p>
+  <h2>What must be shot, and what may be generated</h2>
+  <div class="warn">
+    <p class="small"><strong>Shots 1 and 2 must be photographed.</strong> They are the campaign's evidence. Generating the proof for a brand built on refusing fake proof is the worst available own-goal — and it's the one place in this package where a synthetic asset is an integrity problem, not a production shortcut.</p>
+  </div>
+  <div class="rows" style="margin-top:6px">
+    <div><b>Generate</b><span>The drum interior, V-02's fabric macros, all B-roll. None of it carries evidentiary weight.</span></div>
+    <div><b>Shoot order</b><span>Both knit halves first, one session, light untouched between them. Then the drum. Then product interaction. The hanging-tee close reuses the PS-02 setup — same day.</span></div>
+    <div><b>Captions</b><span>JetBrains Mono, lowercase, Graphite on a Paper pad at 82%, lower third, flush left, 3.3% of frame height. Never over a face, never centered.</span></div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="tag">The other two units</p>
+  <h2>V-02 and V-03</h2>
+  <div class="two">
+    <div>
+      <h3>V-02 — "The Objection" · 20s</h3>
+      <p class="small dim" style="margin-top:6px">Opens by conceding the category's weakness — <em>"Fabric spray doesn't clean anything"</em> — then earns its way back: what odor is, why masking fails, what enzymes do, and what the product does <em>not</em> do.</p>
+      <p class="small dim" style="margin-top:8px">Closes on the boundary line: <em>"It doesn't replace washing. It replaces the washes you didn't need."</em></p>
+      <p class="small" style="margin-top:8px"><strong>Review this one first.</strong> It's the only unit that explicitly bounds the claim, and that closing sentence has to survive legal verbatim — it's what keeps the whole campaign inside what it can defend.</p>
+    </div>
+    <div>
+      <h3>V-03 — "The Five Feet" · 12s</h3>
+      <p class="small dim" style="margin-top:6px">One continuous move through the five feet between the wardrobe and the front door. No voiceover. Sound design only: hinge, hanger, two pump hisses, a door closing.</p>
+      <p class="small" style="margin-top:8px"><strong>The risk, stated plainly.</strong> A unit with no argument in it will almost certainly underperform V-01 on direct response. It isn't built for that. Judge it on frequency-adjusted branded search lift — and kill it if that read isn't available, because a brand unit you can't measure is one you can't defend in a budget meeting.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer><div class="wrap"><div class="foot">
+  <p><strong>Animatic, not footage.</strong> Every frame is drawn procedurally in canvas as a timing and layout study. Nothing here is a photograph, nothing is a real garment, and none of it is evidence of anything.</p>
+  <p style="margin-top:1em">What it <em>is</em> good for: judging pace, caption timing, the audio cut at 0:07, and whether the hook survives its two-second window. That is what the paper storyboard could not tell you.</p>
+  <p style="margin-top:1em">RTB-1 and RTB-2 both gate this unit. It cannot run until they clear.</p>
+</div></div></footer>
+
+<script>
+(function(){
+  "use strict";
+  var DUR = 15;
+  var SHOTS = [
+    {n:1, a:0,  b:2,  scene:'knitD',   label:'Macro — washed',        vo:"This one's been washed.",  cx:'Room tone only'},
+    {n:2, a:2,  b:4,  scene:'knitC',   label:'Whip cut — not washed', vo:"This one hasn't.",         cx:'Whip transition, short'},
+    {n:3, a:4,  b:7,  scene:'drum',    label:'Drum, slow push',       vo:"Same sweater. The difference is the machine.", cx:'Low drum rumble enters'},
+    {n:4, a:7,  b:12, scene:'product', label:'Two pump presses',      vo:"Most washes are for smell, not dirt. This removes the smell — enzymes, not fragrance.", cx:'Rumble cuts dead on the first press'},
+    {n:5, a:12, b:15, scene:'hang',    label:'Tee on hanger, hold',   vo:"",                         cx:'Silence'}
+  ];
+  var CAPS = [
+    {a:0.25,b:2.0, t:"this one's been washed"},
+    {a:2.15,b:4.0, t:"this one hasn't"},
+    {a:4.2, b:7.0, t:"the difference is the machine"},
+    {a:7.2, b:9.4, t:"most washes are for smell, not dirt"},
+    {a:9.5, b:12.0,t:"enzymes, not fragrance"},
+    {a:12.2,b:13.5,t:"wear it again.", cls:'big'},
+    {a:13.6,b:15.0,t:"Get the Starter Kit — $34", cls:'cta'}
+  ];
+  var BURSTS = [8.35, 9.15];
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var stage=document.getElementById('stage'), sctx=stage.getContext('2d');
+  var capsEl=document.getElementById('caps'), voEl=document.getElementById('vo');
+  var tcEl=document.getElementById('tc'), clockEl=document.getElementById('clock');
+  var scrub=document.getElementById('scrub'), playBtn=document.getElementById('play');
+  var muteBtn=document.getElementById('mute'), head=document.getElementById('playhead');
+  var rail=document.getElementById('rail'), scriptEl=document.getElementById('script');
+  var t=0, playing=false, last=0, scenes={}, sw=0, sh=0;
+
+  function tok(n,f){var v=getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v||f;}
+  function rnd(s){var x=s; return function(){x=(x*16807)%2147483647; return (x-1)/2147483646;};}
+
+  /* ----- scene painters ----- */
+  function knit(g,w,h,dmg){
+    var r=rnd(dmg?9001:4242);
+    var base=tok('--fabric','#E6E2D8'), line=tok('--fabric-line','#C9C4B6');
+    var hi=tok('--fabric-hi','#FBF9F4'), lo=tok('--fabric-lo','#A7A295');
+    g.fillStyle=base; g.fillRect(0,0,w,h);
+    var sx=Math.max(9,w/26), sy=sx*1.28;
+    g.lineWidth=Math.max(1,sx/9); g.lineCap='round';
+    for(var y=-sy;y<h+sy;y+=sy){ for(var x=-sx;x<w+sx;x+=sx){
+      var jx=dmg?(r()-0.5)*sx*0.42:(r()-0.5)*0.6, jy=dmg?(r()-0.5)*sx*0.42:(r()-0.5)*0.6;
+      g.strokeStyle=line; g.globalAlpha=dmg?0.26+r()*0.4:0.5;
+      g.beginPath(); g.arc(x+jx,y+jy,sx*0.44,Math.PI*0.08,Math.PI*0.92); g.stroke();
+      g.beginPath(); g.arc(x+jx+sx/2,y+jy+sy/2,sx*0.44,Math.PI*1.08,Math.PI*1.92); g.stroke();
+    }}
+    g.globalAlpha=1;
+    if(dmg){
+      g.lineWidth=Math.max(0.9,sx/12);
+      for(var f=0;f<80;f++){
+        var fx=r()*w, fy=r()*h, L=sx*0.6+r()*sx*2.2, an=(r()-0.5)*2.4;
+        g.strokeStyle=r()>0.45?hi:lo; g.globalAlpha=0.3+r()*0.4;
+        g.beginPath(); g.moveTo(fx,fy);
+        g.quadraticCurveTo(fx+Math.cos(an)*L*0.6, fy+Math.sin(an)*L*0.6-4, fx+Math.cos(an)*L, fy+Math.sin(an)*L);
+        g.stroke();
+      }
+      g.globalAlpha=1;
+      var n=Math.round(w*h/1500);
+      for(var p=0;p<n;p++){
+        var px=r()*w, py=r()*h, pr=sx*0.16+r()*sx*0.34;
+        g.globalAlpha=0.5; g.fillStyle=lo;
+        g.beginPath(); g.ellipse(px+pr*0.7,py+pr*0.45,pr*0.95,pr*0.6,0,0,6.2832); g.fill();
+        var rg=g.createRadialGradient(px-pr*0.42,py-pr*0.42,pr*0.12,px,py,pr*1.1);
+        rg.addColorStop(0,hi); rg.addColorStop(1,line);
+        g.globalAlpha=0.92; g.fillStyle=rg;
+        g.beginPath(); g.arc(px,py,pr,0,6.2832); g.fill();
+      }
+      g.globalAlpha=1;
+    }
+    var lg=g.createLinearGradient(0,0,w,h*0.35);
+    lg.addColorStop(0,'rgba(255,255,255,0.12)'); lg.addColorStop(0.5,'rgba(0,0,0,0)');
+    lg.addColorStop(1,'rgba(0,0,0,0.26)');
+    g.fillStyle=lg; g.fillRect(0,0,w,h);
+    grain(g,w,h,rnd(7),0.055,Math.round(w*h/260));
+  }
+  function grain(g,w,h,r,alpha,n){
+    g.globalAlpha=alpha;
+    for(var i=0;i<n;i++){ g.fillStyle=r()>0.5?'#FFF':'#000'; g.fillRect(r()*w,r()*h,1,1); }
+    g.globalAlpha=1;
+  }
+  function drum(g,w,h){
+    var r=rnd(4711), cx=w*0.5, cy=h*0.5, R=Math.min(w,h)*0.66;
+    g.fillStyle='#0B0B0A'; g.fillRect(0,0,w,h);
+    var bg=g.createRadialGradient(cx-R*0.45,cy-R*0.5,R*0.05,cx,cy,R*1.25);
+    bg.addColorStop(0,'#4C4B47'); bg.addColorStop(0.45,'#2A2A27'); bg.addColorStop(1,'#101010');
+    g.fillStyle=bg; g.beginPath(); g.arc(cx,cy,R,0,6.2832); g.fill();
+    for(var ring=1;ring<=9;ring++){
+      var rr=R*(ring/9.6), cnt=Math.max(6,Math.round(rr*0.42));
+      for(var k=0;k<cnt;k++){
+        var an=(k/cnt)*6.2832+ring*0.31, px=cx+Math.cos(an)*rr, py=cy+Math.sin(an)*rr;
+        var lit=(Math.cos(an+2.35)+1)/2;
+        g.fillStyle='rgba(0,0,0,0.85)';
+        g.beginPath(); g.arc(px,py,R*0.012,0,6.2832); g.fill();
+        g.strokeStyle='rgba(255,255,255,'+(0.05+lit*0.28).toFixed(3)+')'; g.lineWidth=1;
+        g.beginPath(); g.arc(px-0.4,py-0.4,R*0.016,Math.PI*0.75,Math.PI*1.85); g.stroke();
+      }
+    }
+    g.save(); g.translate(cx,cy);
+    for(var p=0;p<3;p++){
+      g.rotate(6.2832/3);
+      var pg=g.createLinearGradient(0,-R*0.9,R*0.12,-R*0.5);
+      pg.addColorStop(0,'#5E5D57'); pg.addColorStop(1,'#232320');
+      g.fillStyle=pg;
+      g.beginPath(); g.moveTo(-R*0.055,-R*0.94); g.lineTo(R*0.055,-R*0.94);
+      g.lineTo(R*0.03,-R*0.30); g.lineTo(-R*0.03,-R*0.30); g.closePath(); g.fill();
+    }
+    g.restore();
+    g.strokeStyle='#6C6B65'; g.lineWidth=R*0.015;
+    g.beginPath(); g.arc(cx,cy,R,0,6.2832); g.stroke();
+    var vg=g.createRadialGradient(cx,cy,R*0.5,cx,cy,Math.max(w,h)*0.8);
+    vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.94)');
+    g.fillStyle=vg; g.fillRect(0,0,w,h);
+    grain(g,w,h,rnd(3),0.07,Math.round(w*h/300));
+  }
+  function tee(g,x,y,s,fill){
+    g.save(); g.translate(x,y); g.scale(s,s);
+    g.beginPath();
+    g.moveTo(22,10); g.lineTo(38,6); g.quadraticCurveTo(50,19,62,6); g.lineTo(78,10);
+    g.lineTo(100,34); g.lineTo(84,49); g.lineTo(76,40); g.lineTo(79,128);
+    g.lineTo(21,128); g.lineTo(24,40); g.lineTo(16,49); g.lineTo(0,34); g.closePath();
+    g.fillStyle=fill; g.fill();
+    g.strokeStyle='rgba(0,0,0,0.20)'; g.lineWidth=1.1; g.stroke();
+    g.restore();
+  }
+  function hanger(g,x,y,s){
+    g.save(); g.translate(x,y); g.scale(s,s);
+    g.strokeStyle='#8A7355'; g.lineWidth=3; g.lineCap='round';
+    g.beginPath(); g.moveTo(22,11); g.lineTo(50,-4); g.lineTo(78,11); g.stroke();
+    g.strokeStyle='#6F6A60'; g.lineWidth=2.4;
+    g.beginPath(); g.moveTo(50,-4); g.lineTo(50,-17);
+    g.arc(56,-17,6,Math.PI,Math.PI*1.9); g.stroke();
+    g.restore();
+  }
+  function bottle(g,x,y,s){
+    g.save(); g.translate(x,y); g.scale(s,s);
+    var bg=g.createLinearGradient(0,0,60,0);
+    bg.addColorStop(0,'#FFFEFB'); bg.addColorStop(0.3,'#F4F2ED');
+    bg.addColorStop(0.8,'#E2DED4'); bg.addColorStop(1,'#CCC7BA');
+    g.fillStyle='#15150F'; g.fillRect(8,12,6,5);
+    g.fillRect(14,8,32,12); g.fillRect(18,20,24,8);
+    g.fillStyle=bg; g.fillRect(20,28,20,12); g.fillRect(0,40,60,120);
+    g.fillStyle='#1A1A18'; g.font='600 8px Archivo, sans-serif'; g.textAlign='center';
+    g.fillText('AIRING',30,102);
+    g.restore();
+  }
+  function room(g,w,h){
+    var wall=g.createLinearGradient(0,0,w,h);
+    wall.addColorStop(0,'#E9E5DB'); wall.addColorStop(1,'#BFBAAE');
+    g.fillStyle=wall; g.fillRect(0,0,w,h);
+    g.fillStyle='rgba(0,0,0,0.13)';
+    g.beginPath(); g.moveTo(w*0.34,0); g.lineTo(w*0.66,0); g.lineTo(w,h*0.52); g.lineTo(w*0.62,h*0.52); g.closePath(); g.fill();
+  }
+  function product(g,w,h){
+    room(g,w,h);
+    g.fillStyle='#A59E90'; g.fillRect(0,h*0.74,w,h*0.26);
+    g.fillStyle='rgba(0,0,0,0.10)'; g.fillRect(0,h*0.74,w,2);
+    var s=w/150;
+    tee(g,w*0.10,h*0.22,s*0.92,'#F1EFE9');
+    hanger(g,w*0.10,h*0.22,s*0.92);
+    g.fillStyle='rgba(0,0,0,0.18)';
+    g.beginPath(); g.ellipse(w*0.74,h*0.745,w*0.16,h*0.012,0,0,6.2832); g.fill();
+    bottle(g,w*0.60,h*0.40,w/150*1.05);
+    grain(g,w,h,rnd(11),0.05,Math.round(w*h/320));
+  }
+  function hang(g,w,h){
+    room(g,w,h);
+    var s=w/128;
+    g.fillStyle='rgba(0,0,0,0.16)';
+    g.save(); g.translate(w*0.20,h*0.30); g.transform(1,0,-0.45,1,0,0);
+    g.fillRect(6,10,96*s*0.9,124*s*0.9); g.restore();
+    tee(g,w*0.17,h*0.27,s,'#F4F2ED');
+    hanger(g,w*0.17,h*0.27,s);
+    grain(g,w,h,rnd(13),0.05,Math.round(w*h/320));
+  }
+
+  var PAINT={knitD:function(g,w,h){knit(g,w,h,true);}, knitC:function(g,w,h){knit(g,w,h,false);},
+             drum:drum, product:product, hang:hang};
+
+  function off(w,h,fn){
+    var c=document.createElement('canvas'), d=Math.min(window.devicePixelRatio||1,2);
+    c.width=Math.round(w*d); c.height=Math.round(h*d);
+    var g=c.getContext('2d'); g.setTransform(d,0,0,d,0,0); fn(g,w,h);
+    return c;
+  }
+  function build(){
+    sw=stage.clientWidth; sh=stage.clientHeight;
+    if(!sw||!sh) return false;
+    var d=Math.min(window.devicePixelRatio||1,2);
+    stage.width=Math.round(sw*d); stage.height=Math.round(sh*d);
+    sctx.setTransform(d,0,0,d,0,0);
+    scenes={};
+    for(var k in PAINT){ scenes[k]=off(sw,sh,PAINT[k]); }
+    return true;
+  }
+
+  function shotAt(x){ for(var i=0;i<SHOTS.length;i++){ if(x<SHOTS[i].b||i===SHOTS.length-1) return SHOTS[i]; } return SHOTS[0]; }
+
+  function render(){
+    if(!sw) return;
+    var s=shotAt(t), p=Math.min(1,Math.max(0,(t-s.a)/(s.b-s.a)));
+    var img=scenes[s.scene]; if(!img) return;
+    sctx.clearRect(0,0,sw,sh);
+    var k=reduce?0:1, sc=1, dx=0;
+    if(s.scene==='drum')      sc=1+0.13*p*k;
+    else if(s.scene==='knitD') sc=1.02+0.03*p*k;
+    else if(s.scene==='knitC'){ sc=1.02; dx=(p<0.05?(1-p/0.05)*sw*0.35*k:0); }
+    else if(s.scene==='product') sc=1.06-0.05*p*k;
+    else sc=1.03-0.02*p*k;
+    var dw=sw*sc, dh=sh*sc;
+    sctx.drawImage(img, -(dw-sw)/2+dx, -(dh-sh)/2, dw, dh);
+
+    if(s.scene==='product'){
+      for(var i=0;i<BURSTS.length;i++){
+        var e=(t-BURSTS[i])/0.5;
+        if(e>=0&&e<=1){
+          var r=rnd(200+i*37);
+          sctx.globalAlpha=(1-e)*0.75;
+          for(var n=0;n<46;n++){
+            var sp=r()*e*sw*0.30, an=Math.PI+(r()-0.5)*0.55;
+            sctx.fillStyle='rgba(255,255,255,0.9)';
+            sctx.fillRect(sw*0.615+Math.cos(an)*sp, sh*0.435+Math.sin(an)*sp*0.7+r()*8-4, 1.4,1.4);
+          }
+          sctx.globalAlpha=1;
+        }
+      }
+    }
+    /* captions */
+    var html='';
+    for(var c=0;c<CAPS.length;c++){
+      if(t>=CAPS[c].a&&t<CAPS[c].b){
+        html+='<div class="cap '+(CAPS[c].cls||'')+'">'+CAPS[c].t+'</div>';
+      }
+    }
+    capsEl.innerHTML=html;
+    tcEl.textContent='0:'+(t<10?'0':'')+t.toFixed(1);
+    clockEl.textContent=t.toFixed(2)+' / 15.00s';
+    head.style.left=(t/DUR*100)+'%';
+    voEl.textContent=s.vo||'—';
+    var rows=scriptEl.children;
+    for(var q=0;q<rows.length;q++) rows[q].classList.toggle('on', SHOTS[q]===s);
+    var segs=rail.querySelectorAll('i');
+    for(var g2=0;g2<segs.length;g2++) segs[g2].classList.toggle('on', SHOTS[g2]===s);
+  }
+
+  function frame(now){
+    if(!playing) return;
+    if(!last) last=now;
+    t+=(now-last)/1000; last=now;
+    if(t>=DUR){ t=DUR; playing=false; playBtn.textContent='Replay'; }
+    scrub.value=t; render();
+    if(playing) requestAnimationFrame(frame);
+  }
+  playBtn.addEventListener('click', function(){
+    if(playing){ playing=false; playBtn.textContent='Play'; return; }
+    if(t>=DUR) t=0;
+    playing=true; last=0; playBtn.textContent='Pause';
+    requestAnimationFrame(frame);
+  });
+  scrub.addEventListener('input', function(){
+    playing=false; playBtn.textContent='Play'; t=parseFloat(scrub.value); render();
+  });
+  muteBtn.addEventListener('click', function(){
+    var on=document.body.classList.toggle('silent');
+    muteBtn.setAttribute('aria-pressed', on?'true':'false');
+    muteBtn.textContent = on?'Audio on':'Audio off';
+  });
+
+  /* build rail + script + frame strip */
+  (function(){
+    var railHtml='';
+    SHOTS.forEach(function(s){
+      railHtml+='<i style="flex:'+(s.b-s.a)+'"><span>'+s.n+'</span></i>';
+    });
+    rail.insertAdjacentHTML('afterbegin', railHtml);
+
+    SHOTS.forEach(function(s){
+      var d=document.createElement('div');
+      d.innerHTML='<span class="t">'+s.a.toFixed(0)+'–'+s.b.toFixed(0)+'s</span>'+
+        '<div><h3>'+s.label+'</h3>'+
+        (s.vo?'<p class="vo"><em>“'+s.vo+'”</em></p>':'<p class="vo">No voiceover</p>')+
+        '<p class="cx">'+s.cx+'</p></div>';
+      d.addEventListener('click', function(){ playing=false; playBtn.textContent='Play'; t=s.a+0.3; scrub.value=t; render(); });
+      scriptEl.appendChild(d);
+    });
+
+    var strip=document.getElementById('strip');
+    SHOTS.forEach(function(s){
+      var wrap=document.createElement('div'); wrap.className='fr';
+      wrap.innerHTML='<div class="box"><canvas></canvas></div><div class="m"><b>Shot '+s.n+' · '+s.a+'–'+s.b+'s</b><span>'+s.label+'</span></div>';
+      strip.appendChild(wrap);
+    });
+  })();
+
+  function thumbs(){
+    var boxes=document.querySelectorAll('.fr canvas');
+    for(var i=0;i<boxes.length;i++){
+      var cv=boxes[i], w=cv.clientWidth, h=cv.clientHeight;
+      if(!w||!h) continue;
+      var d=Math.min(window.devicePixelRatio||1,2);
+      cv.width=Math.round(w*d); cv.height=Math.round(h*d);
+      var g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0);
+      PAINT[SHOTS[i].scene](g,w,h);
+    }
+  }
+
+  function boot(){ if(build()){ render(); thumbs(); } }
+  boot();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ boot(); });
+  var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(boot,160); });
+  if(window.matchMedia){
+    var mq=window.matchMedia('(prefers-color-scheme: dark)');
+    if(mq.addEventListener) mq.addEventListener('change', function(){ setTimeout(boot,60); });
+  }
+  if(window.MutationObserver){
+    new MutationObserver(function(){ setTimeout(boot,60); })
+      .observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  }
+})();
+</script>

@@ -23,6 +23,8 @@ A complete brand and campaign built end-to-end by the Full-Stack AI Agency proto
 | `campaign/05-campaign-map/04-landing-page.md` | 5 | Full conversion page copy |
 | `campaign/05-campaign-map/landing-page.html` | 5 | The page built — live at https://claude.ai/artifact/KRfBriMmmvo1Q8oGgAycb1 |
 | `campaign/05-campaign-map/05-social-campaign.md` | 5 | 7-post organic campaign |
+| `campaign/05-campaign-map/06-storyboards.md` | 5 | Frame breakdowns for V-01, V-02, V-03 |
+| `campaign/05-campaign-map/v01-animatic.html` | 5 | V-01 as a playable animatic — https://claude.ai/artifact/C1CDmuX8UnSNwbsEFDNhtc |
 | `campaign/06-agency-review.md` | 6 | Consistency audit: problem → why → repair |
 | `campaign/07-handoff.md` | 7 | Production order, checklist, approvals, gaps |
 | `campaign/claims-substantiation-register.md` | — | Every factual claim and what must verify it |
@@ -52,3 +54,9 @@ The buy buttons say so when clicked: no store is connected.
 It exists because the handoff lists a frozen brand reference as a blocking foundation item: nothing generative should start before one exists, or every asset drifts and the drift is unfixable later.
 
 Drawing the bottle is also what surfaced F-11 — the Brand Lock had specified a "fine-mist trigger" while separately forbidding a pistol-grip trigger. Prose hid it; a drawing could not.
+
+## V-01 is playable
+
+`campaign/05-campaign-map/v01-animatic.html` runs the launch ad as a 15-second animatic — scrubbable, with the hook window marked at 0–2s, an audio track showing where the drum rumble cuts, and an **Audio off** toggle that strips the voiceover so you can check the unit survives muted.
+
+It exists because V-01's hypothesis is about timing, and a paper storyboard cannot answer a timing question. Every frame is drawn procedurally: it is a pace-and-layout study, not footage.
