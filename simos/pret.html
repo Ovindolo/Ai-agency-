@@ -1,0 +1,292 @@
+<title>Simo's Crafts — Calculator Preț</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter+Tight:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#FAF7F2; --surface:#F1EBE1; --card:#FFFDFA; --ink:#2A2421; --ink-2:#6B6157;
+  --ink-3:#9A8F82; --line:#E0D7C8; --accent:#8E2749; --accent-soft:#F3E4E9;
+  --warn:#B4591F; --ok:#4A6B4F; --focus:#8E2749;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#16130F; --surface:#221D18; --card:#1C1814; --ink:#F2EDE4; --ink-2:#B8ADA0;
+  --ink-3:#847A6D; --line:#332C24; --accent:#E48AA6; --accent-soft:#2E1E24;
+  --warn:#E09256; --ok:#8FB894; --focus:#E48AA6;
+}}
+:root[data-theme="dark"]{
+  --bg:#16130F; --surface:#221D18; --card:#1C1814; --ink:#F2EDE4; --ink-2:#B8ADA0;
+  --ink-3:#847A6D; --line:#332C24; --accent:#E48AA6; --accent-soft:#2E1E24;
+  --warn:#E09256; --ok:#8FB894; --focus:#E48AA6;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Inter Tight",system-ui,sans-serif; font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums}
+.wrap{max-width:980px; margin:0 auto; padding-inline:20px}
+h1,h2,h3{margin:0; font-family:"Fraunces",Georgia,serif; font-weight:600; text-wrap:balance}
+h1{font-size:clamp(28px,5vw,44px); line-height:1.08; letter-spacing:-.015em}
+h2{font-size:clamp(21px,3vw,28px); line-height:1.2}
+h3{font-size:17px; font-family:"Inter Tight",sans-serif; font-weight:600}
+p{margin:0}
+.eyebrow{font-size:11.5px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; color:var(--accent)}
+.lede{color:var(--ink-2); max-width:38rem; font-size:clamp(16px,2vw,18px)}
+.small{font-size:13.5px; line-height:1.5}
+.dim{color:var(--ink-2)}
+.sec{padding-block:clamp(30px,4.5vw,48px); border-top:1px solid var(--line)}
+.sec>*+*{margin-top:16px}
+.head{padding-block:clamp(34px,5vw,56px) clamp(18px,2.5vw,26px)}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+/* alerta */
+.alert{background:var(--accent-soft); border-left:4px solid var(--accent); padding:18px 20px; border-radius:2px}
+.alert .big{font-family:"Fraunces",serif; font-size:clamp(30px,6vw,46px); font-weight:600; line-height:1; color:var(--accent)}
+
+/* grid */
+.model{display:grid; gap:24px}
+@media (min-width:860px){ .model{grid-template-columns:290px minmax(0,1fr)} }
+.panel{background:var(--surface); border:1px solid var(--line); padding:18px; border-radius:3px}
+.grp+.grp{margin-top:18px; padding-top:15px; border-top:1px solid var(--line)}
+.grp>.t{font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:10px}
+.f{display:grid; grid-template-columns:minmax(0,1fr) 76px; gap:10px; align-items:center; margin-bottom:8px}
+.f label{font-size:13.5px; color:var(--ink-2); line-height:1.3}
+.f input{width:100%; font:inherit; font-size:13.5px; font-weight:500; padding:6px 8px;
+  border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:2px; text-align:right}
+.f input:focus{border-color:var(--focus)}
+.note{font-size:11.5px; color:var(--ink-3); line-height:1.4; margin-top:8px}
+
+/* rezultate */
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+.tile{background:var(--card); border:1px solid var(--line); padding:14px 16px 16px; border-radius:3px}
+.tile .k{font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.tile .v{font-family:"Fraunces",serif; font-size:27px; font-weight:600; line-height:1.15; margin-top:6px}
+.tile .n{font-size:12px; color:var(--ink-2); margin-top:4px; line-height:1.35}
+.tile.hero{background:var(--accent); border-color:var(--accent)}
+.tile.hero .k{color:rgba(255,255,255,.75)} .tile.hero .v{color:#fff} .tile.hero .n{color:rgba(255,255,255,.85)}
+.tile.bad .v{color:var(--warn)}
+
+/* defalcare */
+.rows{margin-top:6px}
+.rows div{display:flex; justify-content:space-between; gap:14px; padding-block:9px; border-top:1px solid var(--line); font-size:14px}
+.rows div:last-child{border-bottom:1px solid var(--line); font-weight:600}
+.rows span:first-child{color:var(--ink-2)}
+.rows b{font-weight:600}
+
+/* trepte */
+.tiers{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px}
+.tier{background:var(--card); border:1px solid var(--line); padding:18px; border-radius:3px; cursor:pointer;
+  transition:border-color .15s, transform .15s}
+.tier:hover{border-color:var(--accent)}
+.tier.on{border-color:var(--accent); border-width:2px; padding:17px}
+.tier .n{font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
+.tier h3{margin-top:7px}
+.tier .ex{font-size:12.5px; color:var(--ink-3); margin-top:5px; line-height:1.4}
+.tier .p{font-family:"Fraunces",serif; font-size:25px; font-weight:600; margin-top:12px}
+.tier .h{font-size:12px; color:var(--ink-2); margin-top:3px}
+
+/* chart */
+.chart{background:var(--card); border:1px solid var(--line); padding:18px; border-radius:3px; margin-top:16px}
+svg{display:block; width:100%; height:auto; max-width:100%; overflow:visible}
+footer{border-top:1px solid var(--line); background:var(--surface); margin-top:clamp(32px,4vw,48px)}
+.foot{padding-block:26px 34px; color:var(--ink-3); font-size:13px; line-height:1.6; max-width:42rem}
+.foot b{color:var(--ink-2)}
+</style>
+
+<div class="wrap">
+
+<header class="head">
+  <p class="eyebrow">Simo's Crafts</p>
+  <h1 style="margin-top:10px">Cât ar trebui să coste, de fapt</h1>
+  <p class="lede" style="margin-top:14px">Calculat de la muncă în sus, nu de la „cât cred că dau oamenii". Schimbă orice cifră — tot ce e mai jos se recalculează.</p>
+</header>
+
+<section class="sec" style="border-top:none; padding-top:0">
+  <div class="alert">
+    <p class="small" style="font-weight:600; letter-spacing:.06em; text-transform:uppercase; font-size:11px; color:var(--accent)">Cât câștigă pe oră acum, la 250 lei</p>
+    <p class="big" id="nowRate" style="margin-top:8px">7 lei/h</p>
+    <p class="small" style="margin-top:10px; color:var(--ink-2)">Salariul minim net în România e în jur de <b>14 lei/oră</b>. Coșul de gunoi la un supermarket se plătește mai bine decât broderia asta.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="eyebrow">Treapta</p>
+  <h2>Nu toate piesele sunt la fel</h2>
+  <p class="lede small">Acum se vinde totul la un preț. Dar „Matei" și Duomo-ul din Milano nu sunt același produs. Apasă pe o treaptă ca să încarce orele.</p>
+  <div class="tiers" id="tiers"></div>
+</section>
+
+<section class="sec">
+  <p class="eyebrow">Calculul</p>
+  <h2>Schimbă cifrele tale</h2>
+  <div class="model">
+    <div class="panel">
+      <div class="grp">
+        <p class="t">Munca</p>
+        <div class="f"><label for="i-h">Ore de lucru</label><input id="i-h" type="number" step="1" value="18"></div>
+        <div class="f"><label for="i-r">Tarif dorit lei/oră</label><input id="i-r" type="number" step="5" value="45"></div>
+        <p class="note">Salariu minim ≈ 14 lei/h · meșteșugar calificat 40–60 · artist cu portofoliu 80–120</p>
+      </div>
+      <div class="grp">
+        <p class="t">Materiale</p>
+        <div class="f"><label for="i-g">Gherghef (lei)</label><input id="i-g" type="number" step="1" value="32"></div>
+        <div class="f"><label for="i-nc">Nr. culori ață</label><input id="i-nc" type="number" step="1" value="10"></div>
+        <div class="f"><label for="i-pc">Preț/culoare (lei)</label><input id="i-pc" type="number" step="1" value="10"></div>
+        <div class="f"><label for="i-uc">% consumat din scul</label><input id="i-uc" type="number" step="5" value="35"></div>
+        <div class="f"><label for="i-mp">Material lei/m²</label><input id="i-mp" type="number" step="5" value="80"></div>
+        <div class="f"><label for="i-ms">Suprafață m²</label><input id="i-ms" type="number" step="0.01" value="0.14"></div>
+        <div class="f"><label for="i-a">Ambalaj + stickere</label><input id="i-a" type="number" step="1" value="18"></div>
+        <div class="f"><label for="i-x">Ace, diverse</label><input id="i-x" type="number" step="1" value="6"></div>
+      </div>
+      <div class="grp">
+        <p class="t">Vânzare</p>
+        <div class="f"><label for="i-c">Comision platformă %</label><input id="i-c" type="number" step="0.5" value="0"></div>
+        <div class="f"><label for="i-luna">Piese pe lună</label><input id="i-luna" type="number" step="0.5" value="6"></div>
+        <p class="note">Etsy ≈ 10–11% total (listare + tranzacție + plată). Facebook/Instagram direct = 0%.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="tiles">
+        <div class="tile hero"><p class="k">Preț recomandat</p><p class="v" id="oRec">—</p><p class="n" id="oRecEur">—</p></div>
+        <div class="tile"><p class="k">Preț minim absolut</p><p class="v" id="oMin">—</p><p class="n">Sub ăsta lucrează în pierdere</p></div>
+        <div class="tile bad"><p class="k">Preț actual</p><p class="v">250 lei</p><p class="n" id="oGap">—</p></div>
+        <div class="tile"><p class="k">Venit lunar</p><p class="v" id="oLuna">—</p><p class="n" id="oLunaNow">—</p></div>
+      </div>
+
+      <div class="chart">
+        <h3>Venit lunar, la capacitatea ei reală</h3>
+        <p class="small dim" style="margin-top:3px; margin-bottom:14px">La <span id="cLuna">6</span> piese pe lună. Linia punctată = salariul minim net.</p>
+        <svg id="chart" viewBox="0 0 660 260" role="img" aria-label="Venit lunar la diferite prețuri pe piesă"></svg>
+      </div>
+
+      <div style="margin-top:18px">
+        <h3>Defalcarea</h3>
+        <div class="rows" id="rows"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <p class="eyebrow">Ce urmează</p>
+  <h2>Prețul singur nu ajunge</h2>
+  <p class="lede small">La 1.200 lei piesa, în România o să vândă greu. Asta nu înseamnă că prețul e greșit — înseamnă că <b>piața e greșită</b>.</p>
+  <div class="rows" style="max-width:38rem">
+    <div><span>Piesele simple (nume + motive)</span><b>România, direct</b></div>
+    <div><span>Piesele medii (nume + dată + oră)</span><b>România + Etsy</b></div>
+    <div><span>Scene, portrete, fond pictat</span><b>Doar Etsy, în euro</b></div>
+  </div>
+  <p class="small dim" style="margin-top:14px">Duomo-ul din Milano nu are cumpărător la Cluj la prețul lui corect. Are cumpărător la Milano, la München, la Londra — unde o comandă de artă textilă personalizată la 400–600 € e un preț normal, nu unul curajos.</p>
+</section>
+
+</div>
+
+<footer><div class="wrap"><div class="foot">
+  <p><b>Calculator, nu promisiune.</b> Cifrele de plecare sunt cele date de tine — gherghef 32 lei, 10 lei/culoare, 80 lei/m² material. Restul sunt estimări pe care le poți schimba.</p>
+  <p style="margin-top:12px">Nu îți spune că se va vinde la prețul ăsta. Îți spune <b>sub ce preț nu are sens să lucreze</b> — și aia e o cifră pe care merită s-o știi înainte să accepți următoarea comandă.</p>
+</div></div></footer>
+
+<script>
+(function(){
+  "use strict";
+  var TIERS=[
+    {n:"Treapta 1", t:"Nume + motive", ex:"Matei, Erik, Eva", h:18},
+    {n:"Treapta 2", t:"Nume + dată + oră", ex:"Francesca, Iris — anunț de naștere", h:26},
+    {n:"Treapta 3", t:"Scenă / portret / fond pictat", ex:"Duomo Milano, galeria, The Tichy Family", h:55}
+  ];
+  var active=0;
+  var ids=["h","r","g","nc","pc","uc","mp","ms","a","x","c","luna"], F={};
+  ids.forEach(function(k){ F[k]=document.getElementById("i-"+k); });
+  function v(k){ var n=parseFloat(F[k].value); return isFinite(n)?n:0; }
+  function lei(n){ return Math.round(n).toLocaleString("ro-RO")+" lei"; }
+  function cv(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  function calc(){
+    var mat = v("g") + (v("nc")*v("pc")*v("uc")/100) + (v("mp")*v("ms")) + v("a") + v("x");
+    var munca = v("h")*v("r");
+    var baza = mat + munca;
+    var com = v("c")/100;
+    var pret = com<1 ? baza/(1-com) : baza;
+    var minim = mat + v("h")*14;                       // salariul minim
+    var rec = Math.ceil(pret/50)*50;
+    var acumNet = 250 - mat;
+    var acumRate = v("h")>0 ? acumNet/v("h") : 0;
+    return {mat:mat, munca:munca, pret:pret, minim:minim, rec:rec,
+            acumRate:acumRate, luna:rec*v("luna"), lunaNow:250*v("luna")};
+  }
+
+  function chart(m){
+    var svg=document.getElementById("chart"), W=660,H=260, L=52,R=16,T=16,B=52;
+    var preturi=[250, 450, 700, m.rec, 1500].filter(function(x,i,a){return a.indexOf(x)===i;}).sort(function(a,b){return a-b;});
+    var luna=v("luna");
+    var vals=preturi.map(function(p){ return p*luna; });
+    var max=Math.max.apply(null, vals.concat([3000]))*1.12;
+    var minSal=2400;
+    var bw=(W-L-R)/preturi.length;
+    function Y(x){ return H-B-(x/max)*(H-T-B); }
+    var out="";
+    [0,0.25,0.5,0.75,1].forEach(function(f){
+      var yv=max*f, y=Y(yv);
+      out+='<line x1="'+L+'" y1="'+y.toFixed(1)+'" x2="'+(W-R)+'" y2="'+y.toFixed(1)+'" stroke="'+cv("--line")+'" stroke-width="1"></line>';
+      out+='<text x="'+(L-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="10.5" fill="'+cv("--ink-3")+'" font-family="Inter Tight,sans-serif">'+Math.round(yv/1000)+'k</text>';
+    });
+    preturi.forEach(function(p,i){
+      var val=p*luna, x=L+i*bw+bw*0.2, w=bw*0.6, y=Y(val), h=(H-B)-y;
+      var isNow=(p===250), isRec=(p===m.rec);
+      out+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+Math.max(0,h).toFixed(1)+'" rx="3" fill="'+(isNow?cv("--warn"):cv("--accent"))+'" opacity="'+(isRec?1:(isNow?1:.42))+'"></rect>';
+      out+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(y-7).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="600" fill="'+cv("--ink")+'" font-family="Inter Tight,sans-serif">'+Math.round(val).toLocaleString("ro-RO")+'</text>';
+      out+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-B+18)+'" text-anchor="middle" font-size="11" fill="'+cv("--ink-2")+'" font-family="Inter Tight,sans-serif">'+p+' lei</text>';
+      if(isNow) out+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-B+33)+'" text-anchor="middle" font-size="10" font-weight="600" fill="'+cv("--warn")+'" font-family="Inter Tight,sans-serif">ACUM</text>';
+      if(isRec) out+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-B+33)+'" text-anchor="middle" font-size="10" font-weight="600" fill="'+cv("--accent")+'" font-family="Inter Tight,sans-serif">ȚINTĂ</text>';
+    });
+    var ys=Y(minSal);
+    out+='<line x1="'+L+'" y1="'+ys.toFixed(1)+'" x2="'+(W-R)+'" y2="'+ys.toFixed(1)+'" stroke="'+cv("--ink-2")+'" stroke-width="1.5" stroke-dasharray="5 4"></line>';
+    out+='<text x="'+(W-R)+'" y="'+(ys-7).toFixed(1)+'" text-anchor="end" font-size="10.5" font-weight="600" fill="'+cv("--ink-2")+'" font-family="Inter Tight,sans-serif">salariu minim net ~2.400</text>';
+    svg.innerHTML=out;
+  }
+
+  function render(){
+    var m=calc();
+    document.getElementById("nowRate").textContent=Math.round(m.acumRate)+" lei/h";
+    document.getElementById("oRec").textContent=lei(m.rec);
+    document.getElementById("oRecEur").textContent="≈ "+Math.round(m.rec/5)+" € · "+v("h")+" ore de lucru";
+    document.getElementById("oMin").textContent=lei(m.minim);
+    document.getElementById("oGap").textContent=(m.rec>250? "cu "+(m.rec/250).toFixed(1)+"× sub țintă" : "—");
+    document.getElementById("oLuna").textContent=lei(m.luna);
+    document.getElementById("oLunaNow").textContent="acum: "+lei(m.lunaNow);
+    document.getElementById("cLuna").textContent=v("luna");
+    document.getElementById("rows").innerHTML=
+      '<div><span>Materiale</span><b>'+lei(m.mat)+'</b></div>'+
+      '<div><span>Manoperă — '+v("h")+' ore × '+v("r")+' lei</span><b>'+lei(m.munca)+'</b></div>'+
+      (v("c")>0?'<div><span>Comision platformă '+v("c")+'%</span><b>'+lei(m.pret-m.mat-m.munca)+'</b></div>':'')+
+      '<div><span>Preț recomandat (rotunjit)</span><b>'+lei(m.rec)+'</b></div>';
+    chart(m);
+    try{ localStorage.setItem("simos", JSON.stringify(ids.reduce(function(o,k){o[k]=v(k);return o;},{}))); }catch(e){}
+  }
+
+  function tiers(){
+    document.getElementById("tiers").innerHTML=TIERS.map(function(t,i){
+      var mat=v("g")+(v("nc")*v("pc")*v("uc")/100)+(v("mp")*v("ms"))+v("a")+v("x");
+      var p=Math.ceil((mat+t.h*v("r"))/50)*50;
+      return '<div class="tier'+(i===active?" on":"")+'" data-i="'+i+'">'+
+        '<p class="n">'+t.n+'</p><h3>'+t.t+'</h3><p class="ex">'+t.ex+'</p>'+
+        '<p class="p">'+lei(p)+'</p><p class="h">'+t.h+' ore · ≈ '+Math.round(p/5)+' €</p></div>';
+    }).join("");
+    document.querySelectorAll(".tier").forEach(function(el){
+      el.addEventListener("click", function(){
+        active=parseInt(el.dataset.i,10);
+        F.h.value=TIERS[active].h;
+        render(); tiers();
+      });
+    });
+  }
+
+  ids.forEach(function(k){ F[k].addEventListener("input", function(){ render(); tiers(); }); });
+  try{ var s=JSON.parse(localStorage.getItem("simos")||"null");
+       if(s) ids.forEach(function(k){ if(typeof s[k]==="number") F[k].value=s[k]; }); }catch(e){}
+  render(); tiers();
+  window.addEventListener("resize", function(){ clearTimeout(window.__t); window.__t=setTimeout(render,180); });
+  if(window.matchMedia){ var mq=window.matchMedia("(prefers-color-scheme: dark)");
+    if(mq.addEventListener) mq.addEventListener("change", function(){ setTimeout(render,60); }); }
+  if(window.MutationObserver) new MutationObserver(function(){ setTimeout(render,60); })
+    .observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+})();
+</script>
