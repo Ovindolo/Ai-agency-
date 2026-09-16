@@ -20,6 +20,7 @@ A complete brand and campaign built end-to-end by the Full-Stack AI Agency proto
 | `campaign/05-campaign-map/02-product-photography.md` | 5 | 3 product-shot directions + generation prompts |
 | `campaign/05-campaign-map/03-advertising.md` | 5 | 5 hooks, 3 statics, 3 videos, full copy |
 | `campaign/05-campaign-map/04-landing-page.md` | 5 | Full conversion page copy |
+| `campaign/05-campaign-map/landing-page.html` | 5 | The page built — live at https://claude.ai/artifact/KRfBriMmmvo1Q8oGgAycb1 |
 | `campaign/05-campaign-map/05-social-campaign.md` | 5 | 7-post organic campaign |
 | `campaign/06-agency-review.md` | 6 | Consistency audit: problem → why → repair |
 | `campaign/07-handoff.md` | 7 | Production order, checklist, approvals, gaps |
@@ -31,3 +32,14 @@ A complete brand and campaign built end-to-end by the Full-Stack AI Agency proto
 - Every unverified claim is bracketed `[RTB-n — requires substantiation]` and registered.
 - Product identity (name, bottle, wordmark, scent names) is locked and never altered by any prompt.
 - Nothing here was published, purchased, launched or sent. All of that sits behind human approval.
+
+## The landing page is built
+
+`campaign/05-campaign-map/landing-page.html` is a working execution of the page copy against the Brand Lock — Archivo and JetBrains Mono, the four-token palette, no serif anywhere, one CTA repeated five times.
+
+Two things in it are worth opening it for:
+
+- **Claims audit mode** (header switch) underlines every sentence gated on unpublished evidence and tags it with its `[RTB-n]` id. It is the substantiation register rendered onto the page it governs.
+- **Fig. 1** is a procedural canvas comp standing in for the PS-03 photograph — a layout placeholder, labeled as one, never presented as a photograph of a real garment.
+
+The buy buttons say so when clicked: no store is connected.

@@ -1,0 +1,529 @@
+<title>AIRING No.1</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F2ED; --surface:#EAE7DF; --ink:#1A1A18; --ink-2:#56544D;
+  --ink-3:#8A877D; --hairline:#D6D2C7; --blue:#2E4A7D; --orange:#C9410F;
+  --fabric:#E6E2D8; --fabric-line:#C9C4B6; --fabric-hi:#FBF9F4; --fabric-lo:#A7A295;
+  --focus:#2E4A7D;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B;
+    --ink-3:#77746A; --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345;
+    --fabric:#232220; --fabric-line:#3A3833; --fabric-hi:#4E4B44; --fabric-lo:#0E0E0D;
+    --focus:#8FAAD8;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131312; --surface:#1D1D1A; --ink:#F1EFE9; --ink-2:#A8A59B;
+  --ink-3:#77746A; --hairline:#32312D; --blue:#8FAAD8; --orange:#FF7345;
+  --fabric:#232220; --fabric-line:#3A3833; --fabric-hi:#4E4B44; --fabric-lo:#0E0E0D;
+  --focus:#8FAAD8;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-variation-settings:"wdth" 100;
+  font-size:17px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1080px; margin:0 auto; padding-inline:20px}
+.row{display:grid; grid-template-columns:1fr; gap:10px; padding-block:clamp(40px,7vw,72px)}
+.row + .row{border-top:1px solid var(--hairline)}
+@media (min-width:900px){
+  .row{grid-template-columns:8.5rem minmax(0,1fr); gap:0 32px}
+}
+.tag{
+  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
+  padding-top:.5em;
+}
+.col{max-width:34rem}
+.col.wide{max-width:46rem}
+
+/* ---------- type ---------- */
+h1,h2,h3{margin:0; text-wrap:balance; font-weight:600; font-variation-settings:"wdth" 108}
+h1{font-size:clamp(34px,6.2vw,54px); line-height:1.04; letter-spacing:-.02em}
+h2{font-size:clamp(25px,3.6vw,34px); line-height:1.12; letter-spacing:-.015em}
+h3{font-size:19px; line-height:1.3; letter-spacing:-.008em}
+p{margin:0}
+.col > * + *{margin-top:1.1em}
+.lede{font-size:clamp(18px,2.2vw,21px); line-height:1.45; color:var(--ink-2)}
+.dim{color:var(--ink-2)}
+.small{font-size:14px; line-height:1.5}
+
+/* ---------- header ---------- */
+header{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--hairline);
+}
+.bar{display:flex; align-items:center; gap:16px; min-height:58px; flex-wrap:wrap}
+.mark{
+  font-weight:600; font-variation-settings:"wdth" 122; letter-spacing:.09em;
+  font-size:17px; text-transform:uppercase; margin-right:auto;
+}
+.mark span{color:var(--ink-3); font-size:11px; letter-spacing:.14em; margin-left:10px;
+  font-family:"JetBrains Mono",monospace; font-weight:400; text-transform:none}
+@media (max-width:560px){ .mark span{display:none} }
+
+/* ---------- controls ---------- */
+button{font:inherit; cursor:pointer}
+.cta{
+  display:inline-block; background:var(--ink); color:var(--paper);
+  border:1px solid var(--ink); padding:13px 20px; font-size:15px; font-weight:600;
+  letter-spacing:.005em; border-radius:2px; text-align:center;
+}
+.cta:hover{background:var(--blue); border-color:var(--blue)}
+.cta.sm{padding:9px 14px; font-size:13.5px}
+.switch{
+  display:inline-flex; align-items:center; gap:8px; background:none; border:1px solid var(--hairline);
+  color:var(--ink-2); padding:8px 11px; border-radius:2px; font-size:11px; font-weight:500;
+  letter-spacing:.12em; text-transform:uppercase; font-family:"JetBrains Mono",monospace;
+}
+.switch:hover{border-color:var(--ink-3); color:var(--ink)}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--hairline)}
+body.audit .switch{border-color:var(--orange); color:var(--orange)}
+body.audit .dot{background:var(--orange)}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+
+/* ---------- claim markers ---------- */
+.rtb{
+  font-family:"JetBrains Mono",monospace; font-size:.66em; font-weight:500;
+  letter-spacing:.04em; color:var(--orange); vertical-align:.35em;
+  white-space:nowrap; display:none; padding-left:.25em;
+}
+body.audit .rtb{display:inline}
+body.audit .claim{
+  text-decoration:underline; text-decoration-color:var(--orange);
+  text-decoration-thickness:1.5px; text-underline-offset:3px;
+}
+.auditbar{
+  display:none; background:var(--orange); color:#FFF; padding:9px 0;
+  font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.03em;
+}
+body.audit .auditbar{display:block}
+
+/* ---------- hero ---------- */
+.hero{padding-block:clamp(36px,6vw,64px) clamp(28px,4vw,44px)}
+.buy{display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; margin-top:1.6em}
+.terms{font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--ink-3)}
+
+/* ---------- evidence ---------- */
+.evidence{margin-top:clamp(28px,4vw,44px)}
+.canvas-shell{position:relative; border:1px solid var(--hairline); background:var(--fabric)}
+canvas{display:block; width:100%; height:clamp(200px,34vw,340px); max-width:100%}
+.lbl{
+  position:absolute; bottom:12px; font-family:"JetBrains Mono",monospace; font-size:11px;
+  letter-spacing:.09em; text-transform:uppercase; padding:4px 7px;
+  background:color-mix(in srgb, var(--paper) 82%, transparent); color:var(--ink-2);
+}
+.lbl.l{left:12px; color:var(--orange); border-left:2px solid var(--orange)}
+.lbl.r{right:12px}
+.cap{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-top:10px;
+  font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--ink-3)}
+
+/* ---------- lists ---------- */
+.steps{counter-reset:s; margin-top:1.4em; display:grid; gap:0}
+.steps > div{display:grid; grid-template-columns:2.2rem 1fr; gap:14px;
+  padding-block:18px; border-top:1px solid var(--hairline)}
+.steps > div:last-child{border-bottom:1px solid var(--hairline)}
+.num{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-3); padding-top:.35em}
+.steps p{margin-top:.4em; color:var(--ink-2); font-size:15.5px}
+
+.benefits{display:grid; gap:0; margin-top:1.3em}
+.benefits > div{display:grid; grid-template-columns:minmax(0,10.5rem) minmax(0,1fr); gap:6px 20px;
+  padding-block:14px; border-top:1px solid var(--hairline); align-items:start}
+.benefits > div:last-child{border-bottom:1px solid var(--hairline)}
+.benefits b{font-weight:600}
+.benefits span{color:var(--ink-2); font-size:15.5px}
+@media (max-width:640px){ .benefits > div{grid-template-columns:1fr} }
+
+.qa{margin-top:1.4em; display:grid; gap:0}
+.qa > div{padding-block:18px; border-top:1px solid var(--hairline)}
+.qa > div:last-child{border-bottom:1px solid var(--hairline)}
+.qa p{margin-top:.5em; color:var(--ink-2); font-size:15.5px}
+
+/* ---------- accents ---------- */
+.boundary{border-left:3px solid var(--blue); padding:2px 0 2px 18px; margin-top:1.6em}
+.boundary p{font-size:19px; line-height:1.35; font-variation-settings:"wdth" 104}
+.hole{
+  border:1px dashed var(--hairline); padding:clamp(20px,3.5vw,30px); margin-top:1.2em;
+  background:var(--surface);
+}
+.hole ul{margin:1em 0 0; padding-left:1.1em; color:var(--ink-2); font-size:15px}
+.hole li{margin-bottom:.35em}
+.offer{border:1px solid var(--ink); padding:clamp(22px,3.5vw,32px); margin-top:1.2em}
+.price{font-size:clamp(30px,4.6vw,40px); font-weight:600; letter-spacing:-.02em;
+  font-variation-settings:"wdth" 110; line-height:1}
+
+/* ---------- close ---------- */
+.close{padding-block:clamp(56px,9vw,96px); border-top:1px solid var(--hairline)}
+footer{border-top:1px solid var(--hairline); background:var(--surface)}
+.foot{padding-block:32px 40px; color:var(--ink-3); font-size:13.5px; line-height:1.6; max-width:46rem}
+.foot strong{color:var(--ink-2); font-weight:600}
+
+/* ---------- toast ---------- */
+#toast{
+  position:fixed; left:50%; transform:translateX(-50%) translateY(14px);
+  bottom:calc(20px + env(safe-area-inset-bottom,0px)); z-index:40;
+  background:var(--ink); color:var(--paper); padding:11px 16px; border-radius:2px;
+  font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.03em;
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+  max-width:calc(100vw - 40px); text-align:center;
+}
+#toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){ #toast{transition:none} }
+</style>
+
+<header>
+  <div class="wrap bar">
+    <div class="mark">AIRING<span>No.1 Refresh Mist</span></div>
+    <button class="switch" id="auditBtn" aria-pressed="false">
+      <span class="dot" aria-hidden="true"></span>Claims audit
+    </button>
+    <button class="cta sm" data-buy>Get the Starter Kit — $34</button>
+  </div>
+</header>
+
+<div class="auditbar"><div class="wrap"><span id="auditCount"></span></div></div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="col wide">
+      <p class="tag" style="padding-top:0">AIRING No.1 Refresh Mist</p>
+      <h1 style="margin-top:14px">It's not the wearing that wears your clothes out. It's the washing.</h1>
+      <p class="lede" style="margin-top:18px">An enzyme mist that <span class="claim">removes odor from wool, denim and technical fabric</span><span class="rtb">[RTB-2]</span> — so the shirt goes back in the wardrobe instead of the drum.</p>
+      <div class="buy">
+        <button class="cta" data-buy>Get the Starter Kit — $34</button>
+        <span class="terms">Free shipping over $30 · 30 days to change your mind<span class="rtb">[RTB-7]</span></span>
+      </div>
+    </div>
+
+    <div class="evidence">
+      <div class="canvas-shell">
+        <canvas id="fiber" aria-label="Comparison of merino knit: abraded surface on the left, intact surface on the right"></canvas>
+        <div class="lbl l">Machine-washed</div>
+        <div class="lbl r">Not machine-washed</div>
+      </div>
+      <div class="cap">
+        <span>Placeholder — art-direction comp for PS-03, drawn procedurally. Not the final photograph.</span>
+        <span>Fig. 1 — merino, same garment</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">The problem</p>
+    <div class="col">
+      <h2>You did everything right. It fell apart anyway.</h2>
+      <p class="dim">You stopped buying five cheap sweaters a year and bought one good one. You read the fiber content. You paid more on purpose.</p>
+      <p class="dim">Four months later the shoulders are pilling, the cuffs have gone slack, and the thing you bought to last is already looking tired.</p>
+      <p><span class="claim">That's not age. That's forty minutes of wet fiber dragging against wet fiber, twice a week.</span><span class="rtb">[RTB-1]</span></p>
+      <p>The appliance you never questioned is the one taking the wardrobe apart.</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">The outcome</p>
+    <div class="col">
+      <h2>A wardrobe that still looks new in year three.</h2>
+      <p class="dim">Not preserved in tissue paper. Worn — constantly — and still holding its shape, its color and its surface.</p>
+      <p class="dim">The change isn't buying better. You already did that. The change is what happens between wears.</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">The mechanism</p>
+    <div class="col">
+      <h2>Most of your laundry isn't dirty. It smells.</h2>
+      <p class="dim">Two different problems. Dirt needs washing — nothing removes a stain but water and agitation, and AIRING won't pretend otherwise. Odor is a chemical compound sitting in the fiber, and it can be broken down where it is.</p>
+
+      <div class="steps">
+        <div>
+          <span class="num">01</span>
+          <div>
+            <h3>Enzymes break the compound down</h3>
+            <p><span class="claim">The odor molecules that bind to wool and synthetic fiber are digested, not perfumed over.</span><span class="rtb">[RTB-2]</span></p>
+          </div>
+        </div>
+        <div>
+          <span class="num">02</span>
+          <div>
+            <h3>Molecular capture traps what's left</h3>
+            <p><span class="claim">Remaining volatile compounds are held rather than released.</span><span class="rtb">[RTB-2]</span></p>
+          </div>
+        </div>
+        <div>
+          <span class="num">03</span>
+          <div>
+            <h3>Nothing stays behind</h3>
+            <p><span class="claim">No softeners, no quaternary ammonium compounds, no residue that coats fiber and dulls it over time. Safe on merino, cashmere, raw denim and elastane.</span><span class="rtb">[RTB-3]</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="boundary">
+        <p>It doesn't replace washing. It replaces the washes you didn't need.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">Benefits</p>
+    <div class="col wide">
+      <h2>What actually changes</h2>
+      <div class="benefits">
+        <div><b>Clothes last longer</b><span><span class="claim">Fewer cycles means less abrasion, less pilling, less shape loss.</span><span class="rtb">[RTB-1]</span></span></div>
+        <div><b>No masking</b><span><span class="claim">Enzymes remove the compound.</span><span class="rtb">[RTB-2]</span> You don't end up with a second smell on top of the first.</span></div>
+        <div><b>Fabric-safe</b><span><span class="claim">No softeners, no quats, no residue — designed around wool, cashmere, denim and elastane.</span><span class="rtb">[RTB-3]</span></span></div>
+        <div><b>One bottle, forever</b><span><span class="claim">Aluminum bottle, concentrate refills. You buy the bottle once.</span><span class="rtb">[RTB-4]</span></span></div>
+        <div><b>Ten seconds</b><span>Two sprays and a hanger. It isn't a chore, it's a step.</span></div>
+        <div><b>Less laundry</b><span>The pile stops being the thing you're always behind on.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">How it works</p>
+    <div class="col">
+      <h2>Spray. Hang. Wear it again.</h2>
+      <div class="steps">
+        <div><span class="num">01</span><div><h3>Spray</h3><p>Two to four pulls, 20cm from the fabric. The high-odor spots: underarms, collar, waistband, back of the knee.</p></div></div>
+        <div><span class="num">02</span><div><h3>Hang</h3><p>Anywhere with moving air. A door frame is fine.</p></div></div>
+        <div><span class="num">03</span><div><h3>Wear it again</h3><p>An hour is usually enough. Overnight is better.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">Proof</p>
+    <div class="col">
+      <h2>This section is empty on purpose.</h2>
+      <div class="hole">
+        <p class="small"><strong>AIRING is new.</strong> There are no customer reviews, no press, no test results and no certifications yet — so there are none on this page. Independent sensory odor-panel testing is underway. When it finishes we'll publish it whether or not we like the result.</p>
+        <p class="small" style="margin-top:1em">Reserved for, and rendered only when it exists:</p>
+        <ul class="small">
+          <li>Independent odor-panel results <span class="mono" style="font-size:.85em">[RTB-2 · pending]</span></li>
+          <li>Fabric compatibility testing — merino, cashmere, denim, elastane <span class="mono" style="font-size:.85em">[RTB-3 · pending]</span></li>
+          <li>Verified customer reviews, collected post-purchase only</li>
+          <li>Third-party ingredient safety documentation</li>
+        </ul>
+      </div>
+      <p class="small dim" style="margin-top:1.1em">Build note: this block is a component that returns null on empty data. Shipping a fabricated proof section is structurally impossible, not merely discouraged.</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">Objections</p>
+    <div class="col">
+      <h2>The questions worth asking</h2>
+      <div class="qa">
+        <div>
+          <h3>Isn't this just Febreze?</h3>
+          <p>No — and you're right to ask, because most of this category is fragrance. Fragrance covers odor with a stronger smell. <span class="claim">AIRING is enzyme-based: it breaks the odor compound down and captures what's left.</span><span class="rtb">[RTB-2]</span> If you want the honest test, don't smell the garment while it's damp. Smell it tomorrow.</p>
+        </div>
+        <div>
+          <h3>Isn't it unhygienic not to wash clothes?</h3>
+          <p>Underwear, socks and anything against skin for a full day should be washed. Outer layers — knitwear, jeans, jackets, outer training layers — are a different case, and most of them go in the machine because of smell rather than soil. That's the load AIRING is for.</p>
+        </div>
+        <div>
+          <h3>Will it damage wool or cashmere?</h3>
+          <p><span class="claim">It's formulated around those fibers specifically: no softeners, no quats, no residue.</span><span class="rtb">[RTB-3]</span> Patch-test a hem if you're unsure — with anything you apply to a garment you care about, you should.</p>
+        </div>
+        <div>
+          <h3>Does it actually work?</h3>
+          <p>We'd rather you find out than take our word for it, and we haven't got the customer history yet to point at. That's what the 30 days are for. Use it for a month. If your laundry pile hasn't shrunk, send it back.</p>
+        </div>
+        <div>
+          <h3>What if I hate the smell?</h3>
+          <p><span class="claim"><em>Cold Air</em> has no added fragrance at all.</span><span class="rtb">[RTB-6]</span> Start there.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="row">
+    <p class="tag">The offer</p>
+    <div class="col">
+      <h2>Starter Kit</h2>
+      <div class="offer">
+        <div class="price">$34<span class="rtb">[RTB-8]</span></div>
+        <p class="small dim" style="margin-top:12px">One 250ml refillable aluminum bottle · one concentrate · <em>Cold Air</em> or <em>Line Dry</em></p>
+        <p class="small dim" style="margin-top:6px">Refill 3-pack $27 · Subscribe and save 15% · Free shipping over $30</p>
+        <p class="small" style="margin-top:16px"><strong>30 days to change your mind.</strong> <span class="claim">Use it, properly, for a month. If it hasn't changed how often you do laundry, return it for a full refund — bottle empty, no questions.</span><span class="rtb">[RTB-7]</span></p>
+        <div class="buy"><button class="cta" data-buy>Get the Starter Kit — $34</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="col wide">
+      <h2 style="font-size:clamp(28px,4.6vw,42px)">Your clothes aren't dirty. They're tired.</h2>
+      <p class="lede" style="margin-top:14px">Two sprays. A hanger. Wear it again.</p>
+      <div class="buy">
+        <button class="cta" data-buy>Get the Starter Kit — $34</button>
+        <span class="terms">Free shipping over $30 · 30 days to change your mind</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <p><strong>Concept page.</strong> AIRING is an agency-originated product concept, not a company. Nothing on this page has been sold, shipped or tested, no store is connected, and no customer has ever used this product.</p>
+      <p style="margin-top:1em">Every factual claim carries an <span class="mono" style="color:var(--orange)">[RTB-n]</span> marker and is gated in the campaign's claims substantiation register. Switch on <strong>Claims audit</strong> in the header to see which sentences on this page cannot legally run until their evidence clears. An unresolved marker is specified as a build failure.</p>
+      <p style="margin-top:1em">Fig. 1 is drawn procedurally in canvas as an art-direction comp for the PS-03 photograph. It is a layout stand-in, not a photograph of any real garment, and not evidence of anything.</p>
+    </div>
+  </div>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- claims audit mode ---------- */
+  var body = document.body, btn = document.getElementById('auditBtn');
+  var count = document.querySelectorAll('.rtb').length;
+  var ids = {}; Array.prototype.forEach.call(document.querySelectorAll('.rtb'), function(n){
+    ids[n.textContent.replace(/[\[\]]/g,'')] = 1;
+  });
+  var distinct = Object.keys(ids).sort();
+  document.getElementById('auditCount').textContent =
+    count + ' gated claims on this page · ' + distinct.join(' · ') + ' · none may publish until cleared';
+
+  function setAudit(on){
+    body.classList.toggle('audit', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    try { localStorage.setItem('airing-audit', on ? '1' : '0'); } catch(e){}
+  }
+  try { if (localStorage.getItem('airing-audit') === '1') setAudit(true); } catch(e){}
+  btn.addEventListener('click', function(){ setAudit(!body.classList.contains('audit')); });
+
+  /* ---------- honest CTA ---------- */
+  var toast = document.getElementById('toast'), t;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-buy]'), function(b){
+    b.addEventListener('click', function(){
+      toast.textContent = 'Concept page — no store is connected.';
+      toast.classList.add('on');
+      clearTimeout(t); t = setTimeout(function(){ toast.classList.remove('on'); }, 2600);
+    });
+  });
+
+  /* ---------- Fig. 1 — procedural knit comp ---------- */
+  var canvas = document.getElementById('fiber');
+  var ctx = canvas.getContext('2d');
+
+  function tok(name, fallback){
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+  function rnd(seed){ var s = seed; return function(){ s = (s*16807) % 2147483647; return (s-1)/2147483646; }; }
+
+  function draw(){
+    var w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+
+    var base = tok('--fabric','#E6E2D8'), line = tok('--fabric-line','#C9C4B6');
+    var hi = tok('--fabric-hi','#FBF9F4'), lo = tok('--fabric-lo','#A7A295');
+    var rule = tok('--hairline','#D6D2C7');
+    var mid = w/2, r = rnd(20260916);
+
+    ctx.fillStyle = base; ctx.fillRect(0,0,w,h);
+
+    /* knit loops — regular on the right, disordered on the left */
+    var sx = 8, sy = 10;
+    ctx.lineWidth = 1.1; ctx.lineCap = 'round';
+    for (var y = -sy; y < h + sy; y += sy){
+      for (var x = -sx; x < w + sx; x += sx){
+        var left = x < mid;
+        var jx = left ? (r()-0.5)*3.2 : (r()-0.5)*0.5;
+        var jy = left ? (r()-0.5)*3.2 : (r()-0.5)*0.5;
+        ctx.strokeStyle = line;
+        ctx.globalAlpha = left ? 0.30 + r()*0.4 : 0.52;
+        ctx.beginPath();
+        ctx.arc(x+jx, y+jy, sx*0.44, Math.PI*0.08, Math.PI*0.92);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x+jx+sx/2, y+jy+sy/2, sx*0.44, Math.PI*1.08, Math.PI*1.92);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    /* stray lifted fibers, left half only */
+    ctx.lineWidth = 0.9;
+    for (var f = 0; f < 70; f++){
+      var fx = r()*mid, fy = r()*h, len = 5 + r()*16, ang = (r()-0.5)*2.4;
+      ctx.strokeStyle = r() > 0.45 ? hi : lo;
+      ctx.globalAlpha = 0.35 + r()*0.4;
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.quadraticCurveTo(fx + Math.cos(ang)*len*0.6, fy + Math.sin(ang)*len*0.6 - 4,
+                           fx + Math.cos(ang)*len, fy + Math.sin(ang)*len);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    /* pills — raked from camera left, so highlight left, shadow right */
+    var pills = Math.round(mid*h/900);
+    for (var p = 0; p < pills; p++){
+      var px = r()*(mid-10) + 4, py = r()*(h-10) + 5, pr = 1.6 + r()*3.4;
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = lo;
+      ctx.beginPath(); ctx.ellipse(px + pr*0.7, py + pr*0.45, pr*0.95, pr*0.62, 0, 0, 6.2832); ctx.fill();
+      var g = ctx.createRadialGradient(px - pr*0.42, py - pr*0.42, pr*0.12, px, py, pr*1.1);
+      g.addColorStop(0, hi); g.addColorStop(1, line);
+      ctx.globalAlpha = 0.92; ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(px, py, pr, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    /* raking light falloff */
+    var lg = ctx.createLinearGradient(0,0,w,h*0.3);
+    lg.addColorStop(0, 'rgba(255,255,255,0.10)');
+    lg.addColorStop(0.55, 'rgba(0,0,0,0)');
+    lg.addColorStop(1, 'rgba(0,0,0,0.16)');
+    ctx.fillStyle = lg; ctx.fillRect(0,0,w,h);
+
+    /* grain */
+    ctx.globalAlpha = 0.05;
+    for (var n = 0; n < 2400; n++){
+      ctx.fillStyle = r() > 0.5 ? '#FFFFFF' : '#000000';
+      ctx.fillRect(r()*w, r()*h, 1, 1);
+    }
+    ctx.globalAlpha = 1;
+
+    /* the divide */
+    ctx.strokeStyle = rule; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(mid + 0.5, 0); ctx.lineTo(mid + 0.5, h); ctx.stroke();
+  }
+
+  draw();
+  var rt;
+  window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(draw, 140); });
+  if (window.matchMedia){
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', function(){ setTimeout(draw, 60); });
+  }
+  if (window.MutationObserver){
+    new MutationObserver(function(){ setTimeout(draw, 60); })
+      .observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+  }
+})();
+</script>
