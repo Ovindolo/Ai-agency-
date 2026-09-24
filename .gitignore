@@ -6,3 +6,5 @@ __pycache__/
 .pytest_cache/
 trading-bot/reports/
 trading-bot/vendor/
+trading-bot/runs/
+trading-bot/context/Trade_Ledger.md
