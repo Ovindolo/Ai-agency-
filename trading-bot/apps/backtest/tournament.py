@@ -35,20 +35,30 @@ def split(df: pd.DataFrame, is_frac: float = 0.6) -> tuple[pd.DataFrame, pd.Data
     return df.iloc[:cut], df.iloc[cut:]
 
 
-def run_tournament(df: pd.DataFrame, symbol: str, candidates: dict[str, StrategyParams],
+Candidate = StrategyParams | pd.DataFrame     # built-in params, or a full-history signal frame
+
+
+def _run(df: pd.DataFrame, symbol: str, label: str, cand: Candidate, start_equity: float) -> Report:
+    if isinstance(cand, pd.DataFrame):
+        # Valid only for lookahead-free candidates: a value at bar j depends on data <= j,
+        # so slicing a full-history frame equals recomputing it on the slice.
+        return run_backtest(df, symbol, label=label, signal_frame=cand.loc[df.index], start_equity=start_equity)
+    return run_backtest(df, symbol, label=label, params=cand, start_equity=start_equity)
+
+
+def run_tournament(df: pd.DataFrame, symbol: str, candidates: dict[str, Candidate],
                    *, is_frac: float = 0.6, start_equity: float = 500.0) -> list[Result]:
     is_df, oos_df = split(df, is_frac)
     min_is = round(MIN_TRADES_PER_YEAR * len(is_df) / BARS_PER_YEAR)
     min_oos = round(MIN_TRADES_PER_YEAR * len(oos_df) / BARS_PER_YEAR)
     results: list[Result] = []
-    for name, p in candidates.items():
-        rep = run_backtest(is_df, symbol, label=f"{name} · in-sample", params=p, start_equity=start_equity)
+    for name, cand in candidates.items():
+        rep = _run(is_df, symbol, f"{name} · in-sample", cand, start_equity)
         rep.min_trades = min_is
         results.append(Result(name, rep))
     for r in results:
         if r.passed_is:
-            rep = run_backtest(oos_df, symbol, label=f"{r.name} · out-of-sample", params=candidates[r.name],
-                               start_equity=start_equity)
+            rep = _run(oos_df, symbol, f"{r.name} · out-of-sample", candidates[r.name], start_equity)
             rep.min_trades = min_oos
             r.oos_rep = rep
     return results
@@ -59,7 +69,6 @@ def summary(results: list[Result]) -> str:
     passed_is = [r for r in results if r.passed_is]
     passed_oos = [r for r in passed_is if r.passed_oos]
     best = max(results, key=lambda r: r.is_rep.profit_factor if r.is_rep.n else 0)
-    best_oos = best.oos_rep or run_backtest  # placeholder for type checkers
     lines = [
         f"Candidates tested:            {n}",
         f"Passed in-sample gates:       {len(passed_is)}",

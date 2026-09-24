@@ -4,3 +4,5 @@ trading-bot/data/*.json
 trading-bot/.env
 __pycache__/
 .pytest_cache/
+trading-bot/reports/
+trading-bot/vendor/

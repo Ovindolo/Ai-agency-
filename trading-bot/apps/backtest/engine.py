@@ -24,6 +24,14 @@ from apps.strategy.trend_pullback import StrategyParams, indicators, row_to_sign
 WINDOW = 1000          # bars of history per snapshot; the paper runner fetches the same amount
 
 
+class _SignalOnly:
+    strategy_side = "long"
+
+
+_RULES_ONLY_SNAP = _SignalOnly()
+_RULES_ONLY_JEV = JevResult(status="disabled", error="rules-only run")
+
+
 def bar_exit(pos: Position, o: float, h: float, l: float, c: float, t: datetime, limits: RiskLimits) -> tuple[float | None, str]:
     """Exit price and reason for one bar, or (None, "") to keep holding. Stop wins ties."""
     slip = limits.slippage_pct
@@ -213,16 +221,16 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
         rep.signals += 1
         window = df15.iloc[max(0, i - WINDOW + 1): i + 1]
 
-        snap = build_snapshot(symbol, window, signal=sig,
-                              account={"daily_pnl_pct": st.daily_pnl_pct, "drawdown_pct": st.drawdown_pct})
         if use_jev:
+            snap = build_snapshot(symbol, window, signal=sig,
+                                  account={"daily_pnl_pct": st.daily_pnl_pct, "drawdown_pct": st.drawdown_pct})
             jev_asked += 1
             rec = (jev_records or {}).get(snap.ts)
             jev_hits += rec is not None
-            jev = _jev_from_record(rec)
+            dec = compose_entry(snap, _jev_from_record(rec), thresholds)
         else:
-            jev = JevResult(status="disabled", error="rules-only run")
-        dec = compose_entry(snap, jev, thresholds)
+            # rules-only: the snapshot's only consumers are Jev and its logs, so don't build it
+            dec = compose_entry(_RULES_ONLY_SNAP, _RULES_ONLY_JEV, thresholds)
         if dec.action != "enter":
             rep.vetoed_by_policy += 1
             continue
