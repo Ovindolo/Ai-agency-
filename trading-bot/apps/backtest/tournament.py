@@ -68,7 +68,8 @@ def summary(results: list[Result]) -> str:
     n = len(results)
     passed_is = [r for r in results if r.passed_is]
     passed_oos = [r for r in passed_is if r.passed_oos]
-    best = max(results, key=lambda r: r.is_rep.profit_factor if r.is_rep.n else 0)
+    eligible = [r for r in results if r.is_rep.n >= r.is_rep.min_trades] or results
+    best = max(eligible, key=lambda r: min(r.is_rep.profit_factor, 99.0) if r.is_rep.n else 0)
     lines = [
         f"Candidates tested:            {n}",
         f"Passed in-sample gates:       {len(passed_is)}",

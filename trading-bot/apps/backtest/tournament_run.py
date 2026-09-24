@@ -43,7 +43,12 @@ def main() -> None:
     passed_is = [r for r in results if r.passed_is]
     survivors = [r for r in passed_is if r.passed_oos]
     rows = []
-    for r in sorted(results, key=lambda r: r.is_rep.profit_factor if r.is_rep.n else 0, reverse=True):
+    # Rank by sample size first: a 1-trade "PF inf" is the purest selection-bias fluke there is.
+    def rank(r):
+        enough = r.is_rep.n >= r.is_rep.min_trades
+        pf = r.is_rep.profit_factor if r.is_rep.n else 0.0
+        return (enough, min(pf, 99.0))
+    for r in sorted(results, key=rank, reverse=True):
         o = r.oos_rep
         rows.append(f"| {r.name} | {r.is_rep.n} | {r.is_rep.profit_factor:.2f} | {r.is_rep.net:+.2f} | "
                     f"{'PASS' if r.passed_is else '—'} | "
