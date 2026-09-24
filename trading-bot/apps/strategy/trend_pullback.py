@@ -32,6 +32,29 @@ class StrategyParams:
     min_hours: int = 55               # EMA50 on 1h needs history
 
 
+def exit_frame(df15: pd.DataFrame, p: StrategyParams = StrategyParams()) -> pd.DataFrame:
+    """Our stop/target for ANY entry signal: 1.5 x ATR(1h) placed inside the risk band, target at target_rr.
+
+    Returned columns: entry, stop_pct, stop, take, tradable (enough history and stop within band).
+    Shared by the built-in strategy and every imported one, so all candidates exit the same way.
+    """
+    h1 = resample_1h(df15)
+    hf = pd.DataFrame({"atr_1h": atr(h1), "h1_n": np.arange(1, len(h1) + 1)}, index=h1.index)
+    key = (df15.index + pd.Timedelta("15min")).floor("1h") - pd.Timedelta("1h")
+    j = hf.reindex(key)
+    j.index = df15.index
+    close = df15["close"]
+    raw_stop = p.stop_atr_mult * j["atr_1h"] / close
+    stop_pct = raw_stop.clip(lower=p.stop_min_pct)
+    out = pd.DataFrame(index=df15.index)
+    out["entry"] = close
+    out["stop_pct"] = stop_pct
+    out["stop"] = close * (1 - stop_pct)
+    out["take"] = close * (1 + p.target_rr * stop_pct)
+    out["tradable"] = ((j["h1_n"] >= p.min_hours) & (raw_stop <= p.stop_max_pct)).fillna(False)
+    return out
+
+
 def indicators(df15: pd.DataFrame, p: StrategyParams = StrategyParams()) -> pd.DataFrame:
     h1 = resample_1h(df15)
     e20h, e50h = ema(h1["close"], 20), ema(h1["close"], 50)

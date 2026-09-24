@@ -67,6 +67,7 @@ class Report:
     jev_coverage: float | None = None
     hold_return: float = 0.0
     hold_max_dd: float = 0.0
+    min_trades: int = 80
 
     # ---------------- metrics
     @property
@@ -97,7 +98,7 @@ class Report:
         return {
             "profit_factor >= 1.2": (self.profit_factor >= 1.2, f"{self.profit_factor:.2f}"),
             "max drawdown <= 20%": (self.max_dd <= 0.20, f"{self.max_dd:.1%}"),
-            "trades >= 80": (self.n >= 80, str(self.n)),
+            f"trades >= {self.min_trades}": (self.n >= self.min_trades, str(self.n)),
             "not owned by top 3 trades": (self.net_without_top3 > 0, f"net without top 3: {self.net_without_top3:+.2f}"),
             "beats buy-and-hold": (self.net / self.start_equity > self.hold_return, f"{self.net/self.start_equity:+.1%} vs {self.hold_return:+.1%}"),
         }
@@ -149,7 +150,9 @@ def _jev_from_record(rec: dict | None) -> JevResult:
 def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLimits | None = None,
                  thresholds: PolicyThresholds | None = None, params: StrategyParams | None = None,
                  start_equity: float = 500.0, jev_records: dict[str, dict] | None = None,
-                 use_jev: bool = False) -> Report:
+                 use_jev: bool = False, signal_frame: pd.DataFrame | None = None) -> Report:
+    """signal_frame: optional precomputed frame with columns signal/entry/stop/take/stop_pct
+    (e.g. an imported strategy's entries + our exits). Defaults to the built-in strategy."""
     limits = limits or RiskLimits()
     thresholds = thresholds or PolicyThresholds()
     params = params or StrategyParams()
@@ -167,7 +170,7 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
     jev_hits = jev_asked = 0
     slip, fee = limits.slippage_pct, limits.taker_fee_pct
 
-    ind = indicators(df15, params)
+    ind = signal_frame if signal_frame is not None else indicators(df15, params)
     sig_flags = ind["signal"].to_numpy()
     warmup = min(params.min_hours * 4, len(df15) - 2)
     for i in range(warmup, len(df15) - 1):
