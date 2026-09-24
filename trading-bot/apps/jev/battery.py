@@ -14,6 +14,7 @@ ENTRY_QUESTIONS: dict = {
             "mean_reverting": "price oscillates around a level without direction",
             "chop": "no clear direction, erratic small moves in both directions",
             "high_vol": "large violent moves that make stops unreliable",
+            "crisis": "disorderly market: crash, liquidation cascade, exchange or stablecoin stress",
         },
     },
     "setup_quality": {

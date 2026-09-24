@@ -5,7 +5,7 @@ import pytest
 from apps.risk.engine import (
     AccountState, Action, Candidate, Position, RiskLimits,
     circuit_breakers, evaluate_entry, locked_reserve, manage_position,
-    manual_kill, position_size, tighten_only,
+    correlation_mult, manual_kill, position_size, stoploss_guard, tighten_only,
 )
 
 NOW = datetime(2026, 9, 24, 12, 0, tzinfo=timezone.utc)
@@ -38,9 +38,15 @@ def test_size_is_one_percent_risk_capped_by_position():
     assert "capped by max_position_pct" in notes
 
 def test_size_uses_risk_when_below_cap():
-    # 0.5x -> $2.50 risk / 2.5% stop = $100 -> equals cap; use 0.25x -> $50
-    stake, _ = position_size(acct(), L, stop_pct=0.025, risk_mult=0.25)
-    assert stake == 50.0
+    # tiny risk: 0.2% of 500 = $1 / 2.5% stop = $40 < $100 cap
+    stake, _ = position_size(acct(), RiskLimits(risk_per_trade_min_pct=0.001, risk_per_trade_pct=0.002), stop_pct=0.025)
+    assert stake == 40.0
+
+@pytest.mark.parametrize("mult,expected", [(1.0, 100.0), (0.5, 50.0), (0.25, 25.0)])
+def test_reduce_size_bites_even_when_cap_binds(mult, expected):
+    # regression: the multiplier used to scale only the risk-based size, which the 20% cap then hid
+    stake, _ = position_size(acct(), L, stop_pct=0.02, risk_mult=mult)
+    assert stake == expected
 
 def test_risk_mult_cannot_increase_size():
     a, _ = position_size(acct(equity=5000, peak_equity=5000), L, 0.02, risk_mult=1.0)
@@ -156,3 +162,19 @@ def test_stops_only_move_up():
     p = pos(stop=100.5)
     assert tighten_only(p, 99.0).stop == 100.5
     assert tighten_only(p, 101.0).stop == 101.0
+
+
+# ------------------------------------------------ protections borrowed from freqtrade / the fund prompt
+def test_stoploss_guard_pauses_after_three_stops_in_window():
+    stops = [NOW - timedelta(hours=5), NOW - timedelta(hours=2), NOW - timedelta(minutes=30)]
+    assert stoploss_guard(stops, NOW, L) == stops[-1] + timedelta(minutes=L.stoploss_guard_pause_min)
+    assert stoploss_guard(stops[:2], NOW, L) is None
+    assert stoploss_guard(stops, stops[-1] + timedelta(minutes=L.stoploss_guard_pause_min), L) is None
+
+def test_stoploss_guard_ignores_old_stops():
+    stops = [NOW - timedelta(hours=20), NOW - timedelta(hours=2), NOW - timedelta(minutes=30)]
+    assert stoploss_guard(stops, NOW, L) is None
+
+@pytest.mark.parametrize("corr,mult", [(None, 1.0), (float("nan"), 1.0), (0.3, 1.0), (0.7, 1.0), (0.85, 0.5)])
+def test_correlated_second_position_is_half_size(corr, mult):
+    assert correlation_mult(corr, L) == mult

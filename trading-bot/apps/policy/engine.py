@@ -53,6 +53,8 @@ def compose_entry(snap: Snapshot, jev: JevResult, t: PolicyThresholds, *, strate
         reasons.append(f"setup {jev.setup_quality.score:.2f} < {t.setup_min_score}")
     if jev.aligned_with_signal.noul < t.aligned_min_noul:
         reasons.append(f"aligned p={jev.aligned_with_signal.noul:.2f} < {t.aligned_min_noul}")
+    if jev.regime.choice == "crisis":
+        reasons.append("regime crisis: no new positions")
     if strategy_is_trend and jev.regime.choice in ("chop", "high_vol", "trending_down"):
         reasons.append(f"regime {jev.regime.choice} vs trend strategy")
 

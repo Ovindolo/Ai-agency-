@@ -18,7 +18,7 @@ from apps.common.config import PolicyThresholds
 from apps.features.snapshot import build_snapshot
 from apps.jev.client import JevResult
 from apps.policy.engine import compose_entry
-from apps.risk.engine import AccountState, Action, Candidate, Position, RiskLimits, evaluate_entry, manage_position
+from apps.risk.engine import AccountState, Action, Candidate, Position, RiskLimits, evaluate_entry, manage_position, stoploss_guard
 from apps.strategy.trend_pullback import StrategyParams, indicators, row_to_signal
 
 WINDOW = 1000          # bars of history per snapshot; the paper runner fetches the same amount
@@ -172,6 +172,7 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
     pos: Position | None = None
     pos_meta: dict = {}
     cooldown_until = -1
+    stop_times: list[datetime] = []
     st = AccountState(start_equity, start_equity, start_equity, start_equity, start_equity)
     equity_points: list[tuple[datetime, float]] = []
     day, week = None, None
@@ -206,6 +207,8 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
                 st.realized_pnl_total += pnl
                 if pnl <= 0:
                     cooldown_until = i + limits.cooldown_bars_after_loss
+                    if why == "stop":
+                        stop_times.append(t)
                 pos = None
                 st.open_positions, st.inventory_usd, st.open_symbols = 0, 0.0, frozenset()
                 st.equity = cash
@@ -216,6 +219,10 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
         if i < cooldown_until:
             continue
         if not sig_flags[i]:
+            continue
+        if stoploss_guard(stop_times, t, limits):
+            rep.signals += 1
+            rep.vetoed_by_risk += 1
             continue
         sig = row_to_signal(ind.iloc[i], params)
         rep.signals += 1

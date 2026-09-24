@@ -45,6 +45,11 @@ class RiskLimits:
     pause_hours: int = 24
     min_stake_usd: float = 10.0
     cooldown_bars_after_loss: int = 8
+    stoploss_guard_trades: int = 3
+    stoploss_guard_lookback_min: int = 720
+    stoploss_guard_pause_min: int = 360
+    correlation_max: float = 0.70
+    correlated_risk_mult: float = 0.5
 
     @classmethod
     def load(cls) -> "RiskLimits":
@@ -167,14 +172,19 @@ def position_size(state: AccountState, limits: RiskLimits, stop_pct: float, risk
         notes.append(f"risk_mult {risk_mult} clamped to 1.0")
 
     risk_pct = limits.clamp_risk_pct(state.risk_per_trade_pct if state.risk_per_trade_pct is not None else limits.risk_per_trade_pct)
-    by_risk = state.equity * risk_pct * mult / stop_pct
+    by_risk = state.equity * risk_pct / stop_pct
     by_position_cap = state.equity * limits.max_position_pct
     deployable = state.equity * (1 - limits.cash_reserve_pct) - state.inventory_usd - locked_reserve(state, limits)
 
-    stake = max(0.0, min(by_risk, by_position_cap, deployable))
-    if stake == by_position_cap and by_risk > by_position_cap:
+    # the multiplier applies AFTER the caps: with 1.5-2.5% stops the 20% cap almost always binds,
+    # so scaling only the risk-based size would make "reduce size" a silent no-op
+    sized = min(by_risk, by_position_cap)
+    stake = max(0.0, min(sized * mult, deployable))
+    if by_risk > by_position_cap:
         notes.append("capped by max_position_pct")
-    if stake == max(0.0, deployable) and deployable < min(by_risk, by_position_cap):
+    if mult < 1.0:
+        notes.append(f"size x{mult:g}")
+    if stake == max(0.0, deployable) and deployable < sized * mult:
         notes.append("capped by cash reserve / inventory")
     return round(stake, 2), notes
 
@@ -221,6 +231,24 @@ def evaluate_entry(state: AccountState, limits: RiskLimits, cand: Candidate, now
 
     return Verdict(Action.ALLOW, (*notes, *size_notes), stake_usd=stake, stop=round(stop, 8),
                    take=cand.take, stop_pct=stop_pct, reward_risk=round(rr, 2))
+
+
+def stoploss_guard(stop_times: list[datetime], now: datetime, limits: RiskLimits) -> datetime | None:
+    """freqtrade's StoplossGuard: N stop-outs inside the lookback -> no new entries for a while.
+    Returns the time entries resume, or None. Repeated stops mean the regime is not what the strategy assumes."""
+    recent = [t for t in stop_times if now - t <= timedelta(minutes=limits.stoploss_guard_lookback_min)]
+    if len(recent) >= limits.stoploss_guard_trades:
+        until = max(recent) + timedelta(minutes=limits.stoploss_guard_pause_min)
+        return until if now < until else None
+    return None
+
+
+def correlation_mult(max_corr_with_open: float | None, limits: RiskLimits) -> float:
+    """BTC and ETH usually move together: a second position in a correlated coin is mostly the same bet
+    twice. Above the threshold the new entry gets reduced size. Never above 1."""
+    if max_corr_with_open is None or max_corr_with_open != max_corr_with_open:     # none open / NaN
+        return 1.0
+    return limits.correlated_risk_mult if max_corr_with_open > limits.correlation_max else 1.0
 
 
 # ---------------------------------------------------------------- open-position management

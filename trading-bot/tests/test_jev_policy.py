@@ -91,6 +91,7 @@ def test_jev_unavailable_falls_back_without_extra_size(signal_snap, status):
     ({"setup_quality": {"type": "score", "score": 1.6, "confidence": 0.9}}, "setup"),
     ({"aligned_with_signal": {"type": "noul", "noul": 0.5}}, "aligned"),
     ({"regime": {"type": "choice", "choice": "chop", "confidence": 0.9, "probabilities": {}}}, "regime chop"),
+    ({"regime": {"type": "choice", "choice": "crisis", "confidence": 0.9, "probabilities": {}}}, "crisis"),
 ])
 def test_each_gate_can_veto(signal_snap, patch, fragment):
     d = compose_entry(signal_snap, ask(client({**GOOD, **patch})), T)

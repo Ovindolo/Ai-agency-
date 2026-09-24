@@ -141,3 +141,58 @@ def test_replay_only_sees_closed_candles(market):
     src = ReplaySource({SYM: df})
     seen = src.candles(SYM, sig_times[0])
     assert seen.index[-1] + BAR == pd.Timestamp(sig_times[0])
+
+
+def test_correlated_second_coin_gets_half_size(tmp_path, market):
+    df, sig_times = market
+    twin = df.copy()
+    twin[["open", "high", "low", "close"]] *= 0.05          # same moves, different price: correlation 1.0
+    tg = Notifier(token="", chat_id="", echo=False)
+    bot = Runner(ReplaySource({SYM: df, "ETH/USDT": twin}), [SYM, "ETH/USDT"], notifier=tg, base=tmp_path,
+                 jev=JevClient(enabled=False, log_path=None), now=sig_times[0])
+    bot.step(sig_times[0])
+    btc, eth = bot.positions[SYM], bot.positions["ETH/USDT"]
+    assert eth.stake_usd == pytest.approx(btc.stake_usd / 2, rel=0.01)
+    assert any("corelat" in m for m in tg.sent)
+    assert decisions(tmp_path)[-1]["corr_with_open"] > 0.99
+
+
+def test_stoploss_guard_blocks_entries_in_runner(tmp_path, market):
+    df, sig_times = market
+    bot, tg = make(tmp_path, df, sig_times[0])
+    bot.stop_times = [sig_times[0] - pd.Timedelta(hours=h) for h in (3, 2, 1)]
+    bot.step(sig_times[0])
+    assert not bot.positions
+    assert any("stopuri" in m for m in tg.sent)
+
+
+def test_decisions_carry_versions_and_execution_quality(tmp_path, market):
+    df, sig_times = market
+    bot, _ = make(tmp_path, df, sig_times[0])
+    bot.step(sig_times[0])
+    rec = decisions(tmp_path)[-1]
+    for k in ("strategy_id", "strategy_version", "config_version", "expected_price", "fill", "slippage_bps"):
+        assert rec[k] is not None, k
+    assert 8 < rec["slippage_bps"] < 10                       # half-spread + 8 bps assumed slippage
+
+
+def test_paper_runner_matches_backtest(tmp_path):
+    """Nautilus-style parity: the runner and the backtest must take the same trades on the same data,
+    otherwise the backtest is describing a different bot."""
+    from apps.backtest.engine import run_backtest
+    from apps.trader.paper import WARMUP, simulated_market
+    df = simulated_market(10, 11)
+    rep = run_backtest(df.iloc[WARMUP - 220:], SYM, label="parity")
+    src = ReplaySource({SYM: df})
+    times = src.times(SYM, WARMUP)
+    bot, _ = make(tmp_path, df, times[0])
+    bot.src = src
+    for t in times[:-1]:
+        bot.step(t)
+    exits = [r for r in decisions(tmp_path) if r["type"] == "exit"]
+    enters = [r for r in decisions(tmp_path) if r["type"] == "decision" and r.get("action") == "enter"]
+    assert len(rep.trades) >= 3 and len(exits) == len(rep.trades)
+    for tr, e, x in zip(rep.trades, enters, exits):
+        assert pd.Timestamp(e["t"]) == pd.Timestamp(tr.entry_time)
+        assert x["reason"] == tr.reason
+        assert x["pnl"] == pytest.approx(tr.pnl, abs=0.02)   # only difference: runner pays a simulated half-spread
