@@ -1,0 +1,13 @@
+# Numbers -> words. Code does the arithmetic; Jev only ever sees the words.
+# Every cut point is a guess until paper data says otherwise. Change here, re-run tests.
+ema_gap:         {up: 0.003,  down: -0.003}     # (ema20-ema50)/ema50 on 1h
+return_15m:      {up: 0.008,  down: -0.008}
+return_1h:       {up: 0.015,  down: -0.015}
+atr_pct:         {violent: 0.025, calm: 0.008}
+vol_vs_24h:      {expanding: 1.5, contracting: 0.7}
+spread_bps:      {wide: 8.0}
+depth_usd_l1:    {thin: 50000}
+volume_vs_avg:   {heavy: 1.5, light: 0.6}
+taker_buy_ratio: {buyers: 0.58, sellers: 0.42}
+daily_pnl_pct:   {up: 0.005, down: -0.005}
+rr:              {good: 2.5}

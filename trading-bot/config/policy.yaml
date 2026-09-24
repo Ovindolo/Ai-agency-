@@ -1,0 +1,10 @@
+# Policy thresholds. Live in config, NOT in Jev instructions.
+toxic_max_noul: 0.65            # skip if P(toxic) above this
+setup_min_score: 2.0            # skip if expected setup quality below this (0..3)
+aligned_min_noul: 0.55          # skip if P(aligned with signal) below this
+low_confidence: 0.80            # below this -> reduce size
+low_confidence_risk_mult: 0.5
+jev_down_risk_mult: 1.0         # Jev unavailable -> deterministic only, never MORE size
+exit_tighten_at: 0.8            # exit_urgency expected score thresholds (0..3)
+exit_reduce_at: 1.5
+exit_flatten_at: 2.5

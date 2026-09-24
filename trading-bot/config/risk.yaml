@@ -1,0 +1,25 @@
+# Hard risk limits. Code only. Jev never reads or changes these.
+max_position_pct: 0.20          # max 20% of equity in one position
+max_open_positions: 2
+cash_reserve_pct: 0.30          # 30% never deployed
+risk_per_trade_pct: 0.01        # 1% of equity lost if stop is hit
+risk_per_trade_min_pct: 0.005   # /set clamp lower bound
+risk_per_trade_max_pct: 0.015   # /set clamp upper bound
+max_daily_loss_pct: 0.03        # -> pause 24h
+max_weekly_loss_pct: 0.08       # -> kill
+max_drawdown_pct: 0.12          # from equity peak -> kill
+profit_lock_trigger_pct: 0.10   # once realized profit >= 10% of starting equity...
+profit_lock_fraction: 0.50      # ...lock half of it as reserve
+stop_min_pct: 0.015             # stops tighter than this are widened to it
+stop_max_pct: 0.025             # stops wider than this -> skip (too volatile)
+min_reward_risk: 1.8
+trailing_after_r: 1.2
+time_stop_minutes: 2880         # 48h
+min_edge_fee_mult: 2.5          # target move must be >= 2.5x round-trip cost
+taker_fee_pct: 0.001            # Binance VIP0 taker 0.10%
+slippage_pct: 0.0008            # 8 bps assumed each side
+max_spread_bps: 10.0
+max_data_age_sec: 120
+pause_hours: 24
+min_stake_usd: 10.0             # exchange minimum notional
+cooldown_bars_after_loss: 8     # 8 x 15m = 2h
