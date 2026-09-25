@@ -10,7 +10,11 @@ Changes to strategy or risk come from here, with the operator's approval — nev
 | 2 | How do you trade now? | Futures, by own admission without knowing them well; follows signals from several paid premium futures groups | 2026-09-25 |
 | 2b | Style | 15m chart, holds a few hours; closes "when profit is good" (no fixed target); entries from trend lines, intuition, news on X/Twitter | 2026-09-25 |
 
+| 4 | (answered instead of the stop-loss question) | Uses indicators such as LuxAlgo, Fibonacci, Ichimoku "and many others" to enter | 2026-09-25 |
+
 ## What maps onto the bot
+- Ichimoku, Fibonacci 0.5-0.618 pullback, Supertrend: coded in apps/strategy/classic.py, lookahead-checked, in the tournament.
+- LuxAlgo: mostly paid/closed TradingView scripts; open ones can be ported one by one, many repaint.
 - 15m chart, hours-long holds: same timeframe and horizon as trend_pullback. Good fit.
 - Trend lines: partly codable (trend + pullback already; swing-line breaks could be a tournament candidate).
 - Intuition, X/Twitter news: not codable and deliberately excluded (spec: no scraping X into entries).

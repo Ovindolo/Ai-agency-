@@ -118,23 +118,27 @@ def entry_signals(cls: type, df15: pd.DataFrame) -> pd.Series:
     return mapped.reindex(df15.index, fill_value=False)
 
 
-def has_lookahead(cls: type, df15: pd.DataFrame, cuts: int = 8, rtol: float = 1e-9) -> tuple[bool, str]:
-    """Every value the strategy computes for a past candle must be identical whether it is computed with
-    data up to that candle or with the full history. Checks ALL numeric columns, not just entries - a
-    strategy that never fires can still leak the future into its indicators."""
-    full = indicator_frame(cls, df15)
+def frame_leaks(frame_fn, df15: pd.DataFrame, cuts: int = 8, rtol: float = 1e-9) -> tuple[bool, str]:
+    """Every value computed for a past candle must be identical whether it is computed with data up to
+    that candle or with the full history. Checks ALL numeric columns, not just entries - a strategy that
+    never fires can still leak the future into its indicators. frame_fn: df15 -> numeric frame."""
+    full = frame_fn(df15)
     n = len(df15)
     for k in np.linspace(n * 0.5, n - 1, cuts).astype(int):
-        part = indicator_frame(cls, df15.iloc[:k])
+        part = frame_fn(df15.iloc[:k])
         common = part.index.intersection(full.index)
         cols = [c for c in part.columns if c in full.columns]
-        a = full.loc[common, cols].to_numpy()
-        b = part.loc[common, cols].to_numpy()
+        a = full.loc[common, cols].to_numpy(dtype=float)
+        b = part.loc[common, cols].to_numpy(dtype=float)
         same = np.isclose(a, b, rtol=rtol, atol=1e-12, equal_nan=True)
         if not same.all():
             bad_cols = [cols[j] for j in np.flatnonzero(~same.all(axis=0))]
             return True, f"{len(bad_cols)} column(s) change when later data is added: {', '.join(bad_cols[:4])}"
     return False, ""
+
+
+def has_lookahead(cls: type, df15: pd.DataFrame, cuts: int = 8, rtol: float = 1e-9) -> tuple[bool, str]:
+    return frame_leaks(lambda d: indicator_frame(cls, d), df15, cuts, rtol)
 
 
 def import_strategy(path: Path, df15: pd.DataFrame) -> list[Imported]:

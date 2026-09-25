@@ -13,7 +13,8 @@ from pathlib import Path
 
 from apps.backtest.data import load
 from apps.backtest.tournament import run_tournament
-from apps.strategy.freqtrade_adapter import import_strategy, signal_frame
+from apps.strategy.classic import CLASSIC, entries
+from apps.strategy.freqtrade_adapter import Imported, frame_leaks, import_strategy, signal_frame
 from apps.strategy.trend_pullback import StrategyParams
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,7 +31,13 @@ def main() -> None:
 
     df = load(a.symbol)
     census, candidates = [], {"built_in_trend_pullback": StrategyParams()}
-    for f in sorted(Path(a.repo).rglob("*.py")):
+    for name, fn in CLASSIC.items():                      # Ichimoku, Fibonacci, Supertrend
+        leaks, why = frame_leaks(fn, df)
+        if leaks:
+            census.append(Imported(name, "apps/strategy/classic.py", "15m", status="lookahead", detail=why))
+        else:
+            candidates[name] = signal_frame(entries(name, df), df)
+    for f in sorted(Path(a.repo).rglob("*.py")) if Path(a.repo).exists() else []:
         if "futures" in f.parts:
             continue
         for imp in import_strategy(f, df):
