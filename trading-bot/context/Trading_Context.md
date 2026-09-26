@@ -12,6 +12,8 @@ Changes to strategy or risk come from here, with the operator's approval — nev
 
 | 4 | (answered instead of the stop-loss question) | Uses indicators such as LuxAlgo, Fibonacci, Ichimoku "and many others" to enter | 2026-09-25 |
 
+| 3 | Net result so far? | Started futures with ~1,000, now ~5,000 (to confirm: timeframe, number of trades, leverage) | 2026-09-26 |
+
 ## What maps onto the bot
 - Ichimoku, Fibonacci 0.5-0.618 pullback, Supertrend: coded in apps/strategy/classic.py, lookahead-checked, in the tournament.
 - LuxAlgo: mostly paid/closed TradingView scripts; open ones can be ported one by one, many repaint.
@@ -21,6 +23,9 @@ Changes to strategy or risk come from here, with the operator's approval — nev
 - "Close when profit is good": discretionary exit. The bot uses fixed stop/target/trailing so results can be measured.
 
 ## Open questions
+- 1k -> 5k: over how long, how many trades, what leverage? (separates skill from variance)
+- Idea to propose: a read-only futures risk guard for manual trading (alerts on no-stop positions,
+  leverage, risk per trade, daily loss). Never places orders.
 - Stop-loss habit: set from the start, or wait for a losing trade to come back?
 - Net result of the group signals after fees, funding and subscriptions? Tracked or not?
 - Leverage used; biggest single loss.
