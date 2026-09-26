@@ -64,3 +64,14 @@ Researched twice before building. What the evidence says, and what was built fro
 Measured on simulated data (plumbing only; real data decides): on the same signals, zero-fee maker
 execution added 20-50 USDT/year over taker on 500; on a pure random walk the 15m strategy with all
 costs removed is break-even (PF ~1.0): its losses are its costs, not bad luck.
+
+## Round 3: "use everything on the internet; memes, leverage, hacks, anything" (2026-09-26)
+
+| Asked for | Verdict | Evidence | Built |
+|---|---|---|---|
+| 10 financial MCPs | In Claude's registry: LunarCrush, FMP, CoinDesk (not CoinGecko, Dune, CMC, CryptoPanic, altFINs, Perplexity, QuiverQuant, TradingView). MCPs help Claude research in chat; the bot needs direct APIs. FMP/QuiverQuant are equities data | registry search | Funding and Fear & Greed as testable entry filters (`apps/features/market_context.py`, `make tournament-context`) |
+| Leverage | Growth-optimal leverage is mu/sigma^2; beyond it the MEDIAN outcome falls. On BTC-like simulated days (Kelly 1.4x, +73%/yr at 1x) constant 5x left a median of 25 from 500; 10x+ was liquidated in 95-100% of paths | Kelly; 10 Oct 2025: $19B liquidated in a day, 1.6M accounts | `apps/research/leverage.py` (`make leverage` on real candles) |
+| Funding carry | Real and peer-reviewed (~8%/yr mean for BTC), compressed since 2024; a public walk-forward stopped trading in Dec 2024; ADL can break the hedge in a crash | BIS WP 1087 / Management Science 2026; github.com/zwmjj/funding-rate-arb | `apps/research/carry.py` (`make carry`, per year vs cash) |
+| Memecoins | <1% of pump.fun tokens graduate; profitable wallets 30-50% per month through 2025 (more in 2026 after retail left); $10k+ realized puts a wallet in the top ~0.4% | CoinGecko research, Cointelegraph/Dune | Nothing: no backtestable edge without first-block on-chain infrastructure, and rugs are the base case |
+| NostalgiaForInfinity | Most used freqtrade strategy (~2.9k stars); 5m timeframe; users reported repeated liquidated longs on futures during 10 Oct 2025 | GitHub repo and issues | Not yet: needs 5m data support in the adapter |
+| "Hacks, vulnerabilities" | Refused: exploiting a protocol or exchange is theft. The legal version is bug bounties: Immunefi has paid $134M+ | Immunefi | Nothing (a skill, not a bot) |

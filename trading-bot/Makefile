@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context
 
 test:            ## all tests
 	python -m pytest -q
@@ -32,3 +32,12 @@ audit:           ## audit paid signal groups: make audit CSV=context/semnale.csv
 
 review:          ## write context/Learnings.md from the paper log now
 	python -m apps.review.learn
+
+leverage:        ## Monte Carlo on real BTC days: what 1x..50x leverage does to 500 in a year
+	python -m apps.research.leverage --symbol BTC/USDT
+
+carry:           ## funding carry (long spot + short perp) on real funding history, per year vs cash
+	python -m apps.research.carry --symbol BTC/USDT:USDT
+
+tournament-context: ## tournament + funding-crowding and Fear&Greed filters (needs internet)
+	python -m apps.backtest.tournament_run --context

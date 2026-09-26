@@ -15,7 +15,7 @@ from apps.backtest.data import load
 from apps.backtest.tournament import run_tournament
 from apps.strategy.classic import CLASSIC, entries
 from apps.strategy.freqtrade_adapter import Imported, frame_leaks, import_strategy, signal_frame
-from apps.strategy.trend_pullback import StrategyParams
+from apps.strategy.trend_pullback import StrategyParams, indicators
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -27,10 +27,21 @@ def main() -> None:
     ap.add_argument("--repo", default=str(ROOT / "vendor" / "freqtrade-strategies" / "user_data" / "strategies"))
     ap.add_argument("--symbol", default="BTC/USDT")
     ap.add_argument("--equity", type=float, default=500.0)
+    ap.add_argument("--context", action="store_true", help="also test funding-crowding and Fear&Greed filters")
     a = ap.parse_args()
 
     df = load(a.symbol)
     census, candidates = [], {"built_in_trend_pullback": StrategyParams()}
+    for n in (20, 60):                                     # daily time-series momentum filter
+        candidates[f"trend_pullback+mom{n}d"] = StrategyParams(daily_mom_days=n)
+    if a.context:
+        from apps.features.market_context import crowding_ok, fear_greed_ok, fetch_fear_greed
+        from apps.research.carry import fetch_funding
+        base = indicators(df, StrategyParams())["signal"]
+        perp = a.symbol if ":" in a.symbol else f"{a.symbol}:{a.symbol.split('/')[1]}"
+        years = (df.index[-1] - df.index[0]).days / 365 + 0.1
+        candidates["trend_pullback+no_crowding"] = signal_frame(base & crowding_ok(df.index, fetch_funding(perp, years)), df)
+        candidates["trend_pullback+fng<=80"] = signal_frame(base & fear_greed_ok(df.index, fetch_fear_greed()), df)
     for name, fn in CLASSIC.items():                      # Ichimoku, Fibonacci, Supertrend
         leaks, why = frame_leaks(fn, df)
         if leaks:
