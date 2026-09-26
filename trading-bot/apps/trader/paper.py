@@ -83,8 +83,11 @@ def summarize(bot: Runner, base: Path) -> None:
     gross_w, gross_l = sum(e["pnl"] for e in wins), -sum(e["pnl"] for e in exits if e["pnl"] <= 0)
     a = bot.acct
     print("\n== rezumat")
-    print(f"semnale strategie: {len(signals)} · intrări: {sum(d.get('action') == 'enter' for d in signals)}"
-          f" · respinse de policy: {sum(d['policy'] != 'enter' for d in signals)}"
+    fills = sum(d["type"] == "fill" for d in decisions)
+    unfilled = sum(d["type"] == "unfilled" for d in decisions)
+    print(f"semnale strategie: {len(signals)} · intrări: {sum(d.get('action') == 'enter' for d in signals) + fills}"
+          + (f" (limite umplute {fills}, neumplute {unfilled})" if fills or unfilled else "")
+          + f" · respinse de policy: {sum(d['policy'] != 'enter' for d in signals)}"
           f" · respinse de risk: {sum(d.get('risk') not in (None, 'allow') for d in signals)}")
     print(f"tranzacții închise: {len(exits)} · câștigătoare: {len(wins)}"
           f" · profit factor: {gross_w / gross_l if gross_l else float('inf'):.2f}")

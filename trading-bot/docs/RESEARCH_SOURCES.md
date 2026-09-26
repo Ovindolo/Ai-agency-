@@ -47,3 +47,20 @@ A variant of the fund prompt (AgenKit named four times). New items only:
 | `direction` confidence > 0.80 gate | **Refused.** Spot long only; confidence already gates size | |
 | Max drawdown 15% | **Kept ours: 12%** (stricter) | |
 | State snapshot < 400 tokens, causal timestamps, numbers computed in code | **Already there**: ~14 words, closed candles only, parity- and lookahead-tested | |
+
+## Challenge loop: "500$, a family, make it work" (2026-09-26)
+
+Researched twice before building. What the evidence says, and what was built from it:
+
+| Finding | Source | Built |
+|---|---|---|
+| 97% of people who day-traded futures for 300+ days lost money; no evidence of learning | Chague, De-Losso, Giovannetti, *Day Trading for a Living?* (SSRN 3423101) | Nothing to build; it is the base rate the bot must beat |
+| No peer-reviewed evidence that paid Telegram signal groups make money; channels delete failed calls | web reviews, no academic study found | `apps/audit/signals.py`: replays the operator's group signals with fills, stop-first ambiguity, leverage liquidation, fees, funding and subscription |
+| Costs dominate a small account: Binance spot VIP0 0.10% maker/taker, 0.075% with BNB | Binance fee pages (via search) | `make fees` reads the account's real per-symbol fees |
+| BTC/FDUSD, ETH/FDUSD: 0% maker for regular users since 2024-04-25, kept in the 2026-01-15 update; taker standard | Binance announcements (via search) | Maker entries (post-only limit, 1 bar, 2 bps through-fill rule) and maker targets, exact backtest/runner parity |
+| FDUSD depegged to $0.87 on 2025-04-02 | CoinDesk, BeInCrypto | Warning in `make fees`; only hold FDUSD while trading |
+| Time-series momentum on DAILY data (20-65 days) is the best-documented crypto effect; benefit is mainly lower drawdowns, often lower return than buy-and-hold after costs | Le & Ruthbah (Monash / SSRN 4551518); Rozario et al. (arXiv 2009.12155) | `daily_mom_days` filter for the 15m strategy; `apps/strategy/daily_trend.py` core vs buy-and-hold vs weekly DCA |
+
+Measured on simulated data (plumbing only; real data decides): on the same signals, zero-fee maker
+execution added 20-50 USDT/year over taker on 500; on a pure random walk the 15m strategy with all
+costs removed is break-even (PF ~1.0): its losses are its costs, not bad luck.
