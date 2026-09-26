@@ -18,7 +18,8 @@ from apps.common.config import PolicyThresholds
 from apps.features.snapshot import build_snapshot
 from apps.jev.client import JevResult
 from apps.policy.engine import compose_entry
-from apps.risk.engine import AccountState, Action, Candidate, Position, RiskLimits, evaluate_entry, manage_position, stoploss_guard
+from apps.risk.engine import (AccountState, Action, Candidate, Position, RiskLimits, evaluate_entry, kelly_mult,
+                              manage_position, r_multiple, stoploss_guard)
 from apps.strategy.trend_pullback import StrategyParams, indicators, row_to_signal
 
 WINDOW = 1000          # bars of history per snapshot; the paper runner fetches the same amount
@@ -173,6 +174,7 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
     pos_meta: dict = {}
     cooldown_until = -1
     stop_times: list[datetime] = []
+    r_hist: list[float] = []
     st = AccountState(start_equity, start_equity, start_equity, start_equity, start_equity)
     equity_points: list[tuple[datetime, float]] = []
     day, week = None, None
@@ -205,6 +207,7 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
                 rep.trades.append(Trade(symbol, pos.opened_at, t, pos.entry, exit_px, pos.stake_usd,
                                         pos_meta["entry_fee"] + exit_fee, pnl, why, pos_meta["mult"], pos_meta["fb"]))
                 st.realized_pnl_total += pnl
+                r_hist.append(r_multiple(pnl, pos.stake_usd, pos.entry, pos.initial_stop))
                 if pnl <= 0:
                     cooldown_until = i + limits.cooldown_bars_after_loss
                     if why == "stop":
@@ -244,7 +247,7 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
 
         fill = o[i + 1] * (1 + slip)                   # next bar open
         cand = Candidate(symbol, fill, sig["stop"], sig["take"], spread_bps=1.0, data_age_sec=0)
-        v = evaluate_entry(st, limits, cand, idx[i + 1].to_pydatetime(), risk_mult=dec.risk_mult)
+        v = evaluate_entry(st, limits, cand, idx[i + 1].to_pydatetime(), risk_mult=dec.risk_mult * kelly_mult(r_hist, limits))
         if v.action is not Action.ALLOW:
             rep.vetoed_by_risk += 1
             continue

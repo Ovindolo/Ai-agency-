@@ -50,6 +50,8 @@ class RiskLimits:
     stoploss_guard_pause_min: int = 360
     correlation_max: float = 0.70
     correlated_risk_mult: float = 0.5
+    kelly_min_trades: int = 30
+    kelly_negative_mult: float = 0.5
 
     @classmethod
     def load(cls) -> "RiskLimits":
@@ -249,6 +251,33 @@ def correlation_mult(max_corr_with_open: float | None, limits: RiskLimits) -> fl
     if max_corr_with_open is None or max_corr_with_open != max_corr_with_open:     # none open / NaN
         return 1.0
     return limits.correlated_risk_mult if max_corr_with_open > limits.correlation_max else 1.0
+
+
+def r_multiple(pnl: float, stake_usd: float, entry: float, initial_stop: float) -> float:
+    """Result in units of the risk taken: -1R = lost what the stop allowed, +2R = won twice that."""
+    risk_usd = stake_usd * (entry - initial_stop) / entry
+    return pnl / risk_usd if risk_usd > 0 else 0.0
+
+
+def realized_kelly(r_multiples: list[float]) -> float | None:
+    """Kelly fraction from OUR closed trades (win rate and average win/loss in R), not from any model's
+    probability. None if there is no win or no loss yet."""
+    wins = [r for r in r_multiples if r > 0]
+    losses = [-r for r in r_multiples if r <= 0]
+    if not wins or not losses or sum(losses) == 0:
+        return None
+    p = len(wins) / len(r_multiples)
+    b = (sum(wins) / len(wins)) / (sum(losses) / len(losses))
+    return p - (1 - p) / b
+
+
+def kelly_mult(r_multiples: list[float], limits: RiskLimits) -> float:
+    """Kelly used only as a brake. With enough trades and a measured edge <= 0, size is cut.
+    A positive Kelly never raises size above the hard limits (quarter-Kelly of a small sample is noise)."""
+    if len(r_multiples) < limits.kelly_min_trades:
+        return 1.0
+    k = realized_kelly(r_multiples)
+    return limits.kelly_negative_mult if k is not None and k <= 0 else 1.0
 
 
 # ---------------------------------------------------------------- open-position management

@@ -25,8 +25,10 @@ from apps.features.words import state_text
 from apps.jev.client import JevClient
 from apps.policy.engine import compose_entry, compose_exit
 from apps.risk.engine import (AccountState, Action, Candidate, Position, RiskLimits, circuit_breakers,
-                              correlation_mult, evaluate_entry, manual_kill, stoploss_guard, tighten_only)
+                              correlation_mult, evaluate_entry, kelly_mult, manual_kill, r_multiple,
+                              stoploss_guard, tighten_only)
 from apps.strategy.trend_pullback import StrategyParams, indicators, row_to_signal
+from apps.review import learn
 from apps.trader.notify import Notifier
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,6 +59,7 @@ class Runner:
                  base: Path = ROOT, starting_equity: float = 500.0, now: datetime | None = None):
         self.src, self.symbols, self.jev, self.tg = source, symbols, jev, notifier
         self.limits, self.policy, self.params = RiskLimits.load(), PolicyThresholds.load(), StrategyParams()
+        self.base = base
         self.data, self.logs, self.ctx = base / "data", base / "logs", base / "context"
         for d in (self.data, self.logs, self.ctx):
             d.mkdir(parents=True, exist_ok=True)
@@ -78,11 +81,13 @@ class Runner:
             self.day, self.week, self.trades = s["day"], s["week"], s["trades"]
             self.pending = s.get("pending", [])
             self.stop_times = [datetime.fromisoformat(t) for t in s.get("stop_times", [])]
+            self.r_hist = s.get("r_hist", [])
         else:
             self.cash = eq
             self.acct = AccountState(eq, eq, eq, eq, eq)
             self.positions, self.meta, self.cooldown, self.trades, self.pending = {}, {}, {}, 0, []
             self.stop_times = []
+            self.r_hist = []
             self.day, self.week = now.date().isoformat(), list(now.isocalendar()[:2])
             self.tg.send(f"🟢 Bot pornit în PAPER. Capital virtual: {eq:.2f} USDT. Simboluri: {', '.join(self.symbols)}")
 
@@ -95,6 +100,7 @@ class Runner:
             "positions": {k: {**asdict(p), "opened_at": p.opened_at.isoformat()} for k, p in self.positions.items()},
             "meta": self.meta, "cooldown": {k: v.isoformat() for k, v in self.cooldown.items()},
             "pending": self.pending, "stop_times": [t.isoformat() for t in self.stop_times[-20:]],
+            "r_hist": self.r_hist,
             "jev_last": self.jev.last.as_log() if self.jev.last else None,
         }, indent=1, default=str))
 
@@ -206,6 +212,8 @@ class Runner:
         self.cash += proceeds - fee_out
         self.acct.realized_pnl_total += pnl
         self.trades += 1
+        r = r_multiple(pnl, pos.stake_usd, pos.entry, pos.initial_stop)
+        self.r_hist.append(r)
         if pnl <= 0:
             self.cooldown[sym] = now + timedelta(minutes=15 * self.limits.cooldown_bars_after_loss)
             if why == "stop":
@@ -222,7 +230,10 @@ class Runner:
         level = {"stop": pos.stop, "target": pos.take}.get(why, float(bar["close"]))
         self._log({"type": "exit", "t": now, "symbol": sym, "decision_id": m.get("decision_id"), "price": px,
                    "expected_price": level, "slippage_bps": (level / px - 1) * 1e4 if px else None,
-                   "reason": why, "pnl": pnl, **self.versions})
+                   "reason": why, "pnl": pnl, "r": r, **self.versions})
+        if self.trades % 10 == 0 or self.trades % 25 == 0:   # review loop: measure, suggest, never change anything
+            rv, _ = learn.write(self.base, now, self.limits)
+            self.tg.send(learn.telegram_summary(rv))
 
     def _consider_entry(self, sym: str, frames: dict, now: datetime) -> None:
         df = frames[sym]
@@ -254,7 +265,8 @@ class Runner:
             self.pending.append({"id": rec["id"], "symbol": sym, "px": book["mid"]})
             return
         corr = max((c for c in (hourly_corr(df, frames[o]) for o in self.positions) if c is not None), default=None)
-        mult = dec.risk_mult * correlation_mult(corr, self.limits)
+        km = kelly_mult(self.r_hist, self.limits)
+        mult = dec.risk_mult * correlation_mult(corr, self.limits) * km
         fill = book["ask"] * (1 + self.limits.slippage_pct)
         v = evaluate_entry(self.acct, self.limits, Candidate(sym, fill, sig["stop"], sig["take"], book["spread_bps"],
                                                              data_age), now, risk_mult=mult)
@@ -273,7 +285,8 @@ class Runner:
         self.pending.append({"id": rec["id"], "symbol": sym, "px": fill})
         size_note = ""
         if mult < 1:
-            why_small = dec.fallback if dec.risk_mult < 1 else f"corelat {corr:.2f} cu o poziție deschisă"
+            why_small = (dec.fallback if dec.risk_mult < 1 else "fără avantaj măsurat după "
+                         f"{len(self.r_hist)} tranzacții" if km < 1 else f"corelat {corr:.2f} cu o poziție deschisă")
             size_note = f" · mărime ×{mult:g} ({why_small})"
         self.tg.send(f"🟦 INTRARE {sym} @ {fill:.2f} · {v.stake_usd:.2f} USDT · stop {v.stop:.2f} (−{v.stop_pct:.1%}) · "
                      f"target {v.take:.2f} · R:R {v.reward_risk}{size_note} · Jev: {jev.status}")

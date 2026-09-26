@@ -33,3 +33,17 @@
 position cap always bound first, so "reduce size" did nothing. Fixed: the multiplier applies after the caps
 (`test_reduce_size_bites_even_when_cap_binds`). Consequence worth knowing: real risk per trade is about
 20% x stop = 0.3-0.5% of equity, not the nominal 1%.
+
+## From the "elite quant architect" prompt (2026-09-26)
+
+A variant of the fund prompt (AgenKit named four times). New items only:
+
+| Idea | Verdict | Where |
+|---|---|---|
+| Fractional Kelly "from Jev's calibrated probability", capped at quarter Kelly | **Taken, inverted.** Kelly is computed from OUR closed trades (win rate, avg win/loss in R), never from a model probability that has not been shown to be calibrated. It only brakes: after 30 trades with Kelly <= 0, size halves. A positive Kelly never raises size (quarter Kelly of our stats would be ~3-4% risk per trade, far above the hard limit) | `realized_kelly`, `kelly_mult` in `apps/risk/engine.py`, both engines |
+| Nightly review, Brier score | **Taken.** Every 10 trades (big at 25): win rate, PF, R per trade, exits by reason, Jev calibration vs base rate (skill), suggestions. Nothing applied automatically | `apps/review/learn.py` -> `context/Learnings.md` + Telegram |
+| "Rewrite the Jev schema and ship it before the next open" automatically | **Refused.** Changes go through replay + operator approval; one night of data is not evidence | |
+| Jev `risk_state` (safe/near_limit/reduce) | **Refused.** Drawdown and daily loss are known exactly in code; asking a model to guess them adds error | |
+| `direction` confidence > 0.80 gate | **Refused.** Spot long only; confidence already gates size | |
+| Max drawdown 15% | **Kept ours: 12%** (stricter) | |
+| State snapshot < 400 tokens, causal timestamps, numbers computed in code | **Already there**: ~14 words, closed candles only, parity- and lookahead-tested | |
