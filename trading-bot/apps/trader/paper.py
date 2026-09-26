@@ -40,13 +40,15 @@ def simulated_market(days: int, seed: int, start: float = 60_000.0) -> pd.DataFr
         i += length
     vol = 0.0025 * np.exp(0.3 * rng.standard_normal(n)).clip(0.5, 2.0)
     close = start * np.exp(np.cumsum(drift + vol * rng.standard_normal(n)))
-    open_ = np.concatenate([[start], close[:-1]])
-    wick = np.abs(vol * rng.standard_normal(n)) * close
+    open_ = np.concatenate([[start], close[:-1]]) * (1 + 0.0002 * rng.standard_normal(n))    # small open gaps
+    body_lo, body_hi = np.minimum(open_, close), np.maximum(open_, close)
+    # wicks: often absent on one side (bars that open and never look back), as on real 15m charts
+    lower = np.abs(vol * rng.standard_normal(n)) * close * 0.5 * (rng.random(n) > 0.3)
+    upper = np.abs(vol * rng.standard_normal(n)) * close * 0.5 * (rng.random(n) > 0.3)
     volume = 1000 * np.exp(0.4 * rng.standard_normal(n))
     idx = pd.date_range(pd.Timestamp.now(tz="UTC").floor("D") - pd.Timedelta(minutes=15 * n), periods=n, freq="15min")
-    return pd.DataFrame({"open": open_, "high": np.maximum(open_, close) + wick / 2,
-                         "low": np.minimum(open_, close) - wick / 2, "close": close, "volume": volume,
-                         "taker_buy_volume": volume * 0.5}, index=idx)
+    return pd.DataFrame({"open": open_, "high": body_hi + upper, "low": body_lo - lower, "close": close,
+                         "volume": volume, "taker_buy_volume": volume * 0.5}, index=idx)
 
 
 def replay(args) -> Path:

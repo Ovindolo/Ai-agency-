@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas as pd
 
 from apps.backtest.data import validate_15m
+from apps.features.snapshot import resample_1d
 
 BARS = 1000
 
@@ -22,6 +23,12 @@ class CcxtSource:
         closed = df[df.index + pd.Timedelta("15min") <= pd.Timestamp(now)]     # drop the open candle
         return validate_15m(closed)
 
+    def daily(self, symbol: str, now: datetime, days: int = 200) -> pd.DataFrame:
+        rows = self.ex.fetch_ohlcv(symbol, "1d", limit=days + 1)
+        df = pd.DataFrame(rows, columns=["ts", "open", "high", "low", "close", "volume"])
+        df.index = pd.DatetimeIndex(pd.to_datetime(df.pop("ts"), unit="ms", utc=True))
+        return df[df.index + pd.Timedelta("1D") <= pd.Timestamp(now)]            # complete days only
+
     def book(self, symbol: str, now: datetime | None = None) -> dict:
         ob = self.ex.fetch_order_book(symbol, limit=5)
         bid, ask = ob["bids"][0][0], ob["asks"][0][0]
@@ -33,8 +40,9 @@ class CcxtSource:
 class ReplaySource:
     """Serves history as if it were live: at time t only candles closed by t exist; price = next open."""
 
-    def __init__(self, frames: dict[str, pd.DataFrame]):
+    def __init__(self, frames: dict[str, pd.DataFrame], half_spread_bps: float = 0.5):
         self.frames = {s: validate_15m(df) for s, df in frames.items()}
+        self.half = half_spread_bps / 1e4
 
     def times(self, symbol: str, start: int, end: int | None = None) -> list[datetime]:
         idx = self.frames[symbol].index
@@ -45,8 +53,13 @@ class ReplaySource:
         closed = df[df.index + pd.Timedelta("15min") <= pd.Timestamp(now)]
         return closed.iloc[-BARS:]
 
+    def daily(self, symbol: str, now: datetime) -> pd.DataFrame:
+        df = self.frames[symbol]
+        return resample_1d(df[df.index + pd.Timedelta("15min") <= pd.Timestamp(now)])
+
     def book(self, symbol: str, now: datetime | None = None) -> dict:
         df = self.frames[symbol]
         nxt = df[df.index >= pd.Timestamp(now)] if now is not None else df.iloc[-1:]
         px = float(nxt["open"].iloc[0]) if len(nxt) else float(df["close"].iloc[-1])
-        return {"mid": px, "bid": px * 0.99995, "ask": px * 1.00005, "spread_bps": 1.0, "depth_usd_l1": 1e6}
+        return {"mid": px, "bid": px * (1 - self.half), "ask": px * (1 + self.half), "spread_bps": 2e4 * self.half,
+                "depth_usd_l1": 1e6}

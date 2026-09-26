@@ -5,6 +5,7 @@ import pytest
 
 from apps.backtest.run import recorded_jev
 from apps.jev.client import FakeBackend, JevClient, parse_answers
+from apps.risk.engine import RiskLimits
 from apps.strategy.trend_pullback import StrategyParams, indicators
 from apps.trader.notify import Notifier
 from apps.trader.runner import BAR, Runner
@@ -176,23 +177,59 @@ def test_decisions_carry_versions_and_execution_quality(tmp_path, market):
     assert 8 < rec["slippage_bps"] < 10                       # half-spread + 8 bps assumed slippage
 
 
-def test_paper_runner_matches_backtest(tmp_path):
+PARITY_MODES = {
+    "taker": RiskLimits(),
+    "maker_entry_and_target": RiskLimits(entry_mode="maker", target_mode="maker"),
+    "maker_zero_fee": RiskLimits(entry_mode="maker", target_mode="maker", maker_fee_pct=0.0),
+    "daily_momentum_filter": RiskLimits(),
+}
+
+
+@pytest.mark.parametrize("mode", sorted(PARITY_MODES))
+def test_paper_runner_matches_backtest(tmp_path, mode):
     """Nautilus-style parity: the runner and the backtest must take the same trades on the same data,
-    otherwise the backtest is describing a different bot."""
+    otherwise the backtest is describing a different bot. Holds for every execution mode."""
     from apps.backtest.engine import run_backtest
     from apps.trader.paper import WARMUP, simulated_market
+    limits = PARITY_MODES[mode]
+    params = StrategyParams(daily_mom_days=3) if mode == "daily_momentum_filter" else StrategyParams()
     df = simulated_market(10, 11)
-    rep = run_backtest(df.iloc[WARMUP - 220:], SYM, label="parity")
-    src = ReplaySource({SYM: df})
+    rep = run_backtest(df, SYM, label="parity", limits=limits, params=params, start_bar=WARMUP)
+    src = ReplaySource({SYM: df}, half_spread_bps=0.0)          # the backtest has no spread; compare like with like
     times = src.times(SYM, WARMUP)
-    bot, _ = make(tmp_path, df, times[0])
-    bot.src = src
+    bot = Runner(src, [SYM], jev=JevClient(enabled=False, log_path=None), notifier=Notifier("", "", echo=False),
+                 base=tmp_path, now=times[0], limits=limits, params=params)
     for t in times[:-1]:
         bot.step(t)
-    exits = [r for r in decisions(tmp_path) if r["type"] == "exit"]
-    enters = [r for r in decisions(tmp_path) if r["type"] == "decision" and r.get("action") == "enter"]
+    recs = decisions(tmp_path)
+    exits = [r for r in recs if r["type"] == "exit"]
     assert len(rep.trades) >= 3 and len(exits) == len(rep.trades)
-    for tr, e, x in zip(rep.trades, enters, exits):
-        assert pd.Timestamp(e["t"]) == pd.Timestamp(tr.entry_time)
+    assert sum(r["type"] == "unfilled" for r in recs) == rep.unfilled
+    for tr, x in zip(rep.trades, exits):
+        assert pd.Timestamp(x["t"]) == pd.Timestamp(tr.exit_time) + BAR     # runner stamps the bar close
         assert x["reason"] == tr.reason
-        assert x["pnl"] == pytest.approx(tr.pnl, abs=0.02)   # only difference: runner pays a simulated half-spread
+        assert x["pnl"] == pytest.approx(tr.pnl, abs=1e-6)
+
+
+def test_maker_fill_needs_price_to_trade_through():
+    from apps.backtest.engine import maker_filled
+    assert maker_filled(100.0, 99.97)                      # traded 3 bps through: filled
+    assert not maker_filled(100.0, 99.99)                  # 1 bp through: others were ahead in the queue
+    assert not maker_filled(100.0, 100.0)
+
+
+def test_maker_costs():
+    m = RiskLimits(entry_mode="maker", maker_fee_pct=0.0)
+    assert m.round_trip_cost_pct == pytest.approx(0.001 + 0.0008)            # exit still priced as a taker stop
+    assert RiskLimits().round_trip_cost_pct == pytest.approx(2 * 0.0018)
+    assert RiskLimits(target_mode="maker", maker_fee_pct=0.0).exit_fee_pct("target") == 0.0
+    assert RiskLimits(target_mode="maker", maker_fee_pct=0.0).exit_fee_pct("stop") == 0.001
+
+
+def test_real_fees_file_is_applied_worst_case(tmp_path, market):
+    df, sig_times = market
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "fees.json").write_text(json.dumps({SYM: {"maker": 0.0, "taker": 0.00075}}))
+    bot, tg = make(tmp_path, df, sig_times[0])
+    assert bot.limits.maker_fee_pct == 0.0 and bot.limits.taker_fee_pct == 0.00075
+    assert "taxe reale" in tg.sent[0]

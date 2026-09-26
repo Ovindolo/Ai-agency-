@@ -86,6 +86,22 @@ def resample_1h(df15: pd.DataFrame) -> pd.DataFrame:
     return h[counts.reindex(h.index) == 4]
 
 
+def resample_1d(df15: pd.DataFrame) -> pd.DataFrame:
+    """Daily candles (UTC) built only from complete days of 15m data."""
+    d = df15.resample("1D", label="left", closed="left").agg(
+        {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}).dropna()
+    counts = df15["close"].resample("1D", label="left", closed="left").count()
+    return d[counts.reindex(d.index) == 96]
+
+
+def daily_momentum_on_15m(index: pd.DatetimeIndex, daily: pd.DataFrame, days: int) -> pd.Series:
+    """True where the last COMPLETE day closed above its close `days` days earlier (time-series momentum).
+    A 15m bar starting at T only knows days that ended by T+15m."""
+    up = daily["close"] > daily["close"].shift(days)
+    key = (index + pd.Timedelta("15min")).floor("1D") - pd.Timedelta("1D")
+    return pd.Series(up.reindex(key).fillna(False).to_numpy(dtype=bool), index=index)
+
+
 def build_snapshot(
     symbol: str,
     df15: pd.DataFrame,

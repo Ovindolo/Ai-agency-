@@ -39,6 +39,10 @@ class RiskLimits:
     time_stop_minutes: int = 2880
     min_edge_fee_mult: float = 2.5
     taker_fee_pct: float = 0.001
+    maker_fee_pct: float = 0.001
+    entry_mode: str = "taker"       # taker: pay the ask now | maker: post-only limit at the signal close, 1 bar, no chasing
+    target_mode: str = "taker"      # maker: target rests as a limit sell (fills only if price trades THROUGH it)
+    maker_through_bps: float = 2.0  # a resting order counts as filled only if price trades this far through it (queue proxy)
     slippage_pct: float = 0.0008
     max_spread_bps: float = 10.0
     max_data_age_sec: int = 120
@@ -61,8 +65,16 @@ class RiskLimits:
         return min(max(value, self.risk_per_trade_min_pct), self.risk_per_trade_max_pct)
 
     @property
+    def entry_cost_pct(self) -> float:
+        return self.maker_fee_pct if self.entry_mode == "maker" else self.taker_fee_pct + self.slippage_pct
+
+    @property
     def round_trip_cost_pct(self) -> float:
-        return 2 * (self.taker_fee_pct + self.slippage_pct)
+        # exit priced as the worst case (stop = taker + slippage) even when targets rest as maker
+        return self.entry_cost_pct + self.taker_fee_pct + self.slippage_pct
+
+    def exit_fee_pct(self, reason: str) -> float:
+        return self.maker_fee_pct if reason == "target" and self.target_mode == "maker" else self.taker_fee_pct
 
 
 @dataclass

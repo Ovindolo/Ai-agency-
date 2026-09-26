@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from apps.backtest.engine import bar_exit
+from apps.backtest.engine import bar_exit, maker_filled
 from apps.common.config import PolicyThresholds
 from apps.features.snapshot import build_snapshot
 from apps.features.words import state_text
@@ -56,10 +56,15 @@ def hourly_corr(a, b, hours: int = 168) -> float | None:
 
 class Runner:
     def __init__(self, source, symbols: list[str], *, jev: JevClient, notifier: Notifier,
-                 base: Path = ROOT, starting_equity: float = 500.0, now: datetime | None = None):
+                 base: Path = ROOT, starting_equity: float = 500.0, now: datetime | None = None,
+                 limits: RiskLimits | None = None, params: StrategyParams | None = None):
         self.src, self.symbols, self.jev, self.tg = source, symbols, jev, notifier
-        self.limits, self.policy, self.params = RiskLimits.load(), PolicyThresholds.load(), StrategyParams()
+        self.limits, self.policy, self.params = limits or RiskLimits.load(), PolicyThresholds.load(), params or StrategyParams()
         self.base = base
+        self.fee_note = "taxe din config"
+        if limits is None:                              # real account fees if `make fees` ran
+            from apps.trader import fees
+            self.limits, self.fee_note = fees.apply(self.limits, symbols, base / "data" / "fees.json")
         self.data, self.logs, self.ctx = base / "data", base / "logs", base / "context"
         for d in (self.data, self.logs, self.ctx):
             d.mkdir(parents=True, exist_ok=True)
@@ -82,14 +87,17 @@ class Runner:
             self.pending = s.get("pending", [])
             self.stop_times = [datetime.fromisoformat(t) for t in s.get("stop_times", [])]
             self.r_hist = s.get("r_hist", [])
+            self.orders = s.get("orders", {})
         else:
             self.cash = eq
             self.acct = AccountState(eq, eq, eq, eq, eq)
             self.positions, self.meta, self.cooldown, self.trades, self.pending = {}, {}, {}, 0, []
             self.stop_times = []
             self.r_hist = []
+            self.orders = {}
             self.day, self.week = now.date().isoformat(), list(now.isocalendar()[:2])
-            self.tg.send(f"🟢 Bot pornit în PAPER. Capital virtual: {eq:.2f} USDT. Simboluri: {', '.join(self.symbols)}")
+            self.tg.send(f"🟢 Bot pornit în PAPER. Capital virtual: {eq:.2f} USDT. Simboluri: {', '.join(self.symbols)} · {self.fee_note} · "
+                        f"intrări {self.limits.entry_mode}")
 
     def _save(self) -> None:
         a = asdict(self.acct)
@@ -100,7 +108,7 @@ class Runner:
             "positions": {k: {**asdict(p), "opened_at": p.opened_at.isoformat()} for k, p in self.positions.items()},
             "meta": self.meta, "cooldown": {k: v.isoformat() for k, v in self.cooldown.items()},
             "pending": self.pending, "stop_times": [t.isoformat() for t in self.stop_times[-20:]],
-            "r_hist": self.r_hist,
+            "r_hist": self.r_hist, "orders": self.orders,
             "jev_last": self.jev.last.as_log() if self.jev.last else None,
         }, indent=1, default=str))
 
@@ -128,11 +136,13 @@ class Runner:
         self._resolve_pending(prices)
         self._mark(prices)
 
+        fresh = self._fill_orders(frames, now)
+        exited: set[str] = set()
         for sym in self.symbols:
             df = frames[sym]
             bar = df.iloc[-1]
-            if sym in self.positions:
-                self._manage(sym, df, bar, now)
+            if sym in self.positions and self._manage(sym, df, bar, now, fresh=sym in fresh):
+                exited.add(sym)
 
         breaker = circuit_breakers(self.acct, self.limits, now)
         if breaker and breaker.action is Action.KILL and not ctl.get("kill_notified"):
@@ -149,7 +159,7 @@ class Runner:
         paused = paused or guard is not None
 
         for sym in self.symbols:
-            if sym in self.positions or paused:
+            if sym in self.positions or sym in exited or paused:   # no re-entry on the exit bar (as in backtest)
                 continue
             if sym in self.cooldown and now < self.cooldown[sym]:
                 continue
@@ -170,11 +180,12 @@ class Runner:
 
     def _mark(self, prices: dict[str, float]) -> None:
         inv = sum(p.stake_usd / p.entry * prices[s] for s, p in self.positions.items())
-        self.acct.inventory_usd = inv
+        reserved = sum(o["stake"] for o in self.orders.values())      # resting orders count against the limits
+        self.acct.inventory_usd = inv + reserved
         self.acct.equity = self.cash + inv
         self.acct.peak_equity = max(self.acct.peak_equity, self.acct.equity)
-        self.acct.open_positions = len(self.positions)
-        self.acct.open_symbols = frozenset(self.positions)
+        self.acct.open_positions = len(self.positions) + len(self.orders)
+        self.acct.open_symbols = frozenset(self.positions) | frozenset(self.orders)
 
     def _resolve_pending(self, prices: dict[str, float]) -> None:
         """Calibration data: what the price did 15m after each logged decision."""
@@ -185,10 +196,36 @@ class Runner:
                            "ret_15m": px / p["px"] - 1})
         self.pending = []
 
-    def _manage(self, sym: str, df, bar, now: datetime) -> None:
+    def _fill_orders(self, frames: dict, now: datetime) -> set[str]:
+        """Maker orders placed at the previous close: filled only if the bar that just closed traded below
+        the limit. Otherwise cancelled; the bot never chases price."""
+        filled = set()
+        for sym, o in list(self.orders.items()):
+            del self.orders[sym]
+            bar = frames[sym].iloc[-1]
+            placed = datetime.fromisoformat(o["placed"])
+            if frames[sym].index[-1].to_pydatetime() != placed or not maker_filled(o["limit"], float(bar["low"]),
+                                                                                           self.limits.maker_through_bps):
+                self._log({"type": "unfilled", "t": now, "symbol": sym, "decision_id": o["decision_id"], "limit": o["limit"]})
+                self.tg.send(f"⌛ {sym}: limita {o['limit']:.2f} nu s-a umplut → anulat (nu urmăresc prețul)")
+                continue
+            fee_in = o["stake"] * self.limits.maker_fee_pct
+            self.cash -= o["stake"] + fee_in
+            self.positions[sym] = Position(sym, o["limit"], o["stop"], o["take"], o["stake"], placed)
+            self.meta[sym] = {"fee_in": fee_in, "fallback": o["fallback"], "decision_id": o["decision_id"]}
+            self._log({"type": "fill", "t": now, "symbol": sym, "decision_id": o["decision_id"], "price": o["limit"],
+                       "fee": fee_in, "liquidity": "maker"})
+            self.tg.send(f"🟦 INTRARE {sym} @ {o['limit']:.2f} (limită, maker) · {o['stake']:.2f} USDT · "
+                         f"stop {o['stop']:.2f} · target {o['take']:.2f}")
+            filled.add(sym)
+        return filled
+
+    def _manage(self, sym: str, df, bar, now: datetime, fresh: bool = False) -> bool:
+        """Returns True if the position was closed."""
         pos = self.positions[sym]
         stop_before = pos.stop
-        px, why = bar_exit(pos, bar["open"], bar["high"], bar["low"], bar["close"], now, self.limits)
+        o, h = (pos.entry, pos.entry) if fresh else (bar["open"], bar["high"])   # bar part before our fill doesn't count
+        px, why = bar_exit(pos, o, h, bar["low"], bar["close"], now, self.limits)
         if px is None and stop_before < pos.entry <= pos.stop:      # announce once, not every trailing tick
             self.tg.send(f"🔒 {sym}: trailing stop la {pos.stop:.2f}, peste intrare → tranzacția nu mai poate pierde")
         if px is None:
@@ -204,10 +241,10 @@ class Runner:
                     self.positions[sym] = new
                     self.tg.send(f"🔒 {sym}: stop ridicat la {new.stop:.2f} (Jev: {advice.action})")
         if px is None:
-            return
+            return False
         qty = pos.stake_usd / pos.entry
         proceeds = qty * px
-        fee_out = proceeds * self.limits.taker_fee_pct
+        fee_out = proceeds * self.limits.exit_fee_pct(why)
         pnl = proceeds - fee_out - pos.stake_usd - self.meta[sym]["fee_in"]
         self.cash += proceeds - fee_out
         self.acct.realized_pnl_total += pnl
@@ -234,10 +271,12 @@ class Runner:
         if self.trades % 10 == 0 or self.trades % 25 == 0:   # review loop: measure, suggest, never change anything
             rv, _ = learn.write(self.base, now, self.limits)
             self.tg.send(learn.telegram_summary(rv))
+        return True
 
     def _consider_entry(self, sym: str, frames: dict, now: datetime) -> None:
         df = frames[sym]
-        row = indicators(df, self.params).iloc[-1]
+        daily = self.src.daily(sym, now) if self.params.daily_mom_days else None
+        row = indicators(df, self.params, daily=daily).iloc[-1]
         if not bool(row["signal"]):
             return
         sig = row_to_signal(row, self.params)
@@ -267,7 +306,8 @@ class Runner:
         corr = max((c for c in (hourly_corr(df, frames[o]) for o in self.positions) if c is not None), default=None)
         km = kelly_mult(self.r_hist, self.limits)
         mult = dec.risk_mult * correlation_mult(corr, self.limits) * km
-        fill = book["ask"] * (1 + self.limits.slippage_pct)
+        maker = self.limits.entry_mode == "maker"
+        fill = float(df["close"].iloc[-1]) if maker else book["ask"] * (1 + self.limits.slippage_pct)
         v = evaluate_entry(self.acct, self.limits, Candidate(sym, fill, sig["stop"], sig["take"], book["spread_bps"],
                                                              data_age), now, risk_mult=mult)
         rec.update(risk=v.action.value, risk_reasons=v.reasons, stake=v.stake_usd, corr_with_open=corr,
@@ -275,6 +315,15 @@ class Runner:
         if not v.allowed:
             rec["action"] = "skip"
             self._log(rec)
+            return
+        if maker:
+            self.orders[sym] = {"limit": fill, "stop": v.stop, "take": v.take, "stake": v.stake_usd, "placed": now.isoformat(),
+                                "decision_id": rec["id"], "fallback": dec.fallback}
+            rec["action"] = "order"
+            self._log(rec)
+            self.pending.append({"id": rec["id"], "symbol": sym, "px": book["mid"]})
+            self.tg.send(f"🟨 ORDIN LIMITĂ {sym} @ {fill:.2f} · {v.stake_usd:.2f} USDT · valabil 15 min · stop {v.stop:.2f} · "
+                         f"target {v.take:.2f} · R:R {v.reward_risk}")
             return
         fee_in = v.stake_usd * self.limits.taker_fee_pct
         self.cash -= v.stake_usd + fee_in

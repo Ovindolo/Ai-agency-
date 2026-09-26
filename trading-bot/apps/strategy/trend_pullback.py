@@ -16,7 +16,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from apps.features.snapshot import adx, atr, ema, resample_1h
+from apps.features.snapshot import daily_momentum_on_15m, resample_1d, adx, atr, ema, resample_1h
 
 
 @dataclass(frozen=True)
@@ -30,6 +30,8 @@ class StrategyParams:
     target_rr: float = 2.0
     volume_mult: float = 1.0          # 15m volume >= avg(previous 20) * this
     min_hours: int = 55               # EMA50 on 1h needs history
+    daily_mom_days: int = 0           # 0 = off. N>0: only trade when the last complete day closed above the
+                                      # close N days before (time-series momentum; 20-65 days in the literature)
 
 
 def exit_frame(df15: pd.DataFrame, p: StrategyParams = StrategyParams()) -> pd.DataFrame:
@@ -55,7 +57,9 @@ def exit_frame(df15: pd.DataFrame, p: StrategyParams = StrategyParams()) -> pd.D
     return out
 
 
-def indicators(df15: pd.DataFrame, p: StrategyParams = StrategyParams()) -> pd.DataFrame:
+def indicators(df15: pd.DataFrame, p: StrategyParams = StrategyParams(), daily: pd.DataFrame | None = None) -> pd.DataFrame:
+    """daily: complete daily candles (the live runner fetches them; the 15m window is only ~10 days).
+    Defaults to resampling df15, which is exact when df15 holds the full history (backtest)."""
     h1 = resample_1h(df15)
     e20h, e50h = ema(h1["close"], 20), ema(h1["close"], 50)
     hf = pd.DataFrame({
@@ -79,6 +83,8 @@ def indicators(df15: pd.DataFrame, p: StrategyParams = StrategyParams()) -> pd.D
     stop_pct = raw_stop.clip(lower=p.stop_min_pct)
     ok = (j["trend_up"].fillna(False).astype(bool) & (j["adx_1h"] >= p.adx_min) & (j["h1_n"] >= p.min_hours)
           & touched & reclaimed & vol_ok & (raw_stop <= p.stop_max_pct))
+    if p.daily_mom_days:
+        ok &= daily_momentum_on_15m(df15.index, daily if daily is not None else resample_1d(df15), p.daily_mom_days)
 
     out = pd.DataFrame(index=df15.index)
     out["signal"] = ok.fillna(False)

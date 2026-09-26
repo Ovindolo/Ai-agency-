@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review
 
 test:            ## all tests
 	python -m pytest -q
@@ -20,3 +20,15 @@ tournament:      ## import community strategies, reject lookahead, in/out-of-sam
 
 live:            ## intentionally locked: no live order path exists yet
 	@echo "LIVE este blocat. Nu există cale de ordine reale; vezi docs/LIVE_CHECKLIST.md." && exit 1
+
+fees:            ## real maker/taker fees of YOUR account (read-only key in .env) -> data/fees.json
+	python -m apps.trader.fees
+
+daily:           ## daily trend core vs buy-and-hold vs weekly DCA, ~6 years of BTC/ETH
+	python -m apps.strategy.daily_trend
+
+audit:           ## audit paid signal groups: make audit CSV=context/semnale.csv FEE=30
+	python -m apps.audit.signals $(CSV) --fetch --fee $(or $(FEE),0)
+
+review:          ## write context/Learnings.md from the paper log now
+	python -m apps.review.learn

@@ -16,7 +16,11 @@ min_reward_risk: 1.8
 trailing_after_r: 1.2
 time_stop_minutes: 2880         # 48h
 min_edge_fee_mult: 2.5          # target move must be >= 2.5x round-trip cost
-taker_fee_pct: 0.001            # Binance VIP0 taker 0.10%
+taker_fee_pct: 0.001            # Binance VIP0 taker 0.10% (0.075% paying fees in BNB)
+maker_fee_pct: 0.001            # VIP0 maker 0.10%; some pairs run 0% maker promotions: set from `make fees`, never guessed
+entry_mode: taker               # taker | maker (post-only limit at the signal close, 1 bar, then cancel)
+target_mode: taker              # taker | maker (target rests as a limit sell)
+maker_through_bps: 2.0          # resting orders fill only if price trades 2 bps THROUGH them (we are not first in the queue)
 slippage_pct: 0.0008            # 8 bps assumed each side
 max_spread_bps: 10.0
 max_data_age_sec: 120

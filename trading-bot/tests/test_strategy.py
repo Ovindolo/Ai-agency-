@@ -51,3 +51,19 @@ def test_live_function_matches_vectorized_last_row():
     for i in ind.index[ind["signal"]][:5]:
         pos = df.index.get_loc(i)
         assert long_signal(df.iloc[: pos + 1]) is not None
+
+
+def test_daily_momentum_filter_is_causal_and_only_removes_signals():
+    from apps.features.snapshot import daily_momentum_on_15m, resample_1d
+    from apps.strategy.freqtrade_adapter import frame_leaks
+    from tests.helpers import synthetic_15m
+    df = synthetic_15m(n=96 * 40, drift=0.0002, vol=0.004, seed=9)
+    base = indicators(df, StrategyParams())["signal"]
+    filt = indicators(df, StrategyParams(daily_mom_days=5))["signal"]
+    assert not (filt & ~base).any()                                   # a filter never adds entries
+    leaks, why = frame_leaks(lambda d: indicators(d, StrategyParams(daily_mom_days=5))[["signal"]].astype(float), df)
+    assert not leaks, why
+    reg = daily_momentum_on_15m(df.index, resample_1d(df), 5)
+    first_day = df.index[0].floor("1D")
+    # the bar starting 23:45 on day 6 closes at midnight: day 6 is complete then, and day 1 is 5 days back
+    assert not reg[df.index < first_day + pd.Timedelta(days=6) - pd.Timedelta("15min")].any()

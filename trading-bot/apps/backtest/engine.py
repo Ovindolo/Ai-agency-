@@ -1,7 +1,8 @@
 """Event backtester for STRATEGY + POLICY + RISK. It does not test whether Jev predicts price.
 
 Honesty rules:
-  * Decisions use bar i (closed). Orders fill at bar i+1 OPEN, with slippage and taker fee.
+  * Decisions use bar i (closed). Taker orders fill at bar i+1 OPEN with slippage and taker fee; maker
+    orders rest at the bar-i close for one bar and fill only if bar i+1 trades below it.
   * If stop and target are both inside one bar, the STOP is assumed to fill first.
   * Every run reports buy-and-hold over the same bars. A strategy that loses to holding is not an edge.
   * Mode B replays RECORDED Jev answers only. Missing answers fall back to rules and are counted.
@@ -33,12 +34,22 @@ _RULES_ONLY_SNAP = _SignalOnly()
 _RULES_ONLY_JEV = JevResult(status="disabled", error="rules-only run")
 
 
+def maker_filled(limit: float, bar_low: float, through_bps: float = 2.0) -> bool:
+    """A resting buy fills only if price trades THROUGH it by a margin. Touching is not enough: we'd be
+    behind everyone already queued at that price."""
+    return bar_low < limit * (1 - through_bps / 1e4)
+
+
 def bar_exit(pos: Position, o: float, h: float, l: float, c: float, t: datetime, limits: RiskLimits) -> tuple[float | None, str]:
-    """Exit price and reason for one bar, or (None, "") to keep holding. Stop wins ties."""
+    """Exit price and reason for one bar, or (None, "") to keep holding. Stop wins ties.
+    On a maker-entry fill bar the caller passes o = h = limit: the part of the bar before our fill can't count."""
     slip = limits.slippage_pct
     if l <= pos.stop:
         return min(o, pos.stop) * (1 - slip), "stop"          # gap below stop fills at the open
-    if h >= pos.take:
+    if limits.target_mode == "maker":
+        if h > pos.take * (1 + limits.maker_through_bps / 1e4):
+            return pos.take, "target"                         # resting limit sell: exact price, no slippage
+    elif h >= pos.take:
         return pos.take * (1 - slip), "target"
     d = manage_position(pos, c, t, limits)
     if d.action == "exit":
@@ -73,6 +84,7 @@ class Report:
     signals: int = 0
     vetoed_by_policy: int = 0
     vetoed_by_risk: int = 0
+    unfilled: int = 0                  # maker orders that price never traded through
     jev_coverage: float | None = None
     hold_return: float = 0.0
     hold_max_dd: float = 0.0
@@ -159,7 +171,8 @@ def _jev_from_record(rec: dict | None) -> JevResult:
 def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLimits | None = None,
                  thresholds: PolicyThresholds | None = None, params: StrategyParams | None = None,
                  start_equity: float = 500.0, jev_records: dict[str, dict] | None = None,
-                 use_jev: bool = False, signal_frame: pd.DataFrame | None = None) -> Report:
+                 use_jev: bool = False, signal_frame: pd.DataFrame | None = None,
+                 start_bar: int | None = None) -> Report:
     """signal_frame: optional precomputed frame with columns signal/entry/stop/take/stop_pct
     (e.g. an imported strategy's entries + our exits). Defaults to the built-in strategy."""
     limits = limits or RiskLimits()
@@ -172,6 +185,7 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
     cash = start_equity
     pos: Position | None = None
     pos_meta: dict = {}
+    order: dict | None = None                     # maker entry waiting for the next bar
     cooldown_until = -1
     stop_times: list[datetime] = []
     r_hist: list[float] = []
@@ -180,10 +194,11 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
     day, week = None, None
     jev_hits = jev_asked = 0
     slip, fee = limits.slippage_pct, limits.taker_fee_pct
+    maker = limits.entry_mode == "maker"
 
     ind = signal_frame if signal_frame is not None else indicators(df15, params)
     sig_flags = ind["signal"].to_numpy()
-    warmup = min(params.min_hours * 4, len(df15) - 2)
+    warmup = min(max(params.min_hours * 4, start_bar or 0), len(df15) - 2)
     for i in range(warmup, len(df15) - 1):
         t = idx[i].to_pydatetime()
         mark = cash + (pos.stake_usd / pos.entry * c[i] if pos else 0.0)
@@ -195,13 +210,28 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
             week, st.week_start_equity = t.isocalendar()[:2], mark
         equity_points.append((t, mark))
 
+        # ---------- a resting maker order from the previous bar: filled only if price traded through it
+        fresh = False
+        if order is not None:
+            if maker_filled(order["limit"], l[i], limits.maker_through_bps):
+                pos = Position(symbol, order["limit"], order["stop"], order["take"], order["stake"], t)
+                entry_fee = order["stake"] * limits.maker_fee_pct
+                cash -= order["stake"] + entry_fee
+                pos_meta = {"entry_fee": entry_fee, "mult": order["mult"], "fb": order["fb"]}
+                st.open_positions, st.inventory_usd, st.open_symbols = 1, order["stake"], frozenset({symbol})
+                fresh = True
+            else:
+                rep.unfilled += 1
+            order = None
+
         # ---------- manage open position on the CURRENT bar's range
         if pos is not None:
-            exit_px, why = bar_exit(pos, o[i], h[i], l[i], c[i], t, limits)
+            oo, hh = (pos.entry, pos.entry) if fresh else (o[i], h[i])   # bar part before our fill doesn't count
+            exit_px, why = bar_exit(pos, oo, hh, l[i], c[i], t, limits)
             if exit_px is not None:
                 qty = pos.stake_usd / pos.entry
                 proceeds = qty * exit_px
-                exit_fee = proceeds * fee
+                exit_fee = proceeds * limits.exit_fee_pct(why)
                 pnl = proceeds - exit_fee - pos.stake_usd - pos_meta["entry_fee"]
                 cash += proceeds - exit_fee
                 rep.trades.append(Trade(symbol, pos.opened_at, t, pos.entry, exit_px, pos.stake_usd,
@@ -245,11 +275,15 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
             rep.vetoed_by_policy += 1
             continue
 
-        fill = o[i + 1] * (1 + slip)                   # next bar open
+        fill = c[i] if maker else o[i + 1] * (1 + slip)   # maker: limit at the signal close | taker: next open
         cand = Candidate(symbol, fill, sig["stop"], sig["take"], spread_bps=1.0, data_age_sec=0)
         v = evaluate_entry(st, limits, cand, idx[i + 1].to_pydatetime(), risk_mult=dec.risk_mult * kelly_mult(r_hist, limits))
         if v.action is not Action.ALLOW:
             rep.vetoed_by_risk += 1
+            continue
+        if maker:
+            order = {"limit": fill, "stop": v.stop, "take": v.take, "stake": v.stake_usd, "mult": dec.risk_mult,
+                     "fb": dec.fallback}
             continue
         entry_fee = v.stake_usd * fee
         cash -= v.stake_usd + entry_fee
