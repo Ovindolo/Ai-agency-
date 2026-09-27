@@ -74,3 +74,29 @@ def test_suggestions_never_raise_risk(tmp_path):
 def test_few_trades_means_no_conclusion(tmp_path):
     _write_log(tmp_path, [(0.9, 2.0, 1.0, "target")] * 3)
     assert "prea puține" in suggestions(load(tmp_path), RiskLimits())[0]
+
+
+def test_calibration_split_by_model(tmp_path):
+    _write_log(tmp_path, [(0.8, 2.6, 1.8, "target"), (0.3, -1.9, -1.0, "stop")] * 5)
+    recs = [json.loads(line) for line in (tmp_path / "logs" / "decisions.jsonl").read_text().splitlines()]
+    for i, r in enumerate(recs):
+        if r["type"] == "decision":
+            r["jev_model"] = "jev-latest" if i % 2 else "kev-4b"
+    (tmp_path / "logs" / "decisions.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+    rv = load(tmp_path)
+    assert set(rv.judged_by_model) == {"jev-latest", "kev-4b"}
+    _, text = write(tmp_path, NOW)
+    assert "Pe model" in text
+
+
+def test_export_training_rows(tmp_path):
+    from apps.review.export_training import rows
+    _write_log(tmp_path, [(0.8, 2.6, 1.8, "target"), (0.3, -1.9, -1.0, "stop")])
+    recs = [json.loads(line) for line in (tmp_path / "logs" / "decisions.jsonl").read_text().splitlines()]
+    for r in recs:
+        if r["type"] == "decision":
+            r["words"] = "uptrend trending calm"
+    (tmp_path / "logs" / "decisions.jsonl").write_text("".join(json.dumps(r) + "\n" for r in recs))
+    trades, moves = rows(tmp_path)
+    assert [t["label"] for t in trades] == [1, 0] and len(moves) == 2
+    assert trades[0]["context"] == "uptrend trending calm" and len(trades[0]["options"]) == 2

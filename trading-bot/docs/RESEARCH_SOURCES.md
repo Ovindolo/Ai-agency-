@@ -75,3 +75,17 @@ costs removed is break-even (PF ~1.0): its losses are its costs, not bad luck.
 | Memecoins | <1% of pump.fun tokens graduate; profitable wallets 30-50% per month through 2025 (more in 2026 after retail left); $10k+ realized puts a wallet in the top ~0.4% | CoinGecko research, Cointelegraph/Dune | Nothing: no backtestable edge without first-block on-chain infrastructure, and rugs are the base case |
 | NostalgiaForInfinity | Most used freqtrade strategy (~2.9k stars); 5m timeframe; users reported repeated liquidated longs on futures during 10 Oct 2025 | GitHub repo and issues | Not yet: needs 5m data support in the adapter |
 | "Hacks, vulnerabilities" | Refused: exploiting a protocol or exchange is theft. The legal version is bug bounties: Immunefi has paid $134M+ | Immunefi | Nothing (a skill, not a bot) |
+
+## Round 4: the Jev ecosystem repos (2026-09-27)
+
+All twelve exist (checked on GitHub). What each gives this bot:
+
+| Repo | Verdict | Built |
+|---|---|---|
+| jaredpalmer/kev (~7.4k) | **Used.** Qwen-based Jev-like models, same `POST /v1/systemone` wire format; the official SDK points at it via `base_url`. Its own table: Brier 0.269 (Kev-4B) vs 0.211 (Jev) on non-trading tasks | `JEV_BASE_URL` in `JevClient`: free local decisions; review splits calibration per model so Jev and Kev are compared on OUR trades |
+| typesafe-ai/skills (~2.3k) + the SDK itself | **Used to verify.** SDK default retry policy (2 retries, 0.5-5s backoff) would block the 15m loop on answers we discard as late. Score answers must carry `legend` | `RetryPolicy(max_retries=0)`; tests run through the real SDK with a mock HTTP transport |
+| vinnylarouge/jevlike (~1.3k) | **Prepared.** Trainer for your own Jev-like model from `{context, options, label}` rows | `apps/review/export_training.py`: our logged states + what happened next |
+| browser-use/jev-ultrafast (~20.8k) | Pattern only: one round trip per decision, re-check state freshness before acting. Already done (one battery call, data-age gate) | none |
+| jarrodwatts/jev-trader (~2.6k) | Refused, as the original spec said: Monad market making every block, dry-run only, no P&L published | none |
+| laya-mlx, clm, SemIf-OpenJev | Alternatives; not drop-in with the SDK (Kev is) | none |
+| typesafe-computer-use, fast-jev-compaction, awesome-jev lists | Not trading. Compaction is a Claude Code plugin (needs a TypeSafe key) | none |

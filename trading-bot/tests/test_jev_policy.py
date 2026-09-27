@@ -116,3 +116,40 @@ def test_exit_advice(u, expected):
 
 def test_exit_advice_holds_when_jev_unavailable():
     assert compose_exit(JevResult(status="down"), T).action == "hold"
+
+
+# ------------------------------------------------ the real SDK (wire format, no retries, local Kev server)
+def _sdk_client(handler, timeout_ms=800):
+    httpx2 = pytest.importorskip("httpx2")
+    pytest.importorskip("typesafe_sdk")
+    return JevClient(base_url="http://127.0.0.1:8009", model="kev-latest", timeout_ms=timeout_ms, log_path=None,
+                     transport=httpx2.MockTransport(handler))
+
+
+def test_real_sdk_round_trip_against_local_server():
+    import json
+    httpx2 = pytest.importorskip("httpx2")
+    seen = {}
+
+    def handler(req):
+        seen["url"], seen["body"] = str(req.url), json.loads(req.content)
+        return httpx2.Response(200, json={"model": "kev-latest", "usage": {"input_tokens": 40, "output_tokens": 4},
+                                          "answers": {k: ({**v, "legend": {}, "probabilities": {}} if v["type"] == "score" else v)
+                                                      for k, v in GOOD.items() if k != "exit_urgency"}})
+    c = _sdk_client(handler)
+    assert c.enabled                                        # a local server needs no TypeSafe key
+    r = ask(c)
+    assert r.ok and r.regime.choice == "trending_up" and r.setup_quality.score == 2.4
+    assert seen["url"].endswith("/v1/systemone") and seen["body"]["model"] == "kev-latest"
+    assert set(seen["body"]["questions"]) == {"regime", "setup_quality", "aligned_with_signal", "toxic_or_unstable"}
+
+
+def test_real_sdk_does_not_retry_on_failure():
+    httpx2 = pytest.importorskip("httpx2")
+    calls = []
+
+    def handler(req):
+        calls.append(1)
+        return httpx2.Response(503, json={"error": "busy"})
+    r = ask(_sdk_client(handler))
+    assert r.status == "down" and len(calls) == 1           # SDK default would have tried 3 times with backoff

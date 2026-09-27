@@ -30,6 +30,7 @@ class Review:
     by_reason: dict[str, list[float]] = field(default_factory=dict)
     by_fallback: dict[str, list[float]] = field(default_factory=dict)
     judged: list[tuple[float, int]] = field(default_factory=list)          # (P aligned, won)
+    judged_by_model: dict[str, list[tuple[float, int]]] = field(default_factory=dict)   # Jev vs a local Kev, etc.
     setup_buckets: dict[str, list[float]] = field(default_factory=dict)    # setup_quality bucket -> R
     move_15m: list[tuple[float, int]] = field(default_factory=list)        # (P aligned, price up 15m later)
 
@@ -87,6 +88,7 @@ def load(base: Path) -> Review:
         ans = d.get("jev_answers") or {}
         if "aligned_with_signal" in ans:
             rv.judged.append((ans["aligned_with_signal"]["noul"], won))
+            rv.judged_by_model.setdefault(d.get("jev_model") or "?", []).append((ans["aligned_with_signal"]["noul"], won))
         if "setup_quality" in ans:
             s = ans["setup_quality"]["score"]
             rv.setup_buckets.setdefault("≥2.5" if s >= 2.5 else "2.0–2.5" if s >= 2.0 else "<2.0", []).append(r_mult)
@@ -146,6 +148,10 @@ def render(rv: Review, limits: RiskLimits, now: datetime, big: bool) -> str:
                       f"Brier {cal[0]:.3f} · bază {cal[1]:.3f} · skill {cal[2]:+.2f}", "",
                   "| P(aligned) | tranzacții | P medie | câștigate |", "|---|---|---|---|"]
         lines += [f"| {b} | {n} | {p:.2f} | {o:.0%} |" for b, n, p, o in calibration_table(rv.judged)]
+    if len(rv.judged_by_model) > 1:
+        lines.append("\nPe model: " + " · ".join(
+            f"{name} skill {b[2]:+.2f} ({len(pairs)} tranzacții)" for name, pairs in sorted(rv.judged_by_model.items())
+            if (b := brier(pairs))))
     m = brier(rv.move_15m)
     if m:
         lines.append(f"\nAceeași întrebare vs prețul 15 min mai târziu ({len(rv.move_15m)} decizii): skill {m[2]:+.2f}")

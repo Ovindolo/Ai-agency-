@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training
 
 test:            ## all tests
 	python -m pytest -q
@@ -47,3 +47,6 @@ journal:         ## your futures journal from Binance (read-only key): deposits 
 
 guard:           ## watch your manual futures positions, Telegram alerts (no stop, leverage, risk, liquidation, daily loss)
 	set -a; [ -f .env ] && . ./.env; set +a; python -m apps.futures.guard
+
+export-training: ## logged states + outcomes -> data/train_*.jsonl for a Jev-like model (jevlike format)
+	python -m apps.review.export_training

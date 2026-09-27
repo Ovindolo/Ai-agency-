@@ -87,9 +87,13 @@ def parse_answers(answers: dict[str, Any]) -> dict[str, Any]:
 
 class JevClient:
     def __init__(self, *, api_key: str | None = None, model: str | None = None, timeout_ms: int | None = None,
-                 enabled: bool | None = None, backend: Backend | None = None, log_path: Path | None = LOG_PATH):
-        self.api_key = api_key if api_key is not None else os.getenv("TYPESAFE_API_KEY", "")
+                 enabled: bool | None = None, backend: Backend | None = None, log_path: Path | None = LOG_PATH,
+                 base_url: str | None = None, transport=None):
+        # base_url: a local Jev-compatible server (e.g. Kev: POST /v1/systemone, same wire format) needs no real key
+        self.base_url = base_url if base_url is not None else (os.getenv("JEV_BASE_URL") or os.getenv("TYPESAFE_BASE_URL") or "")
+        self.api_key = api_key if api_key is not None else (os.getenv("TYPESAFE_API_KEY", "") or ("local" if self.base_url else ""))
         self.model = model or os.getenv("JEV_MODEL_ID", "jev-latest")
+        self._transport = transport
         self.timeout_s = (timeout_ms or int(os.getenv("JEV_TIMEOUT_MS", "800"))) / 1000
         env_enabled = os.getenv("JEV_ENABLED", "true").lower() == "true"
         self.enabled = (enabled if enabled is not None else env_enabled) and (bool(self.api_key) or backend is not None)
@@ -104,7 +108,14 @@ class JevClient:
             from typesafe_sdk import TypeSafeClient   # optional dependency
         except ImportError:
             return None
-        self._backend = TypeSafeClient(api_key=self.api_key, model=self.model, timeout=self.timeout_s)
+        from typesafe_sdk._core.retry import RetryPolicy
+        # No retries in the decision path: the SDK default (2 retries, 0.5-5s backoff) would block the loop
+        # for seconds on an answer we then discard as late. A missed decision is a HOLD, not a retry.
+        kw = {"base_url": self.base_url} if self.base_url else {}
+        if self._transport is not None:
+            kw["transport"] = self._transport
+        self._backend = TypeSafeClient(api_key=self.api_key, model=self.model, timeout=self.timeout_s,
+                                       retry=RetryPolicy(max_retries=0), **kw)
         return self._backend
 
     def ask(self, state_text: str, *, candidate_signal: bool, in_position: bool) -> JevResult:
