@@ -1,0 +1,8 @@
+# Futures guard: alerts only. It never places, changes or cancels an order.
+max_leverage: 5                 # per position; above this -> alert
+max_exposure_x: 3.0             # total open notional / account equity
+max_risk_per_trade_pct: 0.02    # loss at the stop, as a share of equity
+max_daily_loss_pct: 0.03        # realized today + unrealized now, vs equity at the start of the day -> "take a break"
+min_liq_distance_pct: 0.10      # mark price closer than 10% to liquidation -> alert
+repeat_minutes: 60              # an unresolved alert is repeated at most this often
+poll_seconds: 60

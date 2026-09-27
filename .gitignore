@@ -8,3 +8,4 @@ trading-bot/reports/
 trading-bot/vendor/
 trading-bot/runs/
 trading-bot/context/Trade_Ledger.md
+trading-bot/context/Futures_Journal.md

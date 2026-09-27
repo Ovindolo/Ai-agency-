@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard
 
 test:            ## all tests
 	python -m pytest -q
@@ -41,3 +41,9 @@ carry:           ## funding carry (long spot + short perp) on real funding histo
 
 tournament-context: ## tournament + funding-crowding and Fear&Greed filters (needs internet)
 	python -m apps.backtest.tournament_run --context
+
+journal:         ## your futures journal from Binance (read-only key): deposits vs profit, fees, win rate, luck test
+	set -a; [ -f .env ] && . ./.env; set +a; python -m apps.futures.journal --days 90
+
+guard:           ## watch your manual futures positions, Telegram alerts (no stop, leverage, risk, liquidation, daily loss)
+	set -a; [ -f .env ] && . ./.env; set +a; python -m apps.futures.guard
