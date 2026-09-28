@@ -89,3 +89,23 @@ All twelve exist (checked on GitHub). What each gives this bot:
 | jarrodwatts/jev-trader (~2.6k) | Refused, as the original spec said: Monad market making every block, dry-run only, no P&L published | none |
 | laya-mlx, clm, SemIf-OpenJev | Alternatives; not drop-in with the SDK (Kev is) | none |
 | typesafe-computer-use, fast-jev-compaction, awesome-jev lists | Not trading. Compaction is a Claude Code plugin (needs a TypeSafe key) | none |
+
+## Round 5: the "elite research analyst" prompt (2026-09-28)
+
+A sound, ad-free research protocol. What it required that the project did not have yet, now in `make research`
+(`apps/research/report.py`, `apps/research/metrics.py`):
+
+| Requirement | Built |
+|---|---|
+| CAGR, Sharpe, Sortino, Calmar next to win rate / PF | `metrics.perf` on daily equity (365-day year) |
+| Walk-forward instead of one split | re-select the best-Sharpe strategy at each fold start using only the past; stitched result vs buy & hold on the same days |
+| Parameter sensitivity | 27 trend_pullback variants (ADX x R:R x stop); share with positive out-of-sample Sharpe |
+| Overfitting / data snooping | Deflated Sharpe Ratio (Bailey & Lopez de Prado 2014) over every variant tried per coin |
+| Regime dependence | bull / sideways / bear days from the trailing 90-day return; compounded annualized return per regime |
+| Not dependent on one asset | a strategy must beat buy & hold with positive OOS Sharpe on at least 2 coins |
+| Charts | one SVG equity chart per coin (no plotting dependency) |
+| Checklist and ranking | 7 checks; nothing is recommended unless it passes all of them |
+
+Found while building it: near-zero return variance produced a huge fake Sharpe (guarded); the vol-targeted
+daily core rebalances ~37x/year on BTC-like volatility, about 17% of capital in fees over 4 years (now
+printed in the report).

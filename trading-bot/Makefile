@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research
 
 test:            ## all tests
 	python -m pytest -q
@@ -50,3 +50,6 @@ guard:           ## watch your manual futures positions, Telegram alerts (no sto
 
 export-training: ## logged states + outcomes -> data/train_*.jsonl for a Jev-like model (jevlike format)
 	python -m apps.review.export_training
+
+research:        ## full research report: 8 strategies x BTC/ETH/SOL, OOS, walk-forward, sensitivity, Deflated Sharpe, regimes
+	python -m apps.research.report --symbols BTC/USDT,ETH/USDT,SOL/USDT --download
