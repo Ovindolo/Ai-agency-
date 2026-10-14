@@ -303,14 +303,29 @@ class Position:
     stake_usd: float
     opened_at: datetime
     initial_stop: float | None = None
+    high_water: float | None = None     # best price seen while open (max favorable excursion)
+    low_water: float | None = None      # worst price seen while open (max adverse excursion)
 
     def __post_init__(self) -> None:
         if self.initial_stop is None:
             self.initial_stop = self.stop
+        if self.high_water is None:
+            self.high_water = self.entry
+        if self.low_water is None:
+            self.low_water = self.entry
 
     @property
     def r_value(self) -> float:
         return self.entry - (self.initial_stop or self.stop)
+
+    @property
+    def mfe_r(self) -> float:
+        """How far the trade went in our favour, in R. 1.0 = it was up one full risk unit at some point."""
+        return (self.high_water - self.entry) / self.r_value if self.r_value > 0 else 0.0
+
+    @property
+    def mae_r(self) -> float:
+        return (self.low_water - self.entry) / self.r_value if self.r_value > 0 else 0.0
 
 
 @dataclass(frozen=True)

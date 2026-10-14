@@ -52,7 +52,8 @@ def test_report_end_to_end_small():
     res = evaluate_symbol("BTC/USDT", df, daily_long)
     apply_checks([res])
     md = markdown([res], simulated=True)
-    for section in ("## 1. Rezumat", "## 4. Rezultate", "Walk-forward", "Sensibilitate", "## 5. Clasament",
+    assert res["ablation"][0][0] == "(toate pornite)" and len(res["ablation"]) == 7
+    for section in ("## 1. Rezumat", "## 4. Rezultate", "Walk-forward", "Sensibilitate", "Ablație", "## 5. Clasament",
                     "## 6. Recomandare", "DATE SIMULATE", "Deflated Sharpe"):
         assert section in md
     assert all(len(r.checks) == 7 for r in res["rows"])

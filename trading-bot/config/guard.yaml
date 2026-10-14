@@ -6,3 +6,4 @@ max_daily_loss_pct: 0.03        # realized today + unrealized now, vs equity at 
 min_liq_distance_pct: 0.10      # mark price closer than 10% to liquidation -> alert
 repeat_minutes: 60              # an unresolved alert is repeated at most this often
 poll_seconds: 60
+max_margin_move_per_day: 0.30   # leverage x daily volatility above this -> alert (a normal day would move 30% of margin)

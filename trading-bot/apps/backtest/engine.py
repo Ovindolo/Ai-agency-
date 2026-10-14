@@ -45,7 +45,10 @@ def bar_exit(pos: Position, o: float, h: float, l: float, c: float, t: datetime,
     On a maker-entry fill bar the caller passes o = h = limit: the part of the bar before our fill can't count."""
     slip = limits.slippage_pct
     if l <= pos.stop:
-        return min(o, pos.stop) * (1 - slip), "stop"          # gap below stop fills at the open
+        px = min(o, pos.stop) * (1 - slip)                    # gap below stop fills at the open
+        pos.low_water = min(pos.low_water, px)                # stop wins ties: this bar's high came after us
+        return px, "stop"
+    pos.high_water, pos.low_water = max(pos.high_water, h), min(pos.low_water, l)
     if limits.target_mode == "maker":
         if h > pos.take * (1 + limits.maker_through_bps / 1e4):
             return pos.take, "target"                         # resting limit sell: exact price, no slippage
@@ -72,6 +75,8 @@ class Trade:
     reason: str
     risk_mult: float
     fallback: str
+    mfe_r: float = 0.0       # best open profit reached, in R
+    mae_r: float = 0.0       # worst open loss reached, in R
 
 
 @dataclass
@@ -235,7 +240,8 @@ def run_backtest(df15: pd.DataFrame, symbol: str, *, label: str, limits: RiskLim
                 pnl = proceeds - exit_fee - pos.stake_usd - pos_meta["entry_fee"]
                 cash += proceeds - exit_fee
                 rep.trades.append(Trade(symbol, pos.opened_at, t, pos.entry, exit_px, pos.stake_usd,
-                                        pos_meta["entry_fee"] + exit_fee, pnl, why, pos_meta["mult"], pos_meta["fb"]))
+                                        pos_meta["entry_fee"] + exit_fee, pnl, why, pos_meta["mult"], pos_meta["fb"],
+                                        pos.mfe_r, pos.mae_r))
                 st.realized_pnl_total += pnl
                 r_hist.append(r_multiple(pnl, pos.stake_usd, pos.entry, pos.initial_stop))
                 if pnl <= 0:

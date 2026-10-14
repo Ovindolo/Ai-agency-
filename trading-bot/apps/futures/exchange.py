@@ -57,6 +57,18 @@ class BinanceFuturesReader:
             pass
         return [s for s in (stop_from_raw(o) for o in raw) if s]
 
+    def daily_vol(self, raw_symbol: str, days: int = 30) -> float:
+        """Stdev of daily returns over the last `days` closed days (public candles)."""
+        if not getattr(self.ex, "markets", None):
+            self.ex.load_markets()
+        m = self.ex.markets_by_id[raw_symbol]
+        unified = (m[0] if isinstance(m, list) else m)["symbol"]
+        rows = self.ex.fetch_ohlcv(unified, "1d", limit=days + 2)[:-1]       # drop today's open candle
+        closes = [r[4] for r in rows]
+        rets = [b / a - 1 for a, b in zip(closes, closes[1:])]
+        mean = sum(rets) / len(rets)
+        return (sum((x - mean) ** 2 for x in rets) / (len(rets) - 1)) ** 0.5
+
     def equity(self) -> float:
         acct = self.ex.fapiPrivateV2GetAccount() if hasattr(self.ex, "fapiPrivateV2GetAccount") else self.ex.fapiPrivateGetAccount()
         return float(acct["totalMarginBalance"])

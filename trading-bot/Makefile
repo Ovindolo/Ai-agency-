@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models
 
 test:            ## all tests
 	python -m pytest -q
@@ -59,3 +59,6 @@ insiders:        ## SEC Form 4 insider-cluster report, last 60 days -> reports/I
 
 insiders-bot:    ## Telegram alerts: 3+ insiders buying one stock in 30 days; /clusters /ticker /rising from your phone
 	set -a; [ -f .env ] && . ./.env; set +a; python -m apps.insiders.bot
+
+replay-models:   ## ask another decision model the logged states: agreement, calibration, flip rate, cost (MODEL=kev-4b URL=http://127.0.0.1:8009)
+	set -a; [ -f .env ] && . ./.env; set +a; python -m apps.review.replay_models --model $(or $(MODEL),jev-latest) $(if $(URL),--base-url $(URL),)

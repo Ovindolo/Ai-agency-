@@ -100,3 +100,20 @@ def test_export_training_rows(tmp_path):
     trades, moves = rows(tmp_path)
     assert [t["label"] for t in trades] == [1, 0] and len(moves) == 2
     assert trades[0]["context"] == "uptrend trending calm" and len(trades[0]["options"]) == 2
+
+
+def test_capture_gap_is_measured_and_suggested(tmp_path):
+    (tmp_path / "logs").mkdir()
+    rows = []
+    for i in range(10):
+        rows.append({"type": "decision", "id": f"d{i}", "policy_fallback": "jev_disabled"})
+        gave_back = i < 6                                    # 6 trades were up 1.5R and still closed red
+        rows.append({"type": "exit", "decision_id": f"d{i}", "pnl": -1.0 if gave_back else 2.0,
+                     "r": -0.4 if gave_back else 1.2, "reason": "stop", "mfe_r": 1.5})
+    (tmp_path / "logs" / "decisions.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    rv = load(tmp_path)
+    cap = rv.capture()
+    assert cap == {"n": 10, "reached_1r": 10, "gave_back": 6, "median_capture": pytest.approx(-0.4 / 1.5)}   # 6 of 10 negative: both middle values are
+    assert any("pe plus cu 1R" in s for s in suggestions(rv, RiskLimits()))
+    _, text = write(tmp_path, NOW)
+    assert "Profit dat înapoi" in text

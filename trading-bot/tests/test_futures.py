@@ -1,3 +1,4 @@
+import statistics
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -159,3 +160,25 @@ def test_reader_income_pages_by_week():
     r = BinanceFuturesReader(ex=FakeEx([], [], rows))
     got = r.income(rows[0]["time"], rows[-1]["time"])
     assert len(got) == 20
+
+
+def test_leverage_is_judged_against_volatility():
+    calm = check([pos(leverage=5)], [StopOrder("BTCUSDT", "SELL", 59500.0, 0.01)], 1000, 0, CFG, {"BTCUSDT": 0.02})
+    assert "vol_leverage" not in keys(calm)                       # 5x * 2%/day = 10% of margin
+    wild = check([pos(leverage=5)], [StopOrder("BTCUSDT", "SELL", 59500.0, 0.01)], 1000, 0, CFG, {"BTCUSDT": 0.08})
+    a = [x for x in wild if x.key.startswith("vol_leverage")][0]
+    assert "40%" in a.text and "~3×" in a.text                    # 5 x 8% = 40%; 30% / 8% -> 3x
+
+
+class VolEx(FakeEx):
+    markets = {"BTC/USDT:USDT": {}}
+    markets_by_id = {"BTCUSDT": [{"symbol": "BTC/USDT:USDT"}]}
+
+    def fetch_ohlcv(self, symbol, tf, limit):
+        closes = [100, 110, 99, 108.9, 98.01, 0]                  # last row = today's open candle, dropped
+        return [[0, 0, 0, 0, c, 0] for c in closes]
+
+
+def test_daily_vol_from_public_candles():
+    r = BinanceFuturesReader(ex=VolEx([], [], []))
+    assert r.daily_vol("BTCUSDT") == pytest.approx(statistics.stdev([0.1, -0.1, 0.1, -0.1]), rel=1e-6)

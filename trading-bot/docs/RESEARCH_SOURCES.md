@@ -109,3 +109,22 @@ A sound, ad-free research protocol. What it required that the project did not ha
 Found while building it: near-zero return variance produced a huge fake Sharpe (guarded); the vol-targeted
 daily core rebalances ~37x/year on BTC-like volatility, about 17% of capital in fees over 4 years (now
 printed in the report).
+
+## Round 6: DXRG, "What LLM Trading Agents Actually Do in Production" (arXiv 2609.05663, 2026-10-14)
+
+Verified on arXiv/Hugging Face listings and the authors' artifact repo (github.com/ProjectDXAI/continuous-record-llm-trading-agents):
+3,505 user-funded vaults + a 500-600 agent Hyperliquid fleet; no directional edge; median leverage 5x in
+every volatility band, one setting held 62% of liquidations; 43.2% of positions reached +300 bps and 49.3%
+of those closed red; a fixed 2%/4% bracket beat every discretionary exit (+39 bps/position); top-3
+render cutoff 1.75x; three frontier models tied on replayed decisions but differed in choice stability.
+Not found in the accessible material: "71 of 205 liquidations", "25x cheaper", "research agent worth zero".
+
+| Rule | Status here | Built |
+|---|---|---|
+| Hard-coded exits, not model exits | Already: stop/target set by code at entry; Jev may only tighten | MFE/MAE per position (`Position.mfe_r/mae_r`), capture gap in the review |
+| Volatility-aware leverage | Spot bot sizes from stop distance (ATR) already | Futures guard: alert when leverage x 30-day daily vol > 30% of margin per day, with the leverage that fits |
+| The candidate list is part of the strategy | Universe is fixed in config; research report runs several coins | none |
+| Switch each tool off | Rules-only vs rules+Jev already | Ablation table in `make research`; on simulated data StoplossGuard and the cost filter changed nothing |
+| Second check before the exchange | Deterministic risk engine already sits there (code, not a model) | none |
+| Save exactly what the model saw | Words + answers were logged | Full numeric snapshot now logged with every decision |
+| Replay on a cheaper model first | Per-model calibration existed | `make replay-models`: agreement, Brier skill, flip rate on identical input, tokens, latency |

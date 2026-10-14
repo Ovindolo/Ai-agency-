@@ -267,7 +267,8 @@ class Runner:
         level = {"stop": pos.stop, "target": pos.take}.get(why, float(bar["close"]))
         self._log({"type": "exit", "t": now, "symbol": sym, "decision_id": m.get("decision_id"), "price": px,
                    "expected_price": level, "slippage_bps": (level / px - 1) * 1e4 if px else None,
-                   "reason": why, "pnl": pnl, "r": r, **self.versions})
+                   "reason": why, "pnl": pnl, "r": r,
+                   "mfe_r": pos.mfe_r, "mae_r": pos.mae_r, **self.versions})
         if self.trades % 10 == 0 or self.trades % 25 == 0:   # review loop: measure, suggest, never change anything
             rv, _ = learn.write(self.base, now, self.limits)
             self.tg.send(learn.telegram_summary(rv))
@@ -290,7 +291,7 @@ class Runner:
         rec = {"type": "decision", "id": f"{sym}-{snap.ts}", "t": now, "symbol": sym, "snapshot_ts": snap.ts,
                "words": words, "jev_status": jev.status, "jev_model": jev.model, "jev_latency_ms": jev.latency_ms,
                "jev_answers": None, "policy": dec.action, "policy_fallback": dec.fallback,
-               "policy_reasons": dec.reasons, "risk_mult": dec.risk_mult, **self.versions}
+               "policy_reasons": dec.reasons, "risk_mult": dec.risk_mult, "snapshot": asdict(snap), **self.versions}
         if jev.ok:
             # typed dicts, readable by parse_answers -> backtest mode B replays exactly these answers
             rec["jev_answers"] = {k: {**asdict(getattr(jev, k)), "type": JEV_KIND.get(k, "noul")} for k in

@@ -14,6 +14,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from statistics import median
 
 from apps.risk.engine import RiskLimits, realized_kelly
 
@@ -33,6 +34,18 @@ class Review:
     judged_by_model: dict[str, list[tuple[float, int]]] = field(default_factory=dict)   # Jev vs a local Kev, etc.
     setup_buckets: dict[str, list[float]] = field(default_factory=dict)    # setup_quality bucket -> R
     move_15m: list[tuple[float, int]] = field(default_factory=list)        # (P aligned, price up 15m later)
+    excursions: list[tuple[float, float]] = field(default_factory=list)    # (best open profit in R, final R)
+
+    def capture(self) -> dict | None:
+        """The 'capture gap' (DXRG 2026: 43% of agent positions reached +300 bps, half of those still closed
+        red): how many trades were up a full R at some point and still closed at or below zero."""
+        if not self.excursions:
+            return None
+        reached = [(m, r) for m, r in self.excursions if m >= 1.0]
+        ratios = [r / m for m, r in self.excursions if m >= 0.5]
+        return {"n": len(self.excursions), "reached_1r": len(reached),
+                "gave_back": sum(1 for _, r in reached if r <= 0),
+                "median_capture": float(median(ratios)) if ratios else None}
 
     @property
     def profit_factor(self) -> float:
@@ -81,6 +94,8 @@ def load(base: Path) -> Review:
         won = int(x["pnl"] > 0)
         rv.n, rv.wins, rv.pnl = rv.n + 1, rv.wins + won, rv.pnl + x["pnl"]
         rv.r.append(r_mult)
+        if x.get("mfe_r") is not None:
+            rv.excursions.append((float(x["mfe_r"]), r_mult))
         reason = x["reason"] if x["reason"] in ("stop", "target") else x["reason"].split(" ")[0]
         rv.by_reason.setdefault(reason, []).append(r_mult)
         d = decisions.get(x.get("decision_id"), {})
@@ -115,6 +130,10 @@ def suggestions(rv: Review, limits: RiskLimits) -> list[str]:
     tstop = rv.by_reason.get("time", [])
     if len(tstop) / rv.n > 0.25:
         out.append(f"{len(tstop)}/{rv.n} ieșiri pe timp (48h): targetul poate fi prea departe pentru volatilitatea actuală.")
+    cap = rv.capture()
+    if cap and cap["reached_1r"] >= 5 and cap["gave_back"] / cap["reached_1r"] > 0.3:
+        out.append(f"{cap['gave_back']}/{cap['reached_1r']} tranzacții au fost pe plus cu 1R și s-au închis pe minus. "
+                   "Propunere de testat în backtest: stop la intrare după +1R sau trailing mai strâns.")
     cal = brier(rv.judged)
     if cal and len(rv.judged) >= MIN_CALIBRATION:
         if cal[2] <= 0:
@@ -142,6 +161,11 @@ def render(rv: Review, limits: RiskLimits, now: datetime, big: bool) -> str:
              f"- Kelly din rezultatele noastre: {k:+.2f}" if k is not None else "- Kelly: încă nu (lipsesc câștiguri sau pierderi)",
              "- Ieșiri: " + " · ".join(f"{k2} {_r(v)}" for k2, v in sorted(rv.by_reason.items())),
              "- După sursa deciziei: " + " · ".join(f"{k2} {_r(v)}" for k2, v in sorted(rv.by_fallback.items()))]
+    cap = rv.capture()
+    if cap:
+        mc = f"{cap['median_capture']:.0%}" if cap["median_capture"] is not None else "—"
+        lines.append(f"- Profit dat înapoi: {cap['reached_1r']}/{cap['n']} tranzacții au ajuns la +1R; "
+                     f"{cap['gave_back']} dintre ele s-au închis pe minus. Captură mediană din maxim: {mc}")
     cal = brier(rv.judged)
     if cal:
         lines += ["", f"**Calibrare Jev** (aligned_with_signal vs tranzacție câștigată, {len(rv.judged)} tranzacții): "

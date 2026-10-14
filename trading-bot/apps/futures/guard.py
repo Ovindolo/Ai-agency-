@@ -36,6 +36,7 @@ class GuardConfig:
     min_liq_distance_pct: float = 0.10
     repeat_minutes: int = 60
     poll_seconds: int = 60
+    max_margin_move_per_day: float = 0.30
 
     @classmethod
     def load(cls) -> "GuardConfig":
@@ -54,7 +55,10 @@ def _usd(x: float) -> str:
 
 
 def check(positions: list[FPosition], stops: list[StopOrder], equity: float, day_pnl: float,
-          cfg: GuardConfig) -> list[Alert]:
+          cfg: GuardConfig, daily_vol: dict[str, float] | None = None) -> list[Alert]:
+    """daily_vol: symbol -> stdev of daily returns (last 30 days). Leverage x daily vol = how much of the
+    margin an ordinary day moves. Fixed leverage in a wild market is how fleets get liquidated
+    (DXRG 2026: median 5x in every volatility band; one setting held 62% of the liquidations)."""
     alerts: list[Alert] = []
     eq = max(equity, 1e-9)
     for p in positions:
@@ -79,6 +83,12 @@ def check(positions: list[FPosition], stops: list[StopOrder], equity: float, day
                                     f"{loss / eq:.1%} din cont (limita ta: {cfg.max_risk_per_trade_pct:.0%})."))
         if p.leverage and p.leverage > cfg.max_leverage:
             alerts.append(Alert(f"leverage:{k}", f"⚠️ {tag}: levier {p.leverage:g}× (limita ta: {cfg.max_leverage:g}×)."))
+        vol = (daily_vol or {}).get(p.symbol)
+        if p.leverage and vol and p.leverage * vol > cfg.max_margin_move_per_day:
+            ok = max(1, int(cfg.max_margin_move_per_day / vol))
+            alerts.append(Alert(f"vol_leverage:{k}", f"⚠️ {tag}: la volatilitatea de acum ({vol:.1%}/zi), {p.leverage:g}× "
+                                f"înseamnă ~{p.leverage * vol:.0%} din marjă într-o zi obișnuită. Pentru limita ta de "
+                                f"{cfg.max_margin_move_per_day:.0%}, levierul potrivit e ~{ok}×."))
         if p.liq and p.mark:
             dist = abs(p.mark - p.liq) / p.mark
             if dist < cfg.min_liq_distance_pct:
@@ -121,7 +131,8 @@ class Dedup:
 
 RESOLVED = {"no_stop": "✅ {s}: are stop acum.", "liq": "✅ {s}: s-a depărtat de lichidare.",
             "risk": "✅ {s}: riscul la stop e în limită.", "leverage": "✅ {s}: levierul e în limită.",
-            "partial_stop": "✅ {s}: stopul acoperă toată poziția.", "exposure": "✅ Expunerea e în limită."}
+            "partial_stop": "✅ {s}: stopul acoperă toată poziția.", "exposure": "✅ Expunerea e în limită.",
+            "vol_leverage": "✅ {s}: levierul se potrivește volatilității."}
 
 
 def resolved_text(key: str) -> str | None:
@@ -141,7 +152,13 @@ def tick(reader, notifier, cfg: GuardConfig, dedup: Dedup, now: datetime | None 
     positions, stops, equity = reader.positions(), reader.stops(), reader.equity()
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
     pnl = day_pnl(reader.income(int(midnight.timestamp() * 1000), int(now.timestamp() * 1000)), positions)
-    alerts = check(positions, stops, equity, pnl, cfg)
+    vols = {}
+    for p in positions:
+        try:
+            vols[p.symbol] = reader.daily_vol(p.symbol)
+        except Exception:  # noqa: BLE001 - no candles: skip only this rule
+            pass
+    alerts = check(positions, stops, equity, pnl, cfg, vols)
     due, resolved = dedup.filter(alerts, now)
     for a in due:
         notifier.send(a.text)

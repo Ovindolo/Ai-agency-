@@ -75,6 +75,30 @@ def sensitivity_grid() -> dict[str, StrategyParams]:
             for a, rr, m in product((15, 20, 25), (1.8, 2.0, 2.5), (1.2, 1.5, 2.0))}
 
 
+ABLATIONS = {   # component -> the setting that switches it off
+    "StoplossGuard (pauză după 3 stopuri)": {"stoploss_guard_trades": 10**6},
+    "frâna Kelly": {"kelly_min_trades": 10**9},
+    "cooldown după pierdere": {"cooldown_bars_after_loss": 0},
+    "trailing stop": {"trailing_after_r": 1e9},
+    "time stop 48h": {"time_stop_minutes": 10**9},
+    "filtrul de cost (target ≥2.5× taxe)": {"min_edge_fee_mult": 0.0},
+}
+
+
+def ablation(df: pd.DataFrame, sym: str) -> list[tuple[str, int, float, float, float]]:
+    """DXRG 2026, rule of thumb: switch each component off; if the trades do not change, it does nothing.
+    Rows: (component, trades, net, Sharpe, max DD); the first row is everything on."""
+    from dataclasses import replace
+    from apps.risk.engine import RiskLimits
+    out = []
+    for name, change in {"(toate pornite)": {}, **ABLATIONS}.items():
+        rep = run_backtest(df, sym, label=name, start_equity=EQUITY, limits=replace(RiskLimits(), **change))
+        eq = daily(rep.equity_curve) if rep.equity_curve is not None and len(rep.equity_curve) else pd.Series(dtype=float)
+        p = perf(eq) if len(eq) > 2 else {}
+        out.append((name, rep.n, rep.net, p.get("sharpe", 0.0), p.get("max_dd", 0.0)))
+    return out
+
+
 def run_15m(df: pd.DataFrame, sym: str, name: str, cand) -> Row:
     kw = {"signal_frame": cand} if isinstance(cand, pd.DataFrame) else {"params": cand}
     rep = run_backtest(df, sym, label=name, start_equity=EQUITY, **kw)
@@ -158,7 +182,7 @@ def evaluate_symbol(sym: str, df: pd.DataFrame, daily_long: pd.DataFrame) -> dic
     bh_wf = perf(bh_eq[bh_eq.index >= wf_start]) if len(wf_eq) else {}
     sens_oos = [perf(oos_slice(s.eq))["sharpe"] for s in sens if len(s.eq) > 10]
     return {"symbol": sym, "rows": rows, "bh": bh, "bh_long": bh_long, "dca_long": dca_long, "labels": labels,
-            "wf": (perf(wf_eq) if len(wf_eq) > 2 else {}, picks, bh_wf), "sens": sens_oos, "trials": len(trial_sr),
+            "wf": (perf(wf_eq) if len(wf_eq) > 2 else {}, picks, bh_wf), "sens": sens_oos, "ablation": ablation(df, sym), "trials": len(trial_sr),
             "long_period": (long_px.index[0], long_px.index[-1])}
 
 
@@ -245,6 +269,17 @@ def markdown(results: list[dict], simulated: bool) -> str:
             L += [f"**Sensibilitate** ({len(s)} variante trend_pullback: ADX × R:R × stop): Sharpe pe date nevăzute pozitiv în "
                   f"{np.mean(np.array(s) > 0):.0%} din variante, median {np.median(s):.2f}. Un avantaj real nu dispare când "
                   "muți un parametru cu un pas.", ""]
+        ab = res.get("ablation") or []
+        if ab:
+            base = ab[0]
+            L += ["**Ablație** (trend_pullback cu câte o componentă oprită; dacă nimic nu se schimbă, componenta nu face nimic aici):", "",
+                  "| Componentă oprită | Tranz. | Net | Δ net | Sharpe | Max DD | Efect |", "|---|---|---|---|---|---|---|"]
+            for name, n, net, sh, dd in ab:
+                same = n == base[1] and abs(net - base[2]) < 0.01
+                eff = "—" if name == base[0] else ("niciun efect pe aceste date" if same else
+                                                  ("o ajută (fără ea iese mai rău)" if net < base[2] else "o încurcă (fără ea iese mai bine)"))
+                L.append(f"| {name} | {n} | {net:+.2f} | {net - base[2]:+.2f} | {sh:.2f} | {dd:.0%} | {eff} |")
+            L.append("")
         L += ["**Pe regimuri** (randament anualizat al strategiei în zilele din fiecare regim):", "",
               "| Strategie | Bull | Lateral | Bear |", "|---|---|---|---|"]
         for r in res["rows"] + [res["bh"]]:
