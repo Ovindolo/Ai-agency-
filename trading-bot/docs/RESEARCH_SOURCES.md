@@ -25,7 +25,7 @@
 | TauricResearch/TradingAgents | LLM analysts + bull/bear debate + decision memory with realized returns | Pattern for the **evening review** only (bull vs bear case on the week's trades, lessons with realized results). Never in the order path |
 | virattt/ai-hedge-fund (~64k★) | multi-agent stock analysis, educational, no live trading | Nothing new: risk manager before portfolio manager is already our order |
 | hummingbot | market making / execution | Nothing now (market making is forbidden); its order-tracking/reconciliation matters when live exists |
-| shiyu-coder/Kronos (AAAI 2026) | foundation model for OHLCV candles | **Candidate** for the tournament as a feature, only if it survives out-of-sample after costs |
+| shiyu-coder/Kronos (AAAI 2026) | foundation model for OHLCV candles | **Wired, not yet judged**: `make kronos-setup && make kronos` scores forecast skill and runs it through the tournament, only on data after 2025-09 (it may have been pre-trained on anything earlier) |
 
 ## A bug these sources exposed
 

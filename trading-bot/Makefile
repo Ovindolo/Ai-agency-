@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos
 
 test:            ## all tests
 	python -m pytest -q
@@ -62,3 +62,12 @@ insiders-bot:    ## Telegram alerts: 3+ insiders buying one stock in 30 days; /c
 
 replay-models:   ## ask another decision model the logged states: agreement, calibration, flip rate, cost (MODEL=kev-4b URL=http://127.0.0.1:8009)
 	set -a; [ -f .env ] && . ./.env; set +a; python -m apps.review.replay_models --model $(or $(MODEL),jev-latest) $(if $(URL),--base-url $(URL),)
+
+KRONOS_REV = 67b630e67f6a18c9e9be918d9b4337c960db1e9a
+kronos-setup:    ## clone Kronos at a pinned commit into vendor/ and install torch (CPU is enough, just slower)
+	[ -d vendor/Kronos ] || git clone https://github.com/shiyu-coder/Kronos vendor/Kronos
+	git -C vendor/Kronos fetch -q origin $(KRONOS_REV) && git -C vendor/Kronos checkout -q $(KRONOS_REV)
+	pip install "torch>=2.0" einops "huggingface_hub>=0.33" safetensors
+
+kronos:          ## Kronos forecast skill + tournament on data after its training: make kronos SYMBOL=ETH/USDT EVERY=4
+	python -m apps.research.kronos_eval --symbol $(or $(SYMBOL),BTC/USDT) --every $(or $(EVERY),4) --download
