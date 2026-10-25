@@ -6,7 +6,7 @@ import pandas as pd
 from apps.backtest.engine import run_backtest
 from apps.research.kronos_eval import evaluate
 from apps.strategy.freqtrade_adapter import frame_leaks, signal_frame
-from apps.strategy.kronos import KronosParams, entries, forecast_frame, skill
+from apps.strategy.kronos import KronosParams, entries, forecast_frame, skill, vol_skill
 from tests.helpers import synthetic_15m
 
 DF = synthetic_15m(n=2500, drift=0.0003, vol=0.004, seed=5)
@@ -68,4 +68,19 @@ def test_entries_run_through_the_same_exits_and_skill_is_measured():
 def test_report_renders():
     fc = forecast_frame(DF, momentum_stub, P)
     md = evaluate(DF, fc, "BTC/USDT", P, DF.index[500], 800.0, "stub")
-    assert "Forecast skill" in md and "## Verdict" in md and "kronos ret>" in md
+    assert "Forecast skill" in md and "Volatility skill" in md and "## Verdict" in md and "kronos ret>" in md
+
+
+def test_vol_skill_rewards_a_forecaster_that_knows_the_coming_move_size():
+    fc = forecast_frame(DF, momentum_stub, P)
+    oracle = fc.copy()
+    move = (DF["close"].shift(-P.horizon) / DF["close"] - 1).abs()
+    oracle["pred_std"] = move.where(fc["pred_std"].notna())
+    assert vol_skill(oracle, DF, P.horizon)["ic_kronos"] > 0.99
+
+
+def test_old_cache_layout_is_ignored(tmp_path):
+    cache = tmp_path / "fc.csv"
+    pd.DataFrame({"pred_ret": [0.1], "up_frac": [1.0]}, index=[DF.index[100]]).to_csv(cache)
+    fc = forecast_frame(DF.iloc[:400], momentum_stub, P, cache=cache)
+    assert fc["pred_std"].notna().any() and fc.loc[DF.index[100], "pred_ret"] != 0.1

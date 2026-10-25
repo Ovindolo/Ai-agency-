@@ -20,7 +20,7 @@ import pandas as pd
 from apps.backtest.data import DATA_DIR, csv_path, download, load
 from apps.backtest.tournament import run_tournament, split
 from apps.strategy.freqtrade_adapter import signal_frame
-from apps.strategy.kronos import KronosParams, entries, forecast_frame, kronos_forecaster, skill
+from apps.strategy.kronos import KronosParams, entries, forecast_frame, kronos_forecaster, skill, vol_skill
 from apps.strategy.trend_pullback import StrategyParams
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +37,10 @@ def evaluate(df: pd.DataFrame, fc: pd.DataFrame, symbol: str, p: KronosParams, s
     is_df, oos_df = split(ev)
     sk = {"in-sample": skill(fc.loc[is_df.index], df, p.horizon),
           "out-of-sample": skill(fc.loc[oos_df.index], df, p.horizon)}
+    vs = {"in-sample": vol_skill(fc.loc[is_df.index], df, p.horizon),
+          "out-of-sample": vol_skill(fc.loc[oos_df.index], df, p.horizon)}
+    vol_rows = "\n".join(f"| {k} | {v['n']} | {v['ic_kronos']:+.3f} | {v['ic_trailing']:+.3f} | {v['ic_blend']:+.3f} |"
+                         for k, v in vs.items())
     skill_rows = "\n".join(f"| {k} | {v['n']} | {v['hit_rate']:.1%} | {v['base_up']:.1%} | {v['ic']:+.3f} |"
                            for k, v in sk.items())
     rows = []
@@ -66,7 +70,18 @@ the model cannot have been pre-trained on it). Forecast {p.horizon} bars (15m) a
 
 Skill out-of-sample: **{'yes' if has_skill else 'no'}** (hit rate above "always up" and IC > 0.02).
 
-## 2. Tournament (same exits, fees and risk engine; first 60% in-sample, last 40% out-of-sample)
+## 2. Volatility skill (size of the next {p.horizon}-bar move, direction ignored)
+
+Independent tests report Kronos is weak on direction but useful on volatility. Here its path spread is
+ranked against |realized move| and compared with plain trailing volatility (last 24h of 15m returns).
+
+| Period | Forecasts | IC Kronos spread | IC trailing vol | IC average of both |
+|---|---|---|---|---|
+{vol_rows}
+
+Useful for position sizing only if Kronos (or the average) beats trailing vol out-of-sample.
+
+## 3. Tournament (same exits, fees and risk engine; first 60% in-sample, last 40% out-of-sample)
 
 | Strategy | IS trades | IS PF | IS net | IS | OOS trades / PF / net | Result |
 |---|---|---|---|---|---|---|
@@ -85,7 +100,7 @@ def main() -> None:
     logging.disable(logging.WARNING)
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbol", default="BTC/USDT")
-    ap.add_argument("--since", default="2025-09-01", help="first test day; must be after Kronos' training data")
+    ap.add_argument("--since", default="2025-09-01", help="first test day; Kronos was pre-trained up to June 2024, so never before 2024-07-01")
     ap.add_argument("--model", default="NeoQuasar/Kronos-small")
     ap.add_argument("--tokenizer", default="NeoQuasar/Kronos-Tokenizer-base")
     ap.add_argument("--equity", type=float, default=800.0)

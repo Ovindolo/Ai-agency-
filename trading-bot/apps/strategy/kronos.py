@@ -7,8 +7,8 @@ go through the same stops/targets/risk engine as every other candidate (signal_f
 Honesty rules this file enforces:
   - A forecast made at bar i sees bars <= i only, and its sampling seed comes from bar i's timestamp,
     so the frame is identical whether built on a slice or on full history (frame_leaks checks it).
-  - Kronos was pre-trained on data from 45 exchanges up to an unpublished date. Any period it may have
-    seen is worthless as a test, so the evaluation starts at `since` (default after the arXiv paper).
+  - Kronos was pre-trained on 45 exchanges up to June 2024 (paper, appendix D). Any period it has seen is
+    worthless as a test, so the evaluation starts at `since`: 2025-09 by default, 2024-07 at the earliest.
   - The model call is slow on CPU, so forecasts are cached per decision bar and a rerun resumes.
 """
 from __future__ import annotations
@@ -27,6 +27,7 @@ VENDOR = ROOT / "vendor" / "Kronos"
 
 # window (lookback rows of OHLCV), future 15m stamps, number of paths, seed -> closes, shape (paths, horizon)
 Forecaster = Callable[[pd.DataFrame, pd.DatetimeIndex, int, int], np.ndarray]
+COLS = ["pred_ret", "up_frac", "pred_std"]
 
 
 @dataclass(frozen=True)
@@ -49,11 +50,14 @@ def seed_for(ts: pd.Timestamp) -> int:
 def forecast_frame(df15: pd.DataFrame, forecaster: Forecaster, p: KronosParams = KronosParams(),
                    cache: Path | None = None, since: pd.Timestamp | None = None,
                    progress: bool = False) -> pd.DataFrame:
-    """pred_ret (mean predicted close at horizon / close - 1) and up_frac on decision bars, NaN elsewhere."""
-    done = pd.DataFrame(columns=["pred_ret", "up_frac"], dtype=float)
+    """On decision bars (NaN elsewhere): pred_ret, the mean predicted return to the horizon; up_frac, the
+    share of paths ending higher; pred_std, the spread of path returns (Kronos' own volatility forecast)."""
+    done = pd.DataFrame(columns=COLS, dtype=float)
     if cache and cache.exists():
-        done = pd.read_csv(cache, index_col=0)
-        done.index = pd.DatetimeIndex(pd.to_datetime(done.index, utc=True))
+        old = pd.read_csv(cache, index_col=0)
+        if list(old.columns) == COLS:                       # a cache from an older layout is ignored
+            done = old
+            done.index = pd.DatetimeIndex(pd.to_datetime(done.index, utc=True))
     step = pd.Timedelta("15min")
     todo = [i for i in range(p.lookback - 1, len(df15), p.every)
             if (since is None or df15.index[i] >= since) and df15.index[i] not in done.index]
@@ -64,16 +68,16 @@ def forecast_frame(df15: pd.DataFrame, forecaster: Forecaster, p: KronosParams =
         future = pd.date_range(t + step, periods=p.horizon, freq=step)
         closes = np.asarray(forecaster(window, future, p.paths, seed_for(t)), dtype=float)
         rets = closes[:, -1] / df15["close"].iat[i] - 1
-        rows.append((t, float(rets.mean()), float((rets > 0).mean())))
+        rows.append((t, float(rets.mean()), float((rets > 0).mean()), float(rets.std())))
         if cache and (len(rows) % 50 == 0 or n == len(todo) - 1):
-            done = pd.concat([done, pd.DataFrame(rows, columns=["t", "pred_ret", "up_frac"]).set_index("t")])
+            done = pd.concat([done, pd.DataFrame(rows, columns=["t", *COLS]).set_index("t")])
             rows = []
             cache.parent.mkdir(exist_ok=True)
             done.sort_index().to_csv(cache)
         if progress and n % 50 == 0:
             print(f"  kronos {n + 1}/{len(todo)}  {t:%Y-%m-%d %H:%M}", flush=True)
     if rows:
-        done = pd.concat([done, pd.DataFrame(rows, columns=["t", "pred_ret", "up_frac"]).set_index("t")])
+        done = pd.concat([done, pd.DataFrame(rows, columns=["t", *COLS]).set_index("t")])
     return done.sort_index().reindex(df15.index)
 
 
@@ -92,6 +96,23 @@ def skill(fc: pd.DataFrame, df15: pd.DataFrame, horizon: int) -> dict[str, float
         "hit_rate": float((np.sign(both["pred"]) == np.sign(both["real"])).mean()),
         "ic": float(both["pred"].rank().corr(both["real"].rank())),       # Spearman without scipy; 0 = no skill
         "base_up": float((both["real"] > 0).mean()),                      # hit rate of "always up"
+    }
+
+
+def vol_skill(fc: pd.DataFrame, df15: pd.DataFrame, horizon: int, trailing: int = 96) -> dict[str, float]:
+    """Does Kronos' path spread rank the size of the coming move better than plain trailing volatility?
+    Rank IC against |realized return|; the baseline is the std of the last `trailing` 15m returns."""
+    move = (df15["close"].shift(-horizon) / df15["close"] - 1).abs()
+    base = np.log(df15["close"]).diff().rolling(trailing).std()
+    both = pd.DataFrame({"kronos": fc["pred_std"], "trailing": base, "move": move}).dropna()
+    if both.empty:
+        return {"n": 0, "ic_kronos": float("nan"), "ic_trailing": float("nan"), "ic_blend": float("nan")}
+    r = both.rank()
+    return {
+        "n": len(both),
+        "ic_kronos": float(r["kronos"].corr(r["move"])),
+        "ic_trailing": float(r["trailing"].corr(r["move"])),
+        "ic_blend": float(((r["kronos"] + r["trailing"]) / 2).corr(r["move"])),   # equal-weight, as in the TSFM vol study
     }
 
 

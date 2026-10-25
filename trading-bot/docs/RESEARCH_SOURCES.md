@@ -128,3 +128,24 @@ Not found in the accessible material: "71 of 205 liquidations", "25x cheaper", "
 | Second check before the exchange | Deterministic risk engine already sits there (code, not a model) | none |
 | Save exactly what the model saw | Words + answers were logged | Full numeric snapshot now logged with every decision |
 | Replay on a cheaper model first | Per-model calibration existed | `make replay-models`: agreement, Brier skill, flip rate on identical input, tokens, latency |
+
+## Round 7: what is new on GitHub and arXiv for this bot (2026-10-25)
+
+Searched GitHub trending lists, the weekly best-of-algorithmic-trading ranking, project releases and
+issues, and arXiv (abstracts read at the source). GitHub's search API is not available in this session.
+
+| Finding | Source | Verdict / built |
+|---|---|---|
+| Kronos pre-training data ends **June 2024** | Kronos paper (arXiv 2508.02739, appendix D); KQSP paper (arXiv 2607.26792) | `--since` can go back to 2024-07-01; default stays 2025-09 for the first run |
+| Independent Kronos tests: direction ~50-53% on crypto (1-30 min), worse than "last price" on point error, does not beat fees; fine-tuning lowers token loss but not trading results | Kronos issue #355 (incl. a crypto 15m comment, 120k+ points); sumit-ai-ml/kronos-market-eval (BTC 24h: 50/100 direction, below buy & hold); Kairos crypto fine-tune numbers quoted in zayansalman/polymarket-crypto #258 | Expect `make kronos` direction to fail; not a reason to skip the test |
+| Same commenter: Kronos **uncertainty** is stable across regimes and used live for sizing; its "80%" bands hold only 53-60% | Kronos issue #355 | **Built**: `pred_std` + volatility skill vs trailing vol in `make kronos` |
+| TSFMs barely beat random walk on returns (Diebold-Mariano rejects in 2 of 10 tasks); on volatility, only TTM beats Log-HAR, and an equal-weight TTM + Log-HAR average is the robust choice | arXiv 2606.27100; arXiv 2607.05291 | Vol is the realistic use. Next candidate: HAR + Kronos average for sizing |
+| Review through Aug 2026: no AI architecture shown to give persistent net alpha; failure points are contamination, repeated selection, costs | arXiv 2609.04917 | Matches the tournament's rules; nothing to change |
+| Bitcoin time-series momentum: slow (12-week) signals beat fast ones; dynamic speed adds little | Kang & Ryu, *Risk Management* 28(3), 2026 | Next: 84-day lookback variant in `daily_trend` (now 20) |
+| Crypto TSMOM vol-targeting / Kelly overlay found null; drawdown-state overlay cut max DD to ~-28% | Howden & Andreev, SSRN 7115459 (abstract via search, SSRN blocks scripts) | Not built; the bot's vol-targeted daily core already exists |
+| 6h trend-following with vol-calibrated trailing stop, Sharpe 2.41 on 150+ pairs 2022-24 | arXiv 2602.11708 (AdaptiveTrend) | Unverified, no code, long/short, many pairs: not for a 800 USDT spot bot |
+| Fee-only backtests inflate perpetual results vs full cost + funding + slippage | arXiv 2512.22476 (AutoQuant) | Already: cost engine, funding in futures research |
+| Chronos-2 (Apache-2.0, covariates, CPU) and TimesFM 2.5 lead generic benchmarks; TiRex has a non-Apache licence | Chronos-2 paper (arXiv 2510.15821), FinVerse (arXiv 2608.03259) | Candidate only if Kronos' vol signal is useful; Chronos-2 is the one to try |
+| freqtrade 2026.9: open interest as informative data, P-value in backtests, security fixes | freqtrade releases | Open interest is a candidate filter (needs Binance futures history) |
+| Order-book imbalance repos (hftbacktest, orderbook-imbalance) | GitHub | Sub-second edge; irrelevant at 15m and with maker fees on 800 USDT |
+| TradingAgents v0.7, OpenAlice, OctoBot | GitHub | LLM research agents / platforms; nothing for the order path |
