@@ -76,5 +76,5 @@ model-data:      ## 20 coins since 2022: 4h candles, funding, open interest, lon
 	python -m apps.model.data
 
 model:           ## own cross-sectional LightGBM model, walk-forward vs momentum and buy&hold, after fees -> reports/MODEL.md
-	pip install -q lightgbm
+	pip install -q lightgbm scikit-learn
 	python -m apps.model.walkforward
