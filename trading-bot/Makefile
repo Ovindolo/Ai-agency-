@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos model-data model
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos model-data model pa audit-calls
 
 test:            ## all tests
 	python -m pytest -q
@@ -78,3 +78,9 @@ model-data:      ## 20 coins since 2022: 4h candles, funding, open interest, lon
 model:           ## own cross-sectional LightGBM model, walk-forward vs momentum and buy&hold, after fees -> reports/MODEL.md
 	pip install -q lightgbm scikit-learn
 	python -m apps.model.walkforward
+
+pa:              ## price-action setups from the operator's books on 20 coins, futures 1h/4h, after costs -> reports/PRICE_ACTION.md
+	python -m apps.pa.backtest
+
+audit-calls:     ## buy-zone calls from a Telegram HTML export: make audit-calls EXPORT=path/to/export AUTHOR=Dan
+	python -m apps.audit.zone_calls $(EXPORT) --author $(or $(AUTHOR),Dan)

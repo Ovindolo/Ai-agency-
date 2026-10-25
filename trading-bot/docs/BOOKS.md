@@ -39,7 +39,7 @@ own backtest is the place to check whether that ranking survives on crypto.
 
 ## Results on the operator's own data (2026-10-25)
 
-**Price action from the books** (`make pa`, 20 coins, Binance futures 1h/4h, 2022-10/2026): every setup
+**Price action from the books** (`make pa`, 20 coins, Binance futures 1h/4h, 2022-01 → 2026-10): every setup
 loses after costs, in-sample and on unseen 2025-26 data. A first run showed supply/demand zones at
 +0.2-0.3 R; that came from the simulator counting a target on the same bar a resting limit order filled
 (the bar's high may come before the fill). With stop-or-nothing on the fill bar, zones lose too
