@@ -1,6 +1,7 @@
 """Historical data: download via ccxt (public endpoints, no key) and load from CSV."""
 from __future__ import annotations
 
+import os
 import time
 from pathlib import Path
 
@@ -13,9 +14,28 @@ def csv_path(symbol: str, tf: str = "15m") -> Path:
     return DATA_DIR / f"{symbol.replace('/', '')}_{tf}.csv"
 
 
-def download(symbol: str, exchange: str = "binance", tf: str = "15m", days: int = 400) -> Path:
+BINANCE_MIRROR = "https://data-api.binance.vision/api/v3"   # Binance's own public market-data host
+
+
+def public_exchange(exchange: str = "binance"):
+    """Keyless ccxt client. ccxt ignores HTTPS_PROXY, so pass it on. api.binance.com answers 451 from
+    restricted regions (e.g. US cloud servers); the same spot candles then come from Binance's mirror."""
     import ccxt
-    ex = getattr(ccxt, exchange)({"enableRateLimit": True})
+    proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+    ex = getattr(ccxt, exchange)({"enableRateLimit": True, **({"httpsProxy": proxy} if proxy else {})})
+    if exchange != "binance":
+        return ex
+    ex.options["fetchMarkets"] = {"types": ["spot"]}
+    try:
+        ex.load_markets()
+    except (ccxt.ExchangeNotAvailable, ccxt.NetworkError):
+        ex.urls["api"]["public"] = BINANCE_MIRROR
+        ex.load_markets(reload=True)
+    return ex
+
+
+def download(symbol: str, exchange: str = "binance", tf: str = "15m", days: int = 400) -> Path:
+    ex = public_exchange(exchange)
     since = ex.milliseconds() - days * 86_400_000
     rows: list[list] = []
     while True:
