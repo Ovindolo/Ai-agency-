@@ -1,6 +1,7 @@
 trading-bot/logs/*.jsonl
 trading-bot/logs/*.log
 trading-bot/data/*.csv
+trading-bot/data/model/
 trading-bot/data/*.json
 trading-bot/.env
 __pycache__/
