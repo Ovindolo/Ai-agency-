@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos model-data model
 
 test:            ## all tests
 	python -m pytest -q
@@ -71,3 +71,10 @@ kronos-setup:    ## clone Kronos at a pinned commit into vendor/ and install tor
 
 kronos:          ## Kronos forecast skill + tournament on data after its training: make kronos SYMBOL=ETH/USDT EVERY=4
 	python -m apps.research.kronos_eval --symbol $(or $(SYMBOL),BTC/USDT) --every $(or $(EVERY),4) --download
+
+model-data:      ## 20 coins since 2022: 4h candles, funding, open interest, long/short ratios, stablecoins, Fear&Greed -> data/model/
+	python -m apps.model.data
+
+model:           ## own cross-sectional LightGBM model, walk-forward vs momentum and buy&hold, after fees -> reports/MODEL.md
+	pip install -q lightgbm
+	python -m apps.model.walkforward
