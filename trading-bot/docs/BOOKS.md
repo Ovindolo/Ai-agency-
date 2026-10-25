@@ -36,3 +36,18 @@ Two things make these numbers far rosier than what a trader gets:
 The useful takeaway is relative: patterns with tight, well-defined breakouts (flags, pennants, double and
 rounding bottoms) fail least, and wide, ragged ones (scallops, broadening, rising wedges) fail most. Our
 own backtest is the place to check whether that ranking survives on crypto.
+
+## Results on the operator's own data (2026-10-25)
+
+**Price action from the books** (`make pa`, 20 coins, Binance futures 1h/4h, 2022-10/2026): every setup
+loses after costs, in-sample and on unseen 2025-26 data. A first run showed supply/demand zones at
++0.2-0.3 R; that came from the simulator counting a target on the same bar a resting limit order filled
+(the bar's high may come before the fill). With stop-or-nothing on the fill bar, zones lose too
+(1h: -0.29 R in-sample, -0.24 R unseen, positive on 4 of 20 coins, negative every year).
+
+**The group admin's buy-zone calls** (`apps/audit/zone_calls.py`, Telegram export 2019-07 → 2022-01):
+157 structured calls, 111 filled. 84% reached target 1 (median +9%, ~4 days), but 31% first fell 20% or
+more, and the median return was -2% after 30 days, -5% after 90. Baseline: the same coins entered 1-10
+days after each post, same target distance: 88% reached it, mean +4.6% vs the calls' +2.7% (sell at T1, no
+stop); with a -20% stop 72% vs 69%. The calls do no better than entering the same coins at another time:
+in 2019-21 the coins rose, the timing added nothing measurable.

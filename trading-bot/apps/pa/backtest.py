@@ -64,7 +64,8 @@ def simulate(df: pd.DataFrame, sig: pd.DataFrame, fund: pd.Series, tf: str) -> l
                 gap = min(o[k], stop) if side == 1 else max(o[k], stop)
                 exit_px, reason, fee_out = gap * (1 - side * SLIP), "stop", TAKER
                 break
-            if tgt_hit:
+            if tgt_hit and not (k == f and kind != "open"):
+                # on the bar a resting order fills, its high may have come before the fill: no target there
                 exit_px, reason, fee_out = target, "target", MAKER
                 break
         if exit_px is None:

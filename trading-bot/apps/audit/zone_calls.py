@@ -184,8 +184,8 @@ def report(s: pd.DataFrame, author: str, n_msgs: int) -> str:
         return (f"| {len(d)} | {pct((d['hits'] >= 1).mean())} | {pct(d['t1_gain'].median())} | "
                 f"{d['t1_days'].median():.1f} | {pct(d['dd_before_t1'].median())} | {pct((d['dd_before_t1'] <= -0.2).mean())} | "
                 f"{pct(d['ret_30d'].median())} | {pct(d['ret_90d'].median())} |")
-    yearly = "\n".join(f"| {y} {block(g)[1:]}" for y, g in f.groupby(f["t"].dt.year))
-    by_quote = "\n".join(f"| {q} {block(g)[1:]}" for q, g in f.groupby(f["pair"].str.split("/").str[1]))
+    yearly = "\n".join(f"| {y} |{block(g)[1:]}" for y, g in f.groupby(f["t"].dt.year))
+    by_quote = "\n".join(f"| {q} |{block(g)[1:]}" for q, g in f.groupby(f["pair"].str.split("/").str[1]))
     return f"""# Audit of {author}'s buy-zone calls
 
 {n_msgs} messages by {author} read; **{len(s)}** structured calls parsed (pair + buy zone + price targets).
