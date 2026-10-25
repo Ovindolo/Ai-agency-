@@ -1,4 +1,5 @@
 trading-bot/logs/*.jsonl
+trading-bot/logs/*.log
 trading-bot/data/*.csv
 trading-bot/data/*.json
 trading-bot/.env
