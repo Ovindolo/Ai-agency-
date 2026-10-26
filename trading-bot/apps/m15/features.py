@@ -1,6 +1,8 @@
 """Everything the bot 'sees' on a 15m chart, as numbers known at the close of each bar.
 
-Indicators (returns, volatility, ATR, RSI, MACD, EMAs, Bollinger, volume, taker flow), structure (distance
+Indicators (returns, volatility, ATR, RSI, MACD, EMAs, Bollinger), volume and order flow (volume vs its
+day average, cumulative delta of aggressive buyers minus sellers, price/delta divergence, VWAP, OBV,
+volume on breakouts, up- vs down-candle volume), structure (distance
 to the 1-day high/low, breakouts, higher highs/lows), candle patterns from the books (pin bar, engulfing,
 inside bar), the classic strategies already in the bot (Ichimoku, Fibonacci 0.618, Supertrend), funding,
 time of day, and BTC's own moves as the market backdrop. Rows are indexed by bar OPEN time; a row's values
@@ -67,6 +69,18 @@ def coin_features(df: pd.DataFrame, funding: pd.Series) -> pd.DataFrame:
     qv = df["quote_volume"]
     f["volume_z"] = np.log(qv / qv.rolling(96).mean())
     f["taker_share4"] = df["taker_buy_quote"].rolling(4).sum() / qv.rolling(4).sum()
+    # order flow: aggressive buyers minus aggressive sellers (delta), as a share of volume traded
+    delta = 2 * df["taker_buy_quote"] - qv
+    for n in (4, 16, 96):
+        f[f"cvd{n}"] = delta.rolling(n).sum() / qv.rolling(n).sum()
+    f["price_delta_div16"] = np.sign(f["r16"]) - np.sign(f["cvd16"])               # price up, sellers lead
+    vwap = qv.rolling(96).sum() / df["volume"].rolling(96).sum()
+    f["vwap96_dist"] = c / vwap - 1
+    obv = (np.sign(c.diff()).fillna(0) * qv).cumsum()
+    f["obv_slope16"] = (obv - obv.shift(16)) / qv.rolling(16).sum()
+    up_v = qv.where(c > df["open"], 0).rolling(16).sum()
+    f["up_volume_share16"] = up_v / qv.rolling(16).sum()
+    f["breakout_volume"] = (f["breakout_up"] - f["breakout_dn"]) * f["volume_z"]   # breakout on high or low volume
     f = f.join(candles(df))
     for name in CLASSIC:
         f[f"sig_{name}"] = entries(name, df).astype(float).rolling(4, min_periods=1).max()
