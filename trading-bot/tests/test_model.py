@@ -33,3 +33,12 @@ def test_book_charges_fees_on_turnover_only():
     steady = book(panel, pd.Series(1.0, index=panel.index).where(panel["coin"] == "A", 0.0), "steady", 1, 1, 0.001)
     assert steady.daily.iloc[1:].eq(0.01).all()                      # no turnover after day 1, no fee
     assert (flips.daily.iloc[1:] < 0.01).all()                       # switching every day pays both sides
+
+
+def test_15m_features_do_not_see_the_future():
+    from apps.m15.features import coin_features
+    df = _coin_4h(5)
+    df.index = pd.date_range("2025-01-01", periods=len(df), freq="15min", tz="UTC")
+    fund = df["funding"].dropna()
+    leaks, why = frame_leaks(lambda d: coin_features(d, fund), df.drop(columns=["funding", "oi_usd", "top_ls", "acct_ls", "taker_ls"]))
+    assert not leaks, why

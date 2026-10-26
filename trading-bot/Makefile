@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos model-data model pa pa-select audit-calls
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos model-data model pa pa-select audit-calls m15
 
 test:            ## all tests
 	python -m pytest -q
@@ -87,3 +87,7 @@ audit-calls:     ## buy-zone calls from a Telegram HTML export: make audit-calls
 
 pa-select:       ## monthly selector: trade only the recently best book setup, out-of-sample (needs make pa first) -> reports/PA_SELECTOR.md
 	python -m apps.pa.selector
+
+m15:             ## one model sees every indicator and pattern on 15m futures, decides long/short/out; 20 coins, after costs -> reports/M15.md
+	pip install -q lightgbm scikit-learn
+	python -m apps.m15.run
