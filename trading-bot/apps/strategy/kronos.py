@@ -59,8 +59,13 @@ def forecast_frame(df15: pd.DataFrame, forecaster: Forecaster, p: KronosParams =
             done = old
             done.index = pd.DatetimeIndex(pd.to_datetime(done.index, utc=True))
     step = pd.Timedelta("15min")
-    todo = [i for i in range(p.lookback - 1, len(df15), p.every)
-            if (since is None or df15.index[i] >= since) and df15.index[i] not in done.index]
+    # decision bars are anchored on the clock (15m slot number mod `every`), not on row positions, so the
+    # grid does not shift when the candle history is re-downloaded with a different start; an existing
+    # cache keeps its own phase
+    slot = (df15.index - pd.Timestamp("1970-01-01", tz="UTC")) // step
+    phase = int(((done.index[0] - pd.Timestamp("1970-01-01", tz="UTC")) // step) % p.every) if len(done) else 0
+    todo = [i for i in range(p.lookback - 1, len(df15)) if slot[i] % p.every == phase
+            and (since is None or df15.index[i] >= since) and df15.index[i] not in done.index]
     rows = []
     for n, i in enumerate(todo):
         t = df15.index[i]

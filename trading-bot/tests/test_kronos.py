@@ -84,3 +84,11 @@ def test_old_cache_layout_is_ignored(tmp_path):
     pd.DataFrame({"pred_ret": [0.1], "up_frac": [1.0]}, index=[DF.index[100]]).to_csv(cache)
     fc = forecast_frame(DF.iloc[:400], momentum_stub, P, cache=cache)
     assert fc["pred_std"].notna().any() and fc.loc[DF.index[100], "pred_ret"] != 0.1
+
+
+def test_decision_grid_does_not_shift_when_history_starts_later():
+    """Re-downloading candles with a different start must not move the decision bars (the cache is keyed on time)."""
+    a = forecast_frame(DF, momentum_stub, P).dropna().index
+    b = forecast_frame(DF.iloc[3:], momentum_stub, P).dropna().index
+    common = a.intersection(b)
+    assert len(common) > 0.9 * min(len(a), len(b))
