@@ -11,6 +11,7 @@ Portfolio: each coin gets 1/N of the account, 1x (no leverage), so results scale
 from __future__ import annotations
 
 import argparse
+import hashlib
 import math
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -18,6 +19,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from apps.backtest.data import DATA_DIR
 from apps.m15.data import COINS, load_15m
 from apps.m15.features import MARKET, coin_features, labels, market
 from apps.pa.data import funding as load_funding
@@ -54,8 +56,19 @@ def walk_forward(frames: dict[str, pd.DataFrame], horizon: int, start: str, trai
     allrows = pd.concat([f.assign(coin=c) for c, f in frames.items()])
     allrows["z"] = (allrows[target] / (allrows["vol96"] * math.sqrt(horizon))).clip(-5, 5)
     months = pd.period_range(pd.Timestamp(start), pd.Timestamp.now(), freq="M")
+    # finished months are cached, keyed on the feature set, so an interrupted run resumes
+    tag = hashlib.sha1(",".join(feats).encode()).hexdigest()[:8]
+    cache = DATA_DIR / "m15_cache"
+    cache.mkdir(parents=True, exist_ok=True)
+    current = pd.Timestamp.now().to_period("M")
     preds, cuts = [], {}
     for m in months:
+        f_cache = cache / f"h{horizon}_{m}_{tag}.pkl"
+        if m != current and f_cache.exists():
+            p_m, c_m = pd.read_pickle(f_cache)
+            preds.append(p_m)
+            cuts[str(m)] = c_m
+            continue
         t0 = m.to_timestamp().tz_localize("UTC")
         t1 = (m + 1).to_timestamp().tz_localize("UTC")
         lo = t0 - pd.DateOffset(months=train_months)
@@ -68,6 +81,8 @@ def walk_forward(frames: dict[str, pd.DataFrame], horizon: int, start: str, trai
         p_tr = model.predict(tr[feats])
         cuts[str(m)] = {q: (np.quantile(p_tr, 1 - q), np.quantile(p_tr, q)) for q in (0.95, 0.99)}
         preds.append(pd.DataFrame({"coin": te["coin"], "pred": model.predict(te[feats]), "month": str(m)}, index=te.index))
+        if m != current:
+            pd.to_pickle((preds[-1], cuts[str(m)]), f_cache)
         print(f"  h={horizon} {m}: trained on {len(tr):,} rows, predicted {len(te):,}", flush=True)
     return pd.concat(preds), cuts
 
