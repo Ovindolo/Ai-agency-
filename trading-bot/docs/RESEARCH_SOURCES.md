@@ -157,3 +157,14 @@ forecasts of the next 2h. Direction: 51.3% right out-of-sample vs 50.6% for "alw
 a real but tiny edge. Traded through the tournament it loses at every threshold (PF 0.41-0.53, in-sample
 already). Volatility: its path spread ranks the next move's size worse than plain 24h trailing volatility
 (IC 0.17 vs 0.22 out-of-sample); the average of both adds 0.006. Verdict: not for entries, not for sizing.
+
+## One 15m model over everything (2026-10-26)
+
+`make m15`: LightGBM over every indicator, order-flow measure (cumulative delta, VWAP, OBV, breakout
+volume), structure, candle pattern and classic strategy the bot knows, plus funding and BTC context; the
+operator's 20 coins, Binance futures 15m, walk-forward monthly 2024-01 → 2026-10. The model does read
+something: 52-54% of directions right and +3 to +10 bp per trade BEFORE costs (rank IC +0.022). After
+taker fees and slippage (14 bp a round trip) every variant loses: -4 to -11 bp per trade, at most 5 of 20
+coins positive, last 6 months worse, Deflated Sharpe 0%. The edge exists but is a third of the cost. Only
+lever left untested: maker-only execution (~4 bp round trip), which brings missed fills and adverse
+selection that a candle backtest cannot measure; it would need paper trading with real order-book fills.
