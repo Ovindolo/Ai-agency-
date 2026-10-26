@@ -149,3 +149,11 @@ issues, and arXiv (abstracts read at the source). GitHub's search API is not ava
 | freqtrade 2026.9: open interest as informative data, P-value in backtests, security fixes | freqtrade releases | Open interest is a candidate filter (needs Binance futures history) |
 | Order-book imbalance repos (hftbacktest, orderbook-imbalance) | GitHub | Sub-second edge; irrelevant at 15m and with maker fees on 800 USDT |
 | TradingAgents v0.7, OpenAlice, OctoBot | GitHub | LLM research agents / platforms; nothing for the order path |
+
+## Kronos on real BTC data (2026-10-26)
+
+`make kronos`, Kronos-small, BTC/USDT 15m, 2025-09-01 → 2026-10-25 (after its June 2024 cutoff), 5,037
+forecasts of the next 2h. Direction: 51.3% right out-of-sample vs 50.6% for "always up", rank IC +0.037:
+a real but tiny edge. Traded through the tournament it loses at every threshold (PF 0.41-0.53, in-sample
+already). Volatility: its path spread ranks the next move's size worse than plain 24h trailing volatility
+(IC 0.17 vs 0.22 out-of-sample); the average of both adds 0.006. Verdict: not for entries, not for sizing.

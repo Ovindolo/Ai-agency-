@@ -74,7 +74,7 @@ def forecast_frame(df15: pd.DataFrame, forecaster: Forecaster, p: KronosParams =
         closes = np.asarray(forecaster(window, future, p.paths, seed_for(t)), dtype=float)
         rets = closes[:, -1] / df15["close"].iat[i] - 1
         rows.append((t, float(rets.mean()), float((rets > 0).mean()), float(rets.std())))
-        if cache and (len(rows) % 50 == 0 or n == len(todo) - 1):
+        if cache and (len(rows) % 10 == 0 or n == len(todo) - 1):
             done = pd.concat([done, pd.DataFrame(rows, columns=["t", *COLS]).set_index("t")])
             rows = []
             cache.parent.mkdir(exist_ok=True)

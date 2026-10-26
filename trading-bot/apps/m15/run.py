@@ -28,7 +28,7 @@ from apps.research.metrics import deflated_sharpe, perf
 ROOT = Path(__file__).resolve().parents[2]
 COST = 2 * (0.0005 + 0.0002)
 PARAMS = dict(n_estimators=200, learning_rate=0.05, num_leaves=31, min_child_samples=500, subsample=0.7,
-              subsample_freq=1, colsample_bytree=0.7, reg_lambda=1.0, random_state=7, verbose=-1, n_jobs=3)
+              subsample_freq=1, colsample_bytree=0.7, reg_lambda=1.0, random_state=7, verbose=-1, n_jobs=4)
 
 
 def build(coins: list[str], since: pd.Timestamp) -> dict[str, pd.DataFrame]:
