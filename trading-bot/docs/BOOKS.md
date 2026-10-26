@@ -51,3 +51,9 @@ more, and the median return was -2% after 30 days, -5% after 90. Baseline: the s
 days after each post, same target distance: 88% reached it, mean +4.6% vs the calls' +2.7% (sell at T1, no
 stop); with a -20% stop 72% vs 69%. The calls do no better than entering the same coins at another time:
 in 2019-21 the coins rose, the timing added nothing measurable.
+
+**A selector that picks the recently best setup each month** (`make pa-select`): scored only on trades
+closed before the month, top 1-10 of (setup, time frame, side[, coin]), cash when nothing is positive.
+20 variants: 19 lose (-0.07 to -0.29 R per trade); the one positive (+0.13 R) has 97 trades, t = 0.7, and a
+Deflated Sharpe of 0%. What worked in recent months does not keep working, so selection cannot rescue
+setups that lose on average.

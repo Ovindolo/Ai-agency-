@@ -1,4 +1,4 @@
-.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos model-data model pa audit-calls
+.PHONY: test paper paper-once replay backtest tournament live fees daily audit review leverage carry tournament-context journal guard export-training research insiders insiders-bot replay-models kronos-setup kronos model-data model pa pa-select audit-calls
 
 test:            ## all tests
 	python -m pytest -q
@@ -84,3 +84,6 @@ pa:              ## price-action setups from the operator's books on 20 coins, f
 
 audit-calls:     ## buy-zone calls from a Telegram HTML export: make audit-calls EXPORT=path/to/export AUTHOR=Dan
 	python -m apps.audit.zone_calls $(EXPORT) --author $(or $(AUTHOR),Dan)
+
+pa-select:       ## monthly selector: trade only the recently best book setup, out-of-sample (needs make pa first) -> reports/PA_SELECTOR.md
+	python -m apps.pa.selector
