@@ -168,3 +168,11 @@ taker fees and slippage (14 bp a round trip) every variant loses: -4 to -11 bp p
 coins positive, last 6 months worse, Deflated Sharpe 0%. The edge exists but is a third of the cost. Only
 lever left untested: maker-only execution (~4 bp round trip), which brings missed fills and adverse
 selection that a candle backtest cannot measure; it would need paper trading with real order-book fills.
+
+## Community strategies, first run on real data (2026-10-27)
+
+`make tournament` had never run with freqtrade installed, so every community strategy had failed to
+load. With freqtrade 2026.9 + TA-Lib: of 62 files, 17 imported and ran on BTC/USDT 15m (2023-12 →
+2026-10, 800 USDT, same exits and costs); 34 use other time frames (unsupported by the adapter), 9 failed
+to load or run. Result with the 6 built-ins: 23 tested, **0 passed in-sample**. Only MultiMa was above
+break-even in-sample (PF 1.05, +12 USDT over ~2 years) and still failed the gates.
